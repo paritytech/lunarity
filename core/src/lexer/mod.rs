@@ -409,27 +409,22 @@ const ZER: ByteHandler = Some(|lex| {
 
             return lex.read_hexadec();
         },
+        b'0'...b'9' => {
+            lex.bump();
 
-        _ => {}
-    }
+            return lex.token = UnexpectedToken;
+        },
+        b'.' => {
+            lex.bump();
 
-    loop {
-        match lex.read_byte() {
-            b'0'...b'9' => {
-                lex.bump();
-            },
-            b'.' => {
-                lex.bump();
+            return lex.read_float(0);
+        },
+        b'e' | b'E' => {
+            lex.bump();
 
-                return lex.read_float();
-            },
-            b'e' | b'E' => {
-                lex.bump();
-
-                return lex.read_scientific();
-            }
-            _ => break,
+            return lex.read_scientific(0);
         }
+        _ => {},
     }
 
     lex.token = LiteralInteger;
@@ -437,18 +432,21 @@ const ZER: ByteHandler = Some(|lex| {
 
 // 1 to 9
 const DIG: ByteHandler = Some(|lex| {
+    let mut floating = 0;
+
     unwind_loop!({
         match lex.next_byte() {
-            b'0'...b'9' => {},
+            b'0'        => floating += 1,
+            b'1'...b'9' => floating = 0,
             b'.' => {
                 lex.bump();
 
-                return lex.read_float();
+                return lex.read_float(floating);
             },
             b'e' | b'E' => {
                 lex.bump();
 
-                return lex.read_scientific();
+                return lex.read_scientific(floating);
             },
             _ => {
                 return lex.token = LiteralInteger;
@@ -463,7 +461,7 @@ const PRD: ByteHandler = Some(|lex| {
         b'0'...b'9' => {
             lex.bump();
 
-            return lex.read_float();
+            return lex.read_float(0);
         },
 
         _ => Accessor,
@@ -691,36 +689,75 @@ impl<'arena> Lexer<'arena> {
     }
 
     #[inline]
-    fn read_float(&mut self) {
+    fn read_float(&mut self, mut floating: i32) {
+        let mut zeroes = 0;
+
         loop {
             match self.read_byte() {
-                b'0'...b'9'  => self.bump(),
+                b'0' => {
+                    self.bump();
+
+                    zeroes += 1;
+                },
+                b'1'...b'9'  => {
+                    self.bump();
+
+                    floating -= 1 + zeroes;
+                    zeroes = 0;
+                },
                 b'e' | b'E'  => {
                     self.bump();
-                    return self.read_scientific();
+                    return self.read_scientific(floating);
                 },
                 _            => break
             }
         }
 
-        self.token = LiteralDecimal;
+        self.token = if floating < 0 {
+            LiteralDecimal
+        } else {
+            LiteralInteger
+        }
     }
 
     #[inline]
-    fn read_scientific(&mut self) {
-        match self.read_byte() {
-            b'-' | b'+' => self.bump(),
-            _           => {}
-        }
+    fn read_scientific(&mut self, floating: i32) {
+        let neg = match self.read_byte() {
+            b'-' => { self.bump(); true },
+            b'+' => { self.bump(); false },
+            _    => false,
+        };
 
-        loop {
+        let mut e = match self.read_byte() {
+            byte @ b'0'...b'9' => {
+                self.bump();
+
+                (byte - b'0') as i32
+            },
+            _ => {
+                self.bump();
+
+                return self.token = UnexpectedToken;
+            },
+        };
+
+        for _ in 0..5 {
             match self.read_byte() {
-                b'0'...b'9' => self.bump(),
-                _           => break
+                byte @ b'0'...b'9' => {
+                    e = e * 10 + (byte - b'0') as i32;
+                    self.bump();
+                },
+                _ => break
             }
         }
 
-        self.token = LiteralDecimal;
+        if neg { e *= -1; }
+
+        self.token = if floating + e < 0 {
+            LiteralDecimal
+        } else {
+            LiteralInteger
+        };
     }
 }
 
@@ -809,7 +846,8 @@ mod test {
     fn literals() {
         assert_lex(
             r#"
-                true false 0 42 0xDEAD 0Xdead 3.14 .12345 'foo bar' "doge to the moon"
+                true false 0 42 0xDEAD 0Xdead 3.14 3.14E+2 .12345 'foo bar' "doge to the moon"
+                5.1e2 42e-3 500E-1 10.000
             "#,
              &[
                 (LiteralTrue, "true"),
@@ -819,9 +857,14 @@ mod test {
                 (LiteralHex, "0xDEAD"),
                 (LiteralHex, "0Xdead"),
                 (LiteralDecimal, "3.14"),
+                (LiteralInteger, "3.14E+2"),
                 (LiteralDecimal, ".12345"),
                 (LiteralString, "'foo bar'"),
                 (LiteralString, "\"doge to the moon\""),
+                (LiteralInteger, "5.1e2"),
+                (LiteralDecimal, "42e-3"),
+                (LiteralInteger, "500E-1"),
+                (LiteralInteger, "10.000"),
             ][..]
         );
     }
