@@ -441,7 +441,7 @@ const DIG: ByteHandler = Some(|lex| {
             b'.' => {
                 lex.bump();
 
-                return lex.read_float(floating);
+                return lex.read_float(0);
             },
             b'e' | b'E' => {
                 lex.bump();
@@ -846,8 +846,8 @@ mod test {
     fn literals() {
         assert_lex(
             r#"
-                true false 0 42 0xDEAD 0Xdead 3.14 3.14E+2 .12345 'foo bar' "doge to the moon"
-                5.1e2 42e-3 500E-1 10.000
+                true false 0 42 0xDEAD 0Xdead 3.14 3.14E+2 .12345
+                5.1e2 42e-3 500E-1 500.1 10.000 'foo bar' "doge to the moon"
             "#,
              &[
                 (LiteralTrue, "true"),
@@ -859,12 +859,13 @@ mod test {
                 (LiteralDecimal, "3.14"),
                 (LiteralInteger, "3.14E+2"),
                 (LiteralDecimal, ".12345"),
-                (LiteralString, "'foo bar'"),
-                (LiteralString, "\"doge to the moon\""),
                 (LiteralInteger, "5.1e2"),
                 (LiteralDecimal, "42e-3"),
                 (LiteralInteger, "500E-1"),
+                (LiteralDecimal, "500.1"),
                 (LiteralInteger, "10.000"),
+                (LiteralString, "'foo bar'"),
+                (LiteralString, "\"doge to the moon\""),
             ][..]
         );
     }
