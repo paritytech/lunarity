@@ -1,4 +1,6 @@
-use lexer::{util, ByteHandler};
+use lexer::{ByteHandler, Lexer};
+use lexer::util::legal_in_label;
+use lexer::token::Token;
 use lexer::token::Token::*;
 
 macro_rules! byte {
@@ -22,19 +24,23 @@ macro_rules! byte {
 macro_rules! match_label {
     // Check if the label is followed by a 0..256 number divisible by 8
     ($lex:ident [ $( $byte:ident )* @ bits256 => $token:expr ]) => {
-        unimplemented!();
+        if $lex.read_bits256($token) {
+            return;
+        }
     };
 
     // Check if the label is followed by a fixed number range
     ($lex:ident [ $( $byte:ident )* @ bits256x80 => $token:expr ]) => {
-        unimplemented!();
+        if $lex.read_bits256x80($token) {
+            return;
+        }
     };
 
     // Parse a sequence of label bytes
     ($lex:ident [ $( $byte:ident )* => $token:expr ]) => {
-        if $(
-            $lex.next_byte() == byte!($byte) &&
-        )* {$lex.bump(); !util::legal_in_label($lex.read_byte())} {
+        if
+            $( $lex.next_byte() == byte!($byte) && )* { $lex.bump(); $lex.end_of_label() }
+        {
             return $lex.token = $token;
         }
     };
@@ -68,7 +74,7 @@ macro_rules! match_label {
             $(
                 byte!($match) => match_label!($lex [ $( $cont )* ] ),
             )*
-            ch if !util::legal_in_label(ch) => return $lex.token = $token,
+            ch if !legal_in_label(ch) => return $lex.token = $token,
             _ => {}
         }
     };
@@ -96,12 +102,12 @@ pub const IDT: ByteHandler = Some(|lex| {
 // Identifier or keyword starting with a letter `b`
 pub const L_A: ByteHandler = Some(|lex| {
     match_label!(lex [
-        [ b s t r a c t => KeywordReserved ]    // abstract
+        [ b s t r a c t => ReservedWord ]    // abstract
         [ d d
-            [ r e s s   => KeywordType ]
+            [ r e s s   => TypeAddress ]
             [ m o d     => IdentifierBuiltin ]
         ]
-        [ f t e r       => KeywordReserved ]    // after
+        [ f t e r       => ReservedWord ]    // after
         [ n o n y m o u s => KeywordAnonymous ]
         [ s
             [             => KeywordAs ]
@@ -121,24 +127,24 @@ pub const L_B: ByteHandler = Some(|lex| {
     match_label!(lex [
         [ l o c k => IdentifierBuiltin ] // block
         [ r e a k => KeywordBreak ]
-        [ o o l   => KeywordType ]
+        [ o o l   => TypeBool ]
         [ y t e
-            [     => KeywordType ]        // byte
+            [     => TypeBytes ]        // byte
             [ s
-                [       => KeywordType ]  // bytes
+                [       => TypeBytes ]  // bytes
                 [ _1
-                    [               => KeywordType ] // bytes1
-                    [ (b'0'...b'9') => KeywordType ] // bytes10 - bytes19
+                    [               => TypeBytes ] // bytes1
+                    [ (b'0'...b'9') => TypeBytes ] // bytes10 - bytes19
                 ]
                 [ _2
-                    [               => KeywordType ] // bytes2
-                    [ (b'0'...b'9') => KeywordType ] // bytes20 - bytes29
+                    [               => TypeBytes ] // bytes2
+                    [ (b'0'...b'9') => TypeBytes ] // bytes20 - bytes29
                 ]
                 [ _3
-                    [               => KeywordType ] // bytes3
-                    [ (b'0'...b'2') => KeywordType ] // bytes30 - bytes32
+                    [               => TypeBytes ] // bytes3
+                    [ (b'0'...b'2') => TypeBytes ] // bytes30 - bytes32
                 ]
-                [ (b'4'...b'9')     => KeywordType ] // bytes4 - bytes9
+                [ (b'4'...b'9')     => TypeBytes ] // bytes4 - bytes9
             ]
         ]
     ]);
@@ -151,8 +157,8 @@ pub const L_B: ByteHandler = Some(|lex| {
 pub const L_C: ByteHandler = Some(|lex| {
     match_label!(lex [
         [ a
-            [ s e    => KeywordReserved ] // case
-            [ t c h  => KeywordReserved ] // catch
+            [ s e    => ReservedWord ] // case
+            [ t c h  => ReservedWord ] // catch
         ]
         [ o n
             [ s t a n t => KeywordConstant ]
@@ -170,10 +176,11 @@ pub const L_C: ByteHandler = Some(|lex| {
 // Identifier or keyword starting with a letter `d`
 pub const L_D: ByteHandler = Some(|lex| {
     match_label!(lex [
+        [ a y s         => UnitTime ]  // days
         [ o             => KeywordDo ]
         [ e
             [ l e t e   => KeywordDelete ]
-            [ f a u l t => KeywordReserved ] // default
+            [ f a u l t => ReservedWord ] // default
         ]
     ]);
 
@@ -199,7 +206,16 @@ pub const L_E: ByteHandler = Some(|lex| {
 // Identifier or keyword starting with a letter `f`
 pub const L_F: ByteHandler = Some(|lex| {
     match_label!(lex [
-        [ i n a l       => KeywordReserved ] //final
+        [ i
+            [ n
+                [ a l   => ReservedWord ] // final
+                [ n e y => UnitEther ]    // finney
+            ]
+            [ x e d
+                [                            => TypeFixed ]
+                [ (b'1'...b'9') @ bits256x80 => TypeFixed ]
+            ]
+        ]
         [ o r           => KeywordFor ]
         [ u n c t i o n => DeclarationFunction ]
         [ a l s e       => LiteralFalse ]
@@ -225,15 +241,15 @@ pub const L_H: ByteHandler = Some(|lex| {
 pub const L_I: ByteHandler = Some(|lex| {
     match_label!(lex [
         [ n
-            [               => KeywordReserved ] // in
-            [ l i n e       => KeywordReserved ] // inline
+            [               => ReservedWord ] // in
+            [ l i n e       => ReservedWord ] // inline
             [ t
-                [             => KeywordType ]   // int
+                [             => TypeInt ]
                 [ e r
                     [ f a c e => DeclarationInterface ]
                     [ n a l   => KeywordInternal ]
                 ]
-                [ (b'0'...b'9') @ bits256 => KeywordType ]
+                [ (b'1'...b'9') @ bits256 => TypeInt ]
             ]
             [ d e x e d      => KeywordIndexed ]
         ]
@@ -258,7 +274,7 @@ pub const L_K: ByteHandler = Some(|lex| {
 // Identifier or keyword starting with a letter `l`
 pub const L_L: ByteHandler = Some(|lex| {
     match_label!(lex [
-        [ e t         => KeywordReserved ] // let
+        [ e t         => ReservedWord ] // let
         [ i b r a r y => DeclarationLibrary ]
         [ o g
             [ (b'0'...b'4') => IdentifierBuiltin ]
@@ -273,7 +289,7 @@ pub const L_L: ByteHandler = Some(|lex| {
 pub const L_M: ByteHandler = Some(|lex| {
     match_label!(lex [
         [ a
-            [ t c h     => KeywordReserved ]     // match
+            [ t c h     => ReservedWord ]     // match
             [ p p i n g => KeywordMapping ]
         ]
         [ e m o r y     => KeywordMemory ]
@@ -292,7 +308,7 @@ pub const L_N: ByteHandler = Some(|lex| {
     match_label!(lex [
         [ e w   => KeywordNew ]
         [ o w   => IdentifierBuiltin ] // now
-        [ u l l => KeywordReserved ]   // null
+        [ u l l => ReservedWord ]   // null
     ]);
 
     lex.read_label();
@@ -302,7 +318,7 @@ pub const L_N: ByteHandler = Some(|lex| {
 
 // Identifier or keyword starting with a letter `n`
 pub const L_O: ByteHandler = Some(|lex| {
-    match_label!(lex [ f => KeywordReserved ]); // of
+    match_label!(lex [ f => ReservedWord ]); // of
 
     lex.read_label();
     lex.token = Identifier;
@@ -334,7 +350,7 @@ pub const L_R: ByteHandler = Some(|lex| {
                 [   => KeywordReturn ]
                 [ s => KeywordReturns ]
             ]
-            [ l o c a t a b l e => KeywordReserved ]   // relocatable
+            [ l o c a t a b l e => ReservedWord ]   // relocatable
             [ v e r t           => IdentifierBuiltin ] // revert
             [ q u i r e         => IdentifierBuiltin ] // require
         ]
@@ -357,18 +373,18 @@ pub const L_S: ByteHandler = Some(|lex| {
             [_2 _5 _6 => IdentifierBuiltin]    // sha256
         ]
         [ t
-            [ a t i c   => KeywordReserved ]   // static
+            [ a t i c   => ReservedWord ]   // static
             [ o r a g e => KeywordStorage ]
             [ r
                 [ u c t => DeclarationStruct ]
-                [ i n g => KeywordType ]       // string
+                [ i n g => TypeString ]
             ]
         ]
         [ u
             [ p e r     => KeywordSuper ]      // super
             [ i c i d e => IdentifierBuiltin ] // suicide
         ]
-        [ w i t c h     => KeywordReserved ]   // switch
+        [ w i t c h     => ReservedWord ]      // switch
         [ z a b o       => UnitEther ]         // szabo
     ]);
 
@@ -380,15 +396,15 @@ pub const L_S: ByteHandler = Some(|lex| {
 pub const L_T: ByteHandler = Some(|lex| {
     match_label!(lex [
         [ y p e
-            [     => KeywordReserved ] // type
-            [ o f => KeywordReserved ] // typeof
+            [     => ReservedWord ] // type
+            [ o f => ReservedWord ] // typeof
         ]
         [ h
             [ i s   => KeywordThis ]
             [ r o w => KeywordThrow ]
         ]
         [ r
-            [ y   => KeywordReserved ] // try
+            [ y   => ReservedWord ] // try
             [ u e => LiteralTrue ]
         ]
         [ x       => IdentifierBuiltin ] // tx
@@ -403,12 +419,12 @@ pub const L_U: ByteHandler = Some(|lex| {
     match_label!(lex [
         [ s i n g                        => KeywordUsing ]
         [ i n t
-            [                            => KeywordType ]
-            [ (b'0'...b'9') @ bits256    => KeywordType ]
+            [                            => TypeUint ]
+            [ (b'1'...b'9') @ bits256    => TypeUint ]
         ]
         [ f i x e d
-            [                            => KeywordType ]
-            [ (b'0'...b'9') @ bits256x80 => KeywordType ]
+            [                            => TypeUfixed ]
+            [ (b'1'...b'9') @ bits256x80 => TypeUfixed ]
         ]
     ]);
 
@@ -441,10 +457,87 @@ pub const L_W: ByteHandler = Some(|lex| {
     lex.token = Identifier;
 });
 
-// // Identifier or keyword starting with a letter `y`
-// pub const L_Y: ByteHandler = Some(|lex| {
-//     match_label!(lex [i e l d => Yield]);
+// Identifier or keyword starting with a letter `y`
+pub const L_Y: ByteHandler = Some(|lex| {
+    match_label!(lex [ e a r s => UnitTime ]); // years
 
-//     lex.read_label();
-//     lex.token = Identifier;
-// });
+    lex.read_label();
+    lex.token = Identifier;
+});
+
+
+impl<'arena> Lexer<'arena> {
+    #[inline]
+    fn end_of_label(&self) -> bool {
+        !legal_in_label(self.read_byte())
+    }
+
+    fn read_bits256(&mut self, token: Token) -> bool {
+        let mut n = (self.read_byte() - b'0') as u16;
+
+        self.bump();
+
+        for _ in 0..2 {
+            match self.read_byte() {
+                byte @ b'0'...b'9' => {
+                    n = n * 10 + (byte - b'0') as u16;
+                },
+                _ => break,
+            }
+
+            self.bump();
+        }
+
+
+        // First digit has to be 1...9, so we don't need to check for zero.
+        if n % 8 == 0 && n <= 256 && self.end_of_label() {
+            self.token = token;
+
+            return true;
+        }
+
+        false
+    }
+
+    fn read_bits256x80(&mut self, token: Token) -> bool {
+        let mut m = (self.read_byte() - b'0') as u16;
+        let mut byte = self.next_byte();
+
+        for _ in 0..2 {
+            match byte {
+                b'0'...b'9' => {},
+                _ => break,
+            }
+
+            m = m * 10 + (byte - b'0') as u16;
+            byte = self.next_byte();
+        }
+
+        // First digit has to be 1...9, so we don't need to check for zero.
+        if m % 8 != 0 || m > 256 || byte != b'x' {
+            return false;
+        }
+
+        let mut n = match self.next_byte() {
+            byte @ b'0'...b'9' => (byte - b'0'),
+            _                  => return false,
+        };
+
+        match self.next_byte() {
+            byte @ b'0'...b'9' => {
+                n = n * 10 + (byte - b'0');
+
+                self.bump();
+            },
+            _ => {},
+        }
+
+        if n <= 80 && self.end_of_label() {
+            self.token = token;
+
+            return true;
+        }
+
+        false
+    }
+}
