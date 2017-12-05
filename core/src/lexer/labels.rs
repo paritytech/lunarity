@@ -102,12 +102,12 @@ pub const IDT: ByteHandler = Some(|lex| {
 // Identifier or keyword starting with a letter `b`
 pub const L_A: ByteHandler = Some(|lex| {
     match_label!(lex [
-        [ b s t r a c t => ReservedWord ]    // abstract
+        [ b s t r a c t   => ReservedWord ]    // abstract
         [ d d
-            [ r e s s   => TypeAddress ]
-            [ m o d     => IdentifierBuiltin ]
+            [ r e s s     => TypeAddress ]
+            [ m o d       => IdentifierBuiltin ]
         ]
-        [ f t e r       => ReservedWord ]    // after
+        [ f t e r         => ReservedWord ]    // after
         [ n o n y m o u s => KeywordAnonymous ]
         [ s
             [             => KeywordAs ]
