@@ -2,8 +2,9 @@ mod token;
 mod labels;
 mod util;
 
-pub use lexer::token::*;
+pub use lexer::token::Token;
 
+use lexer::util::legal_in_label;
 use lexer::labels::*;
 use lexer::token::Token::*;
 
@@ -362,18 +363,13 @@ const SLH: ByteHandler = Some(|lex| {
             // Keep consuming bytes until */ happens in a row
             unwind_loop!({
                 match lex.next_byte() {
-                    b'*' => {
-                        match lex.next_byte() {
-                            b'/' => {
-                                lex.bump();
-                                return lex.advance();
-                            },
-                            0 => return lex.token = UnexpectedEndOfProgram,
-                            _ => {}
-                        }
-                    },
                     0 => return lex.token = UnexpectedEndOfProgram,
-                    _ => {}
+                    _ => {
+                        if lex.read_pair() == *b"*/" {
+                            lex.index += 2;
+                            return lex.advance();
+                        }
+                    }
                 }
             });
         },
@@ -544,7 +540,7 @@ impl<'arena> Lexer<'arena> {
     pub fn advance(&mut self) {
         let mut ch;
 
-        unwind_loop!({
+        loop {
             ch = self.read_byte();
 
             if let Some(handler) = self.handler_from_byte(ch) {
@@ -553,7 +549,7 @@ impl<'arena> Lexer<'arena> {
             }
 
             self.bump();
-        })
+        }
     }
 
     /// Create an `&str` slice from source spanning current token.
@@ -630,6 +626,12 @@ impl<'arena> Lexer<'arena> {
         unsafe { *self.ptr.offset(self.index as isize) }
     }
 
+    /// This is safe if `read_byte` does not return `0`
+    #[inline]
+    fn read_pair(&self) -> [u8; 2] {
+        unsafe { *(self.ptr.offset(self.index as isize) as *const [u8; 2]) }
+    }
+
     /// Manually increment the index. Calling `read_byte` and then `bump`
     /// is equivalent to consuming a byte on an iterator.
     #[inline]
@@ -644,16 +646,10 @@ impl<'arena> Lexer<'arena> {
     }
 
     #[inline]
-    fn read_label(&mut self) -> &'arena str {
-        let start = self.token_start;
-
-        unwind_loop!({
-            if util::legal_in_label(self.read_byte()) {
-                self.bump();
-            } else {
-                return self.slice_from(start)
-            }
-        })
+    fn read_label(&mut self) {
+        while legal_in_label(self.read_byte()) {
+            self.bump();
+        }
     }
 
     #[inline]
@@ -671,6 +667,38 @@ impl<'arena> Lexer<'arena> {
             from_utf8_unchecked(from_raw_parts(
                 self.ptr.offset(start as isize), end - start
             ))
+        }
+    }
+
+    #[inline]
+    pub fn read_pragma(&mut self) -> &'arena str {
+        loop {
+            match self.read_byte() {
+                0x01...0x20 => self.bump(),
+                _           => break,
+            }
+        }
+
+        let start = self.index;
+
+        loop {
+            match self.read_byte() {
+                0    => {
+                    self.token = UnexpectedEndOfProgram;
+
+                    return self.slice_from(start);
+                },
+                b';' => {
+                    let version = self.slice_from(start);
+
+                    self.token_start = self.index;
+                    self.token = Semicolon;
+                    self.bump();
+
+                    return version;
+                },
+                _    => self.bump(),
+            }
         }
     }
 
@@ -1256,7 +1284,7 @@ mod test {
 
     #[test]
     fn not_real_types() {
-                assert_lex(
+        assert_lex(
             "
                 bytes33 int127 fixed127 fixed128x fixed258x80 fixed256x81
                 bytes0  uint0  uint53   ufixed1x1
@@ -1274,5 +1302,26 @@ mod test {
                 (Identifier, "ufixed1x1"),
             ][..]
         );
+    }
+
+    #[test]
+    fn second_price_auction() {
+        let source = include_str!("../../benches/second-price-auction.sol");
+
+        let arena = Arena::new();
+        let mut lex = Lexer::new(&arena, source);
+
+        let mut tokens = 0;
+
+        while lex.token != EndOfProgram {
+            assert_ne!(lex.token, UnexpectedToken);
+            assert_ne!(lex.token, UnexpectedEndOfProgram);
+
+            tokens += 1;
+
+            lex.advance();
+        }
+
+        assert_eq!(tokens, 1300);
     }
 }

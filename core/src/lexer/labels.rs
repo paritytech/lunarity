@@ -465,7 +465,6 @@ pub const L_Y: ByteHandler = Some(|lex| {
     lex.token = Identifier;
 });
 
-
 impl<'arena> Lexer<'arena> {
     #[inline]
     fn end_of_label(&self) -> bool {

@@ -1,0 +1,6022 @@
+{
+  "type": "Program",
+  "body": [
+    {
+      "type": "PragmaStatement",
+      "start_version": {
+        "type": "VersionLiteral",
+        "operator": "^",
+        "version": "0.4.17",
+        "start": 99,
+        "end": 106
+      },
+      "end_version": null,
+      "start": 83,
+      "end": 107
+    },
+    {
+      "type": "ContractStatement",
+      "name": "Token",
+      "is": [],
+      "body": [
+        {
+          "type": "FunctionDeclaration",
+          "name": "transfer",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 198,
+                "end": 205
+              },
+              "id": "_to",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 198,
+              "end": 209
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint256",
+                "members": [],
+                "array_parts": [],
+                "start": 211,
+                "end": 218
+              },
+              "id": "_value",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 211,
+              "end": 225
+            }
+          ],
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 227,
+              "end": 234
+            }
+          ],
+          "returnParams": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "bool",
+                "members": [],
+                "array_parts": [],
+                "start": 243,
+                "end": 247
+              },
+              "id": "success",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 243,
+              "end": 255
+            }
+          ],
+          "body": null,
+          "is_abstract": true,
+          "start": 180,
+          "end": 257
+        }
+      ],
+      "start": 159,
+      "end": 259
+    },
+    {
+      "type": "ContractStatement",
+      "name": "Certifier",
+      "is": [],
+      "body": [
+        {
+          "type": "EventDeclaration",
+          "name": "Confirmed",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 324,
+                "end": 331
+              },
+              "id": "who",
+              "is_indexed": true,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 324,
+              "end": 343
+            }
+          ],
+          "is_anonymous": false,
+          "start": 308,
+          "end": 345
+        },
+        {
+          "type": "EventDeclaration",
+          "name": "Revoked",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 364,
+                "end": 371
+              },
+              "id": "who",
+              "is_indexed": true,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 364,
+              "end": 383
+            }
+          ],
+          "is_anonymous": false,
+          "start": 350,
+          "end": 385
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "certified",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 409,
+                "end": 416
+              },
+              "id": null,
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 409,
+              "end": 416
+            }
+          ],
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 418,
+              "end": 425
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "constant",
+              "params": [],
+              "start": 425,
+              "end": 434
+            }
+          ],
+          "returnParams": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "bool",
+                "members": [],
+                "array_parts": [],
+                "start": 443,
+                "end": 447
+              },
+              "id": null,
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 443,
+              "end": 447
+            }
+          ],
+          "body": null,
+          "is_abstract": true,
+          "start": 390,
+          "end": 449
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "get",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 467,
+                "end": 474
+              },
+              "id": null,
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 467,
+              "end": 474
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "string",
+                "members": [],
+                "array_parts": [],
+                "start": 476,
+                "end": 482
+              },
+              "id": null,
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 476,
+              "end": 482
+            }
+          ],
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 484,
+              "end": 491
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "constant",
+              "params": [],
+              "start": 491,
+              "end": 500
+            }
+          ],
+          "returnParams": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "bytes32",
+                "members": [],
+                "array_parts": [],
+                "start": 509,
+                "end": 516
+              },
+              "id": null,
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 509,
+              "end": 516
+            }
+          ],
+          "body": null,
+          "is_abstract": true,
+          "start": 454,
+          "end": 518
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "getAddress",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 543,
+                "end": 550
+              },
+              "id": null,
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 543,
+              "end": 550
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "string",
+                "members": [],
+                "array_parts": [],
+                "start": 552,
+                "end": 558
+              },
+              "id": null,
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 552,
+              "end": 558
+            }
+          ],
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 560,
+              "end": 567
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "constant",
+              "params": [],
+              "start": 567,
+              "end": 576
+            }
+          ],
+          "returnParams": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 585,
+                "end": 592
+              },
+              "id": null,
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 585,
+              "end": 592
+            }
+          ],
+          "body": null,
+          "is_abstract": true,
+          "start": 523,
+          "end": 594
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "getUint",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 616,
+                "end": 623
+              },
+              "id": null,
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 616,
+              "end": 623
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "string",
+                "members": [],
+                "array_parts": [],
+                "start": 625,
+                "end": 631
+              },
+              "id": null,
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 625,
+              "end": 631
+            }
+          ],
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 633,
+              "end": 640
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "constant",
+              "params": [],
+              "start": 640,
+              "end": 649
+            }
+          ],
+          "returnParams": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 658,
+                "end": 662
+              },
+              "id": null,
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 658,
+              "end": 662
+            }
+          ],
+          "body": null,
+          "is_abstract": true,
+          "start": 599,
+          "end": 664
+        }
+      ],
+      "start": 283,
+      "end": 666
+    },
+    {
+      "type": "ContractStatement",
+      "name": "SecondPriceAuction",
+      "is": [],
+      "body": [
+        {
+          "type": "EventDeclaration",
+          "name": "Buyin",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 1077,
+                "end": 1084
+              },
+              "id": "who",
+              "is_indexed": true,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1077,
+              "end": 1096
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 1098,
+                "end": 1102
+              },
+              "id": "accounted",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1098,
+              "end": 1112
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 1114,
+                "end": 1118
+              },
+              "id": "received",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1114,
+              "end": 1127
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 1129,
+                "end": 1133
+              },
+              "id": "price",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1129,
+              "end": 1139
+            }
+          ],
+          "is_anonymous": false,
+          "start": 1065,
+          "end": 1141
+        },
+        {
+          "type": "EventDeclaration",
+          "name": "Injected",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 1197,
+                "end": 1204
+              },
+              "id": "who",
+              "is_indexed": true,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1197,
+              "end": 1216
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 1218,
+                "end": 1222
+              },
+              "id": "accounted",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1218,
+              "end": 1232
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 1234,
+                "end": 1238
+              },
+              "id": "received",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1234,
+              "end": 1247
+            }
+          ],
+          "is_anonymous": false,
+          "start": 1182,
+          "end": 1249
+        },
+        {
+          "type": "EventDeclaration",
+          "name": "Ticked",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 1331,
+                "end": 1335
+              },
+              "id": "era",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1331,
+              "end": 1339
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 1341,
+                "end": 1345
+              },
+              "id": "received",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1341,
+              "end": 1354
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 1356,
+                "end": 1360
+              },
+              "id": "accounted",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1356,
+              "end": 1370
+            }
+          ],
+          "is_anonymous": false,
+          "start": 1318,
+          "end": 1372
+        },
+        {
+          "type": "EventDeclaration",
+          "name": "Ended",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 1442,
+                "end": 1446
+              },
+              "id": "price",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1442,
+              "end": 1452
+            }
+          ],
+          "is_anonymous": false,
+          "start": 1430,
+          "end": 1454
+        },
+        {
+          "type": "EventDeclaration",
+          "name": "Finalised",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 1554,
+                "end": 1561
+              },
+              "id": "who",
+              "is_indexed": true,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1554,
+              "end": 1573
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 1575,
+                "end": 1579
+              },
+              "id": "tokens",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1575,
+              "end": 1586
+            }
+          ],
+          "is_anonymous": false,
+          "start": 1538,
+          "end": 1588
+        },
+        {
+          "type": "EventDeclaration",
+          "name": "Retired",
+          "params": null,
+          "is_anonymous": false,
+          "start": 1643,
+          "end": 1659
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "SecondPriceAuction",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 1831,
+                "end": 1838
+              },
+              "id": "_certifierContract",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1831,
+              "end": 1857
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 1867,
+                "end": 1874
+              },
+              "id": "_tokenContract",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1867,
+              "end": 1889
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 1899,
+                "end": 1906
+              },
+              "id": "_treasury",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1899,
+              "end": 1916
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 1926,
+                "end": 1933
+              },
+              "id": "_admin",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1926,
+              "end": 1940
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 1950,
+                "end": 1954
+              },
+              "id": "_beginTime",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1950,
+              "end": 1965
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 1975,
+                "end": 1979
+              },
+              "id": "_tokenCap",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 1975,
+              "end": 1989
+            }
+          ],
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 2004,
+              "end": 2015
+            }
+          ],
+          "returnParams": null,
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "certifier",
+                    "start": 2025,
+                    "end": 2034
+                  },
+                  "right": {
+                    "type": "CallExpression",
+                    "callee": {
+                      "type": "Identifier",
+                      "name": "Certifier",
+                      "start": 2037,
+                      "end": 2046
+                    },
+                    "arguments": [
+                      {
+                        "type": "Identifier",
+                        "name": "_certifierContract",
+                        "start": 2047,
+                        "end": 2065
+                      }
+                    ],
+                    "start": 2037,
+                    "end": 2066
+                  },
+                  "start": 2025,
+                  "end": 2066
+                },
+                "start": 2025,
+                "end": 2067
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "tokenContract",
+                    "start": 2076,
+                    "end": 2089
+                  },
+                  "right": {
+                    "type": "CallExpression",
+                    "callee": {
+                      "type": "Identifier",
+                      "name": "Token",
+                      "start": 2092,
+                      "end": 2097
+                    },
+                    "arguments": [
+                      {
+                        "type": "Identifier",
+                        "name": "_tokenContract",
+                        "start": 2098,
+                        "end": 2112
+                      }
+                    ],
+                    "start": 2092,
+                    "end": 2113
+                  },
+                  "start": 2076,
+                  "end": 2113
+                },
+                "start": 2076,
+                "end": 2114
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "treasury",
+                    "start": 2123,
+                    "end": 2131
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "_treasury",
+                    "start": 2134,
+                    "end": 2143
+                  },
+                  "start": 2123,
+                  "end": 2143
+                },
+                "start": 2123,
+                "end": 2144
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "admin",
+                    "start": 2153,
+                    "end": 2158
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "_admin",
+                    "start": 2161,
+                    "end": 2167
+                  },
+                  "start": 2153,
+                  "end": 2167
+                },
+                "start": 2153,
+                "end": 2168
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "beginTime",
+                    "start": 2177,
+                    "end": 2186
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "_beginTime",
+                    "start": 2189,
+                    "end": 2199
+                  },
+                  "start": 2177,
+                  "end": 2199
+                },
+                "start": 2177,
+                "end": 2200
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "tokenCap",
+                    "start": 2209,
+                    "end": 2217
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "_tokenCap",
+                    "start": 2220,
+                    "end": 2229
+                  },
+                  "start": 2209,
+                  "end": 2229
+                },
+                "start": 2209,
+                "end": 2230
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "endTime",
+                    "start": 2239,
+                    "end": 2246
+                  },
+                  "right": {
+                    "type": "BinaryExpression",
+                    "operator": "+",
+                    "left": {
+                      "type": "Identifier",
+                      "name": "beginTime",
+                      "start": 2249,
+                      "end": 2258
+                    },
+                    "right": {
+                      "type": "DenominationLiteral",
+                      "literal": 28,
+                      "denomination": "days",
+                      "start": 2261,
+                      "end": 2268
+                    },
+                    "start": 2249,
+                    "end": 2268
+                  },
+                  "start": 2239,
+                  "end": 2268
+                },
+                "start": 2239,
+                "end": 2269
+              }
+            ],
+            "start": 2015,
+            "end": 2275
+          },
+          "is_abstract": false,
+          "start": 1794,
+          "end": 2275
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": null,
+          "params": null,
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 2338,
+              "end": 2345
+            }
+          ],
+          "returnParams": null,
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "Identifier",
+                    "name": "assert",
+                    "start": 2347,
+                    "end": 2353
+                  },
+                  "arguments": [
+                    {
+                      "type": "Literal",
+                      "value": false,
+                      "start": 2354,
+                      "end": 2359
+                    }
+                  ],
+                  "start": 2347,
+                  "end": 2360
+                },
+                "start": 2347,
+                "end": 2361
+              }
+            ],
+            "start": 2345,
+            "end": 2363
+          },
+          "is_abstract": false,
+          "start": 2327,
+          "end": 2363
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "buyin",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint8",
+                "members": [],
+                "array_parts": [],
+                "start": 2502,
+                "end": 2507
+              },
+              "id": "v",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 2502,
+              "end": 2509
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "bytes32",
+                "members": [],
+                "array_parts": [],
+                "start": 2511,
+                "end": 2518
+              },
+              "id": "r",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 2511,
+              "end": 2520
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "bytes32",
+                "members": [],
+                "array_parts": [],
+                "start": 2522,
+                "end": 2529
+              },
+              "id": "s",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 2522,
+              "end": 2531
+            }
+          ],
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 2541,
+              "end": 2556
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "payable",
+              "params": [],
+              "start": 2556,
+              "end": 2572
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "when_not_halted",
+              "params": [],
+              "start": 2572,
+              "end": 2596
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "when_active",
+              "params": [],
+              "start": 2596,
+              "end": 2616
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "only_eligible",
+              "params": [
+                {
+                  "type": "MemberExpression",
+                  "object": {
+                    "type": "Identifier",
+                    "name": "msg",
+                    "start": 2630,
+                    "end": 2633
+                  },
+                  "property": {
+                    "type": "Identifier",
+                    "name": "sender",
+                    "start": 2634,
+                    "end": 2640
+                  },
+                  "computed": false,
+                  "start": 2630,
+                  "end": 2640
+                },
+                {
+                  "type": "Identifier",
+                  "name": "v",
+                  "start": 2642,
+                  "end": 2643
+                },
+                {
+                  "type": "Identifier",
+                  "name": "r",
+                  "start": 2645,
+                  "end": 2646
+                },
+                {
+                  "type": "Identifier",
+                  "name": "s",
+                  "start": 2648,
+                  "end": 2649
+                }
+              ],
+              "start": 2616,
+              "end": 2650
+            }
+          ],
+          "returnParams": null,
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "Identifier",
+                    "name": "flushEra",
+                    "start": 2665,
+                    "end": 2673
+                  },
+                  "arguments": [],
+                  "start": 2665,
+                  "end": 2675
+                },
+                "start": 2665,
+                "end": 2676
+              },
+              {
+                "type": "IfStatement",
+                "test": {
+                  "type": "BinaryExpression",
+                  "operator": ">",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "currentBonus",
+                    "start": 2721,
+                    "end": 2733
+                  },
+                  "right": {
+                    "type": "Literal",
+                    "value": 0,
+                    "start": 2736,
+                    "end": 2737
+                  },
+                  "start": 2721,
+                  "end": 2737
+                },
+                "consequent": {
+                  "type": "BlockStatement",
+                  "body": [
+                    {
+                      "type": "IfStatement",
+                      "test": {
+                        "type": "BinaryExpression",
+                        "operator": "&&",
+                        "left": {
+                          "type": "BinaryExpression",
+                          "operator": ">=",
+                          "left": {
+                            "type": "Identifier",
+                            "name": "now",
+                            "start": 2801,
+                            "end": 2804
+                          },
+                          "right": {
+                            "type": "BinaryExpression",
+                            "operator": "+",
+                            "left": {
+                              "type": "Identifier",
+                              "name": "beginTime",
+                              "start": 2808,
+                              "end": 2817
+                            },
+                            "right": {
+                              "type": "Identifier",
+                              "name": "BONUS_MIN_DURATION",
+                              "start": 2820,
+                              "end": 2838
+                            },
+                            "start": 2808,
+                            "end": 2838
+                          },
+                          "start": 2801,
+                          "end": 2838
+                        },
+                        "right": {
+                          "type": "BinaryExpression",
+                          "operator": "<=",
+                          "left": {
+                            "type": "BinaryExpression",
+                            "operator": "+",
+                            "left": {
+                              "type": "Identifier",
+                              "name": "lastNewInterest",
+                              "start": 2917,
+                              "end": 2932
+                            },
+                            "right": {
+                              "type": "Identifier",
+                              "name": "BONUS_LATCH",
+                              "start": 2935,
+                              "end": 2946
+                            },
+                            "start": 2917,
+                            "end": 2946
+                          },
+                          "right": {
+                            "type": "MemberExpression",
+                            "object": {
+                              "type": "Identifier",
+                              "name": "block",
+                              "start": 2950,
+                              "end": 2955
+                            },
+                            "property": {
+                              "type": "Identifier",
+                              "name": "number",
+                              "start": 2956,
+                              "end": 2962
+                            },
+                            "computed": false,
+                            "start": 2950,
+                            "end": 2962
+                          },
+                          "start": 2917,
+                          "end": 2962
+                        },
+                        "start": 2801,
+                        "end": 2962
+                      },
+                      "consequent": {
+                        "type": "BlockStatement",
+                        "body": [
+                          {
+                            "type": "ExpressionStatement",
+                            "expression": {
+                              "type": "UpdateExpression",
+                              "operator": "--",
+                              "argument": {
+                                "type": "Identifier",
+                                "name": "currentBonus",
+                                "start": 3044,
+                                "end": 3056
+                              },
+                              "prefix": false,
+                              "start": 3044,
+                              "end": 3058
+                            },
+                            "start": 3044,
+                            "end": 3059
+                          }
+                        ],
+                        "start": 3026,
+                        "end": 3073
+                      },
+                      "alternate": null,
+                      "start": 2797,
+                      "end": 3073
+                    },
+                    {
+                      "type": "IfStatement",
+                      "test": {
+                        "type": "BinaryExpression",
+                        "operator": ">=",
+                        "left": {
+                          "type": "Identifier",
+                          "name": "now",
+                          "start": 3090,
+                          "end": 3093
+                        },
+                        "right": {
+                          "type": "BinaryExpression",
+                          "operator": "+",
+                          "left": {
+                            "type": "Identifier",
+                            "name": "beginTime",
+                            "start": 3097,
+                            "end": 3106
+                          },
+                          "right": {
+                            "type": "Identifier",
+                            "name": "BONUS_MAX_DURATION",
+                            "start": 3109,
+                            "end": 3127
+                          },
+                          "start": 3097,
+                          "end": 3127
+                        },
+                        "start": 3090,
+                        "end": 3127
+                      },
+                      "consequent": {
+                        "type": "BlockStatement",
+                        "body": [
+                          {
+                            "type": "ExpressionStatement",
+                            "expression": {
+                              "type": "AssignmentExpression",
+                              "operator": "=",
+                              "left": {
+                                "type": "Identifier",
+                                "name": "currentBonus",
+                                "start": 3147,
+                                "end": 3159
+                              },
+                              "right": {
+                                "type": "Literal",
+                                "value": 0,
+                                "start": 3162,
+                                "end": 3163
+                              },
+                              "start": 3147,
+                              "end": 3163
+                            },
+                            "start": 3147,
+                            "end": 3164
+                          }
+                        ],
+                        "start": 3129,
+                        "end": 3178
+                      },
+                      "alternate": null,
+                      "start": 3086,
+                      "end": 3178
+                    },
+                    {
+                      "type": "IfStatement",
+                      "test": {
+                        "type": "BinaryExpression",
+                        "operator": "==",
+                        "left": {
+                          "type": "MemberExpression",
+                          "object": {
+                            "type": "MemberExpression",
+                            "object": {
+                              "type": "Identifier",
+                              "name": "buyins",
+                              "start": 3195,
+                              "end": 3201
+                            },
+                            "property": {
+                              "type": "MemberExpression",
+                              "object": {
+                                "type": "Identifier",
+                                "name": "msg",
+                                "start": 3202,
+                                "end": 3205
+                              },
+                              "property": {
+                                "type": "Identifier",
+                                "name": "sender",
+                                "start": 3206,
+                                "end": 3212
+                              },
+                              "computed": false,
+                              "start": 3202,
+                              "end": 3212
+                            },
+                            "computed": true,
+                            "start": 3195,
+                            "end": 3222
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "received",
+                            "start": 3214,
+                            "end": 3222
+                          },
+                          "computed": false,
+                          "start": 3195,
+                          "end": 3222
+                        },
+                        "right": {
+                          "type": "Literal",
+                          "value": 0,
+                          "start": 3226,
+                          "end": 3227
+                        },
+                        "start": 3195,
+                        "end": 3227
+                      },
+                      "consequent": {
+                        "type": "BlockStatement",
+                        "body": [
+                          {
+                            "type": "ExpressionStatement",
+                            "expression": {
+                              "type": "AssignmentExpression",
+                              "operator": "=",
+                              "left": {
+                                "type": "Identifier",
+                                "name": "lastNewInterest",
+                                "start": 3271,
+                                "end": 3286
+                              },
+                              "right": {
+                                "type": "CallExpression",
+                                "callee": {
+                                  "type": "Identifier",
+                                  "name": "uint32",
+                                  "start": 3289,
+                                  "end": 3295
+                                },
+                                "arguments": [
+                                  {
+                                    "type": "MemberExpression",
+                                    "object": {
+                                      "type": "Identifier",
+                                      "name": "block",
+                                      "start": 3296,
+                                      "end": 3301
+                                    },
+                                    "property": {
+                                      "type": "Identifier",
+                                      "name": "number",
+                                      "start": 3302,
+                                      "end": 3308
+                                    },
+                                    "computed": false,
+                                    "start": 3296,
+                                    "end": 3308
+                                  }
+                                ],
+                                "start": 3289,
+                                "end": 3309
+                              },
+                              "start": 3271,
+                              "end": 3309
+                            },
+                            "start": 3271,
+                            "end": 3310
+                          }
+                        ],
+                        "start": 3229,
+                        "end": 3324
+                      },
+                      "alternate": null,
+                      "start": 3191,
+                      "end": 3324
+                    }
+                  ],
+                  "start": 2739,
+                  "end": 3334
+                },
+                "alternate": null,
+                "start": 2717,
+                "end": 3334
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "DeclarativeExpression",
+                  "name": "accounted",
+                  "literal": {
+                    "type": "Type",
+                    "literal": "uint",
+                    "members": [],
+                    "array_parts": [],
+                    "start": 3344,
+                    "end": 3348
+                  },
+                  "storage_location": null,
+                  "start": 3344,
+                  "end": 3358
+                },
+                "start": 3344,
+                "end": 3359
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "DeclarativeExpression",
+                  "name": "refund",
+                  "literal": {
+                    "type": "Type",
+                    "literal": "bool",
+                    "members": [],
+                    "array_parts": [],
+                    "start": 3368,
+                    "end": 3372
+                  },
+                  "storage_location": null,
+                  "start": 3368,
+                  "end": 3379
+                },
+                "start": 3368,
+                "end": 3380
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "DeclarativeExpression",
+                  "name": "price",
+                  "literal": {
+                    "type": "Type",
+                    "literal": "uint",
+                    "members": [],
+                    "array_parts": [],
+                    "start": 3389,
+                    "end": 3393
+                  },
+                  "storage_location": null,
+                  "start": 3389,
+                  "end": 3399
+                },
+                "start": 3389,
+                "end": 3400
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "SequenceExpression",
+                    "expressions": [
+                      {
+                        "type": "Identifier",
+                        "name": "accounted",
+                        "start": 3410,
+                        "end": 3419
+                      },
+                      {
+                        "type": "Identifier",
+                        "name": "refund",
+                        "start": 3421,
+                        "end": 3427
+                      },
+                      {
+                        "type": "Identifier",
+                        "name": "price",
+                        "start": 3429,
+                        "end": 3434
+                      }
+                    ],
+                    "start": 3409,
+                    "end": 3435
+                  },
+                  "right": {
+                    "type": "CallExpression",
+                    "callee": {
+                      "type": "Identifier",
+                      "name": "theDeal",
+                      "start": 3438,
+                      "end": 3445
+                    },
+                    "arguments": [
+                      {
+                        "type": "MemberExpression",
+                        "object": {
+                          "type": "Identifier",
+                          "name": "msg",
+                          "start": 3446,
+                          "end": 3449
+                        },
+                        "property": {
+                          "type": "Identifier",
+                          "name": "value",
+                          "start": 3450,
+                          "end": 3455
+                        },
+                        "computed": false,
+                        "start": 3446,
+                        "end": 3455
+                      }
+                    ],
+                    "start": 3438,
+                    "end": 3456
+                  },
+                  "start": 3409,
+                  "end": 3456
+                },
+                "start": 3409,
+                "end": 3457
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "Identifier",
+                    "name": "require",
+                    "start": 3499,
+                    "end": 3506
+                  },
+                  "arguments": [
+                    {
+                      "type": "UnaryExpression",
+                      "operator": "!",
+                      "argument": {
+                        "type": "Identifier",
+                        "name": "refund",
+                        "start": 3509,
+                        "end": 3515
+                      },
+                      "prefix": true,
+                      "start": 3508,
+                      "end": 3515
+                    }
+                  ],
+                  "start": 3499,
+                  "end": 3516
+                },
+                "start": 3499,
+                "end": 3517
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "+=",
+                  "left": {
+                    "type": "MemberExpression",
+                    "object": {
+                      "type": "MemberExpression",
+                      "object": {
+                        "type": "Identifier",
+                        "name": "buyins",
+                        "start": 3561,
+                        "end": 3567
+                      },
+                      "property": {
+                        "type": "MemberExpression",
+                        "object": {
+                          "type": "Identifier",
+                          "name": "msg",
+                          "start": 3568,
+                          "end": 3571
+                        },
+                        "property": {
+                          "type": "Identifier",
+                          "name": "sender",
+                          "start": 3572,
+                          "end": 3578
+                        },
+                        "computed": false,
+                        "start": 3568,
+                        "end": 3578
+                      },
+                      "computed": true,
+                      "start": 3561,
+                      "end": 3589
+                    },
+                    "property": {
+                      "type": "Identifier",
+                      "name": "accounted",
+                      "start": 3580,
+                      "end": 3589
+                    },
+                    "computed": false,
+                    "start": 3561,
+                    "end": 3589
+                  },
+                  "right": {
+                    "type": "CallExpression",
+                    "callee": {
+                      "type": "Identifier",
+                      "name": "uint128",
+                      "start": 3593,
+                      "end": 3600
+                    },
+                    "arguments": [
+                      {
+                        "type": "Identifier",
+                        "name": "accounted",
+                        "start": 3601,
+                        "end": 3610
+                      }
+                    ],
+                    "start": 3593,
+                    "end": 3611
+                  },
+                  "start": 3561,
+                  "end": 3611
+                },
+                "start": 3561,
+                "end": 3612
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "+=",
+                  "left": {
+                    "type": "MemberExpression",
+                    "object": {
+                      "type": "MemberExpression",
+                      "object": {
+                        "type": "Identifier",
+                        "name": "buyins",
+                        "start": 3621,
+                        "end": 3627
+                      },
+                      "property": {
+                        "type": "MemberExpression",
+                        "object": {
+                          "type": "Identifier",
+                          "name": "msg",
+                          "start": 3628,
+                          "end": 3631
+                        },
+                        "property": {
+                          "type": "Identifier",
+                          "name": "sender",
+                          "start": 3632,
+                          "end": 3638
+                        },
+                        "computed": false,
+                        "start": 3628,
+                        "end": 3638
+                      },
+                      "computed": true,
+                      "start": 3621,
+                      "end": 3648
+                    },
+                    "property": {
+                      "type": "Identifier",
+                      "name": "received",
+                      "start": 3640,
+                      "end": 3648
+                    },
+                    "computed": false,
+                    "start": 3621,
+                    "end": 3648
+                  },
+                  "right": {
+                    "type": "CallExpression",
+                    "callee": {
+                      "type": "Identifier",
+                      "name": "uint128",
+                      "start": 3652,
+                      "end": 3659
+                    },
+                    "arguments": [
+                      {
+                        "type": "MemberExpression",
+                        "object": {
+                          "type": "Identifier",
+                          "name": "msg",
+                          "start": 3660,
+                          "end": 3663
+                        },
+                        "property": {
+                          "type": "Identifier",
+                          "name": "value",
+                          "start": 3664,
+                          "end": 3669
+                        },
+                        "computed": false,
+                        "start": 3660,
+                        "end": 3669
+                      }
+                    ],
+                    "start": 3652,
+                    "end": 3670
+                  },
+                  "start": 3621,
+                  "end": 3670
+                },
+                "start": 3621,
+                "end": 3671
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "+=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "totalAccounted",
+                    "start": 3680,
+                    "end": 3694
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "accounted",
+                    "start": 3698,
+                    "end": 3707
+                  },
+                  "start": 3680,
+                  "end": 3707
+                },
+                "start": 3680,
+                "end": 3708
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "+=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "totalReceived",
+                    "start": 3717,
+                    "end": 3730
+                  },
+                  "right": {
+                    "type": "MemberExpression",
+                    "object": {
+                      "type": "Identifier",
+                      "name": "msg",
+                      "start": 3734,
+                      "end": 3737
+                    },
+                    "property": {
+                      "type": "Identifier",
+                      "name": "value",
+                      "start": 3738,
+                      "end": 3743
+                    },
+                    "computed": false,
+                    "start": 3734,
+                    "end": 3743
+                  },
+                  "start": 3717,
+                  "end": 3743
+                },
+                "start": 3717,
+                "end": 3744
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "endTime",
+                    "start": 3753,
+                    "end": 3760
+                  },
+                  "right": {
+                    "type": "CallExpression",
+                    "callee": {
+                      "type": "Identifier",
+                      "name": "calculateEndTime",
+                      "start": 3763,
+                      "end": 3779
+                    },
+                    "arguments": [],
+                    "start": 3763,
+                    "end": 3781
+                  },
+                  "start": 3753,
+                  "end": 3781
+                },
+                "start": 3753,
+                "end": 3782
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "Identifier",
+                    "name": "Buyin",
+                    "start": 3791,
+                    "end": 3796
+                  },
+                  "arguments": [
+                    {
+                      "type": "MemberExpression",
+                      "object": {
+                        "type": "Identifier",
+                        "name": "msg",
+                        "start": 3797,
+                        "end": 3800
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "sender",
+                        "start": 3801,
+                        "end": 3807
+                      },
+                      "computed": false,
+                      "start": 3797,
+                      "end": 3807
+                    },
+                    {
+                      "type": "Identifier",
+                      "name": "accounted",
+                      "start": 3809,
+                      "end": 3818
+                    },
+                    {
+                      "type": "MemberExpression",
+                      "object": {
+                        "type": "Identifier",
+                        "name": "msg",
+                        "start": 3820,
+                        "end": 3823
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "value",
+                        "start": 3824,
+                        "end": 3829
+                      },
+                      "computed": false,
+                      "start": 3820,
+                      "end": 3829
+                    },
+                    {
+                      "type": "Identifier",
+                      "name": "price",
+                      "start": 3831,
+                      "end": 3836
+                    }
+                  ],
+                  "start": 3791,
+                  "end": 3837
+                },
+                "start": 3791,
+                "end": 3838
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "MemberExpression",
+                    "object": {
+                      "type": "Identifier",
+                      "name": "treasury",
+                      "start": 3876,
+                      "end": 3884
+                    },
+                    "property": {
+                      "type": "Identifier",
+                      "name": "transfer",
+                      "start": 3885,
+                      "end": 3893
+                    },
+                    "computed": false,
+                    "start": 3876,
+                    "end": 3893
+                  },
+                  "arguments": [
+                    {
+                      "type": "MemberExpression",
+                      "object": {
+                        "type": "Identifier",
+                        "name": "msg",
+                        "start": 3894,
+                        "end": 3897
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "value",
+                        "start": 3898,
+                        "end": 3903
+                      },
+                      "computed": false,
+                      "start": 3894,
+                      "end": 3903
+                    }
+                  ],
+                  "start": 3876,
+                  "end": 3904
+                },
+                "start": 3876,
+                "end": 3905
+              }
+            ],
+            "start": 2655,
+            "end": 3911
+          },
+          "is_abstract": false,
+          "start": 2487,
+          "end": 3911
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "inject",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 4010,
+                "end": 4017
+              },
+              "id": "_who",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 4010,
+              "end": 4022
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint128",
+                "members": [],
+                "array_parts": [],
+                "start": 4024,
+                "end": 4031
+              },
+              "id": "_received",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 4024,
+              "end": 4041
+            }
+          ],
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 4051,
+              "end": 4066
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "only_admin",
+              "params": [],
+              "start": 4066,
+              "end": 4085
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "only_basic",
+              "params": [
+                {
+                  "type": "Identifier",
+                  "name": "_who",
+                  "start": 4096,
+                  "end": 4100
+                }
+              ],
+              "start": 4085,
+              "end": 4101
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "before_beginning",
+              "params": [],
+              "start": 4110,
+              "end": 4131
+            }
+          ],
+          "returnParams": null,
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "DeclarativeExpression",
+                    "name": "bonus",
+                    "literal": {
+                      "type": "Type",
+                      "literal": "uint128",
+                      "members": [],
+                      "array_parts": [],
+                      "start": 4141,
+                      "end": 4148
+                    },
+                    "storage_location": null,
+                    "start": 4141,
+                    "end": 4154
+                  },
+                  "right": {
+                    "type": "BinaryExpression",
+                    "operator": "/",
+                    "left": {
+                      "type": "BinaryExpression",
+                      "operator": "*",
+                      "left": {
+                        "type": "Identifier",
+                        "name": "_received",
+                        "start": 4157,
+                        "end": 4166
+                      },
+                      "right": {
+                        "type": "CallExpression",
+                        "callee": {
+                          "type": "Identifier",
+                          "name": "uint128",
+                          "start": 4169,
+                          "end": 4176
+                        },
+                        "arguments": [
+                          {
+                            "type": "Identifier",
+                            "name": "currentBonus",
+                            "start": 4177,
+                            "end": 4189
+                          }
+                        ],
+                        "start": 4169,
+                        "end": 4190
+                      },
+                      "start": 4157,
+                      "end": 4196
+                    },
+                    "right": {
+                      "type": "Literal",
+                      "value": 100,
+                      "start": 4193,
+                      "end": 4196
+                    },
+                    "start": 4157,
+                    "end": 4196
+                  },
+                  "start": 4141,
+                  "end": 4196
+                },
+                "start": 4141,
+                "end": 4197
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "DeclarativeExpression",
+                    "name": "accounted",
+                    "literal": {
+                      "type": "Type",
+                      "literal": "uint128",
+                      "members": [],
+                      "array_parts": [],
+                      "start": 4206,
+                      "end": 4213
+                    },
+                    "storage_location": null,
+                    "start": 4206,
+                    "end": 4223
+                  },
+                  "right": {
+                    "type": "BinaryExpression",
+                    "operator": "+",
+                    "left": {
+                      "type": "Identifier",
+                      "name": "_received",
+                      "start": 4226,
+                      "end": 4235
+                    },
+                    "right": {
+                      "type": "Identifier",
+                      "name": "bonus",
+                      "start": 4238,
+                      "end": 4243
+                    },
+                    "start": 4226,
+                    "end": 4243
+                  },
+                  "start": 4206,
+                  "end": 4243
+                },
+                "start": 4206,
+                "end": 4244
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "+=",
+                  "left": {
+                    "type": "MemberExpression",
+                    "object": {
+                      "type": "MemberExpression",
+                      "object": {
+                        "type": "Identifier",
+                        "name": "buyins",
+                        "start": 4254,
+                        "end": 4260
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "_who",
+                        "start": 4261,
+                        "end": 4265
+                      },
+                      "computed": true,
+                      "start": 4254,
+                      "end": 4276
+                    },
+                    "property": {
+                      "type": "Identifier",
+                      "name": "accounted",
+                      "start": 4267,
+                      "end": 4276
+                    },
+                    "computed": false,
+                    "start": 4254,
+                    "end": 4276
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "accounted",
+                    "start": 4280,
+                    "end": 4289
+                  },
+                  "start": 4254,
+                  "end": 4289
+                },
+                "start": 4254,
+                "end": 4290
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "+=",
+                  "left": {
+                    "type": "MemberExpression",
+                    "object": {
+                      "type": "MemberExpression",
+                      "object": {
+                        "type": "Identifier",
+                        "name": "buyins",
+                        "start": 4299,
+                        "end": 4305
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "_who",
+                        "start": 4306,
+                        "end": 4310
+                      },
+                      "computed": true,
+                      "start": 4299,
+                      "end": 4320
+                    },
+                    "property": {
+                      "type": "Identifier",
+                      "name": "received",
+                      "start": 4312,
+                      "end": 4320
+                    },
+                    "computed": false,
+                    "start": 4299,
+                    "end": 4320
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "_received",
+                    "start": 4324,
+                    "end": 4333
+                  },
+                  "start": 4299,
+                  "end": 4333
+                },
+                "start": 4299,
+                "end": 4334
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "+=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "totalAccounted",
+                    "start": 4343,
+                    "end": 4357
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "accounted",
+                    "start": 4361,
+                    "end": 4370
+                  },
+                  "start": 4343,
+                  "end": 4370
+                },
+                "start": 4343,
+                "end": 4371
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "+=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "totalReceived",
+                    "start": 4380,
+                    "end": 4393
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "_received",
+                    "start": 4397,
+                    "end": 4406
+                  },
+                  "start": 4380,
+                  "end": 4406
+                },
+                "start": 4380,
+                "end": 4407
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "endTime",
+                    "start": 4416,
+                    "end": 4423
+                  },
+                  "right": {
+                    "type": "CallExpression",
+                    "callee": {
+                      "type": "Identifier",
+                      "name": "calculateEndTime",
+                      "start": 4426,
+                      "end": 4442
+                    },
+                    "arguments": [],
+                    "start": 4426,
+                    "end": 4444
+                  },
+                  "start": 4416,
+                  "end": 4444
+                },
+                "start": 4416,
+                "end": 4445
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "Identifier",
+                    "name": "Injected",
+                    "start": 4454,
+                    "end": 4462
+                  },
+                  "arguments": [
+                    {
+                      "type": "Identifier",
+                      "name": "_who",
+                      "start": 4463,
+                      "end": 4467
+                    },
+                    {
+                      "type": "Identifier",
+                      "name": "accounted",
+                      "start": 4469,
+                      "end": 4478
+                    },
+                    {
+                      "type": "Identifier",
+                      "name": "_received",
+                      "start": 4480,
+                      "end": 4489
+                    }
+                  ],
+                  "start": 4454,
+                  "end": 4490
+                },
+                "start": 4454,
+                "end": 4491
+              }
+            ],
+            "start": 4131,
+            "end": 4497
+          },
+          "is_abstract": false,
+          "start": 3994,
+          "end": 4497
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "finalise",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 4571,
+                "end": 4578
+              },
+              "id": "_who",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 4571,
+              "end": 4583
+            }
+          ],
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 4593,
+              "end": 4608
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "when_not_halted",
+              "params": [],
+              "start": 4608,
+              "end": 4632
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "when_ended",
+              "params": [],
+              "start": 4632,
+              "end": 4651
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "only_buyins",
+              "params": [
+                {
+                  "type": "Identifier",
+                  "name": "_who",
+                  "start": 4663,
+                  "end": 4667
+                }
+              ],
+              "start": 4651,
+              "end": 4668
+            }
+          ],
+          "returnParams": null,
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "IfStatement",
+                "test": {
+                  "type": "BinaryExpression",
+                  "operator": "==",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "endPrice",
+                    "start": 4750,
+                    "end": 4758
+                  },
+                  "right": {
+                    "type": "Literal",
+                    "value": 0,
+                    "start": 4762,
+                    "end": 4763
+                  },
+                  "start": 4750,
+                  "end": 4763
+                },
+                "consequent": {
+                  "type": "BlockStatement",
+                  "body": [
+                    {
+                      "type": "ExpressionStatement",
+                      "expression": {
+                        "type": "AssignmentExpression",
+                        "operator": "=",
+                        "left": {
+                          "type": "Identifier",
+                          "name": "endPrice",
+                          "start": 4779,
+                          "end": 4787
+                        },
+                        "right": {
+                          "type": "BinaryExpression",
+                          "operator": "/",
+                          "left": {
+                            "type": "Identifier",
+                            "name": "totalAccounted",
+                            "start": 4790,
+                            "end": 4804
+                          },
+                          "right": {
+                            "type": "Identifier",
+                            "name": "tokenCap",
+                            "start": 4807,
+                            "end": 4815
+                          },
+                          "start": 4790,
+                          "end": 4815
+                        },
+                        "start": 4779,
+                        "end": 4815
+                      },
+                      "start": 4779,
+                      "end": 4816
+                    },
+                    {
+                      "type": "ExpressionStatement",
+                      "expression": {
+                        "type": "CallExpression",
+                        "callee": {
+                          "type": "Identifier",
+                          "name": "Ended",
+                          "start": 4829,
+                          "end": 4834
+                        },
+                        "arguments": [
+                          {
+                            "type": "Identifier",
+                            "name": "endPrice",
+                            "start": 4835,
+                            "end": 4843
+                          }
+                        ],
+                        "start": 4829,
+                        "end": 4844
+                      },
+                      "start": 4829,
+                      "end": 4845
+                    }
+                  ],
+                  "start": 4765,
+                  "end": 4855
+                },
+                "alternate": null,
+                "start": 4746,
+                "end": 4855
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "DeclarativeExpression",
+                    "name": "total",
+                    "literal": {
+                      "type": "Type",
+                      "literal": "uint",
+                      "members": [],
+                      "array_parts": [],
+                      "start": 4896,
+                      "end": 4900
+                    },
+                    "storage_location": null,
+                    "start": 4896,
+                    "end": 4906
+                  },
+                  "right": {
+                    "type": "MemberExpression",
+                    "object": {
+                      "type": "MemberExpression",
+                      "object": {
+                        "type": "Identifier",
+                        "name": "buyins",
+                        "start": 4909,
+                        "end": 4915
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "_who",
+                        "start": 4916,
+                        "end": 4920
+                      },
+                      "computed": true,
+                      "start": 4909,
+                      "end": 4931
+                    },
+                    "property": {
+                      "type": "Identifier",
+                      "name": "accounted",
+                      "start": 4922,
+                      "end": 4931
+                    },
+                    "computed": false,
+                    "start": 4909,
+                    "end": 4931
+                  },
+                  "start": 4896,
+                  "end": 4931
+                },
+                "start": 4896,
+                "end": 4932
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "DeclarativeExpression",
+                    "name": "tokens",
+                    "literal": {
+                      "type": "Type",
+                      "literal": "uint",
+                      "members": [],
+                      "array_parts": [],
+                      "start": 4941,
+                      "end": 4945
+                    },
+                    "storage_location": null,
+                    "start": 4941,
+                    "end": 4952
+                  },
+                  "right": {
+                    "type": "BinaryExpression",
+                    "operator": "/",
+                    "left": {
+                      "type": "Identifier",
+                      "name": "total",
+                      "start": 4955,
+                      "end": 4960
+                    },
+                    "right": {
+                      "type": "Identifier",
+                      "name": "endPrice",
+                      "start": 4963,
+                      "end": 4971
+                    },
+                    "start": 4955,
+                    "end": 4971
+                  },
+                  "start": 4941,
+                  "end": 4971
+                },
+                "start": 4941,
+                "end": 4972
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "+=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "totalFinalised",
+                    "start": 4981,
+                    "end": 4995
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "total",
+                    "start": 4999,
+                    "end": 5004
+                  },
+                  "start": 4981,
+                  "end": 5004
+                },
+                "start": 4981,
+                "end": 5005
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "UnaryExpression",
+                  "operator": "delete",
+                  "argument": {
+                    "type": "MemberExpression",
+                    "object": {
+                      "type": "Identifier",
+                      "name": "buyins",
+                      "start": 5021,
+                      "end": 5027
+                    },
+                    "property": {
+                      "type": "Identifier",
+                      "name": "_who",
+                      "start": 5028,
+                      "end": 5032
+                    },
+                    "computed": true,
+                    "start": 5021,
+                    "end": 5033
+                  },
+                  "prefix": true,
+                  "start": 5014,
+                  "end": 5033
+                },
+                "start": 5014,
+                "end": 5034
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "Identifier",
+                    "name": "require",
+                    "start": 5043,
+                    "end": 5050
+                  },
+                  "arguments": [
+                    {
+                      "type": "CallExpression",
+                      "callee": {
+                        "type": "MemberExpression",
+                        "object": {
+                          "type": "Identifier",
+                          "name": "tokenContract",
+                          "start": 5052,
+                          "end": 5065
+                        },
+                        "property": {
+                          "type": "Identifier",
+                          "name": "transfer",
+                          "start": 5066,
+                          "end": 5074
+                        },
+                        "computed": false,
+                        "start": 5052,
+                        "end": 5074
+                      },
+                      "arguments": [
+                        {
+                          "type": "Identifier",
+                          "name": "_who",
+                          "start": 5075,
+                          "end": 5079
+                        },
+                        {
+                          "type": "Identifier",
+                          "name": "tokens",
+                          "start": 5081,
+                          "end": 5087
+                        }
+                      ],
+                      "start": 5052,
+                      "end": 5088
+                    }
+                  ],
+                  "start": 5043,
+                  "end": 5089
+                },
+                "start": 5043,
+                "end": 5090
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "Identifier",
+                    "name": "Finalised",
+                    "start": 5100,
+                    "end": 5109
+                  },
+                  "arguments": [
+                    {
+                      "type": "Identifier",
+                      "name": "_who",
+                      "start": 5110,
+                      "end": 5114
+                    },
+                    {
+                      "type": "Identifier",
+                      "name": "tokens",
+                      "start": 5116,
+                      "end": 5122
+                    }
+                  ],
+                  "start": 5100,
+                  "end": 5123
+                },
+                "start": 5100,
+                "end": 5124
+              },
+              {
+                "type": "IfStatement",
+                "test": {
+                  "type": "BinaryExpression",
+                  "operator": "==",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "totalFinalised",
+                    "start": 5138,
+                    "end": 5152
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "totalAccounted",
+                    "start": 5156,
+                    "end": 5170
+                  },
+                  "start": 5138,
+                  "end": 5170
+                },
+                "consequent": {
+                  "type": "BlockStatement",
+                  "body": [
+                    {
+                      "type": "ExpressionStatement",
+                      "expression": {
+                        "type": "CallExpression",
+                        "callee": {
+                          "type": "Identifier",
+                          "name": "Retired",
+                          "start": 5186,
+                          "end": 5193
+                        },
+                        "arguments": [],
+                        "start": 5186,
+                        "end": 5195
+                      },
+                      "start": 5186,
+                      "end": 5196
+                    }
+                  ],
+                  "start": 5172,
+                  "end": 5206
+                },
+                "alternate": null,
+                "start": 5134,
+                "end": 5206
+              }
+            ],
+            "start": 4673,
+            "end": 5212
+          },
+          "is_abstract": false,
+          "start": 4553,
+          "end": 5212
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "flushEra",
+          "params": null,
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "private",
+              "params": [],
+              "start": 5337,
+              "end": 5345
+            }
+          ],
+          "returnParams": null,
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "DeclarativeExpression",
+                    "name": "currentEra",
+                    "literal": {
+                      "type": "Type",
+                      "literal": "uint",
+                      "members": [],
+                      "array_parts": [],
+                      "start": 5355,
+                      "end": 5359
+                    },
+                    "storage_location": null,
+                    "start": 5355,
+                    "end": 5370
+                  },
+                  "right": {
+                    "type": "BinaryExpression",
+                    "operator": "/",
+                    "left": {
+                      "type": "BinaryExpression",
+                      "operator": "-",
+                      "left": {
+                        "type": "Identifier",
+                        "name": "now",
+                        "start": 5374,
+                        "end": 5377
+                      },
+                      "right": {
+                        "type": "Identifier",
+                        "name": "beginTime",
+                        "start": 5380,
+                        "end": 5389
+                      },
+                      "start": 5373,
+                      "end": 5390
+                    },
+                    "right": {
+                      "type": "Identifier",
+                      "name": "ERA_PERIOD",
+                      "start": 5393,
+                      "end": 5403
+                    },
+                    "start": 5373,
+                    "end": 5403
+                  },
+                  "start": 5355,
+                  "end": 5403
+                },
+                "start": 5355,
+                "end": 5404
+              },
+              {
+                "type": "IfStatement",
+                "test": {
+                  "type": "BinaryExpression",
+                  "operator": ">",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "currentEra",
+                    "start": 5417,
+                    "end": 5427
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "eraIndex",
+                    "start": 5430,
+                    "end": 5438
+                  },
+                  "start": 5417,
+                  "end": 5438
+                },
+                "consequent": {
+                  "type": "BlockStatement",
+                  "body": [
+                    {
+                      "type": "ExpressionStatement",
+                      "expression": {
+                        "type": "CallExpression",
+                        "callee": {
+                          "type": "Identifier",
+                          "name": "Ticked",
+                          "start": 5454,
+                          "end": 5460
+                        },
+                        "arguments": [
+                          {
+                            "type": "Identifier",
+                            "name": "eraIndex",
+                            "start": 5461,
+                            "end": 5469
+                          },
+                          {
+                            "type": "Identifier",
+                            "name": "totalReceived",
+                            "start": 5471,
+                            "end": 5484
+                          },
+                          {
+                            "type": "Identifier",
+                            "name": "totalAccounted",
+                            "start": 5486,
+                            "end": 5500
+                          }
+                        ],
+                        "start": 5454,
+                        "end": 5501
+                      },
+                      "start": 5454,
+                      "end": 5502
+                    }
+                  ],
+                  "start": 5440,
+                  "end": 5512
+                },
+                "alternate": null,
+                "start": 5413,
+                "end": 5512
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "eraIndex",
+                    "start": 5521,
+                    "end": 5529
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "currentEra",
+                    "start": 5532,
+                    "end": 5542
+                  },
+                  "start": 5521,
+                  "end": 5542
+                },
+                "start": 5521,
+                "end": 5543
+              }
+            ],
+            "start": 5345,
+            "end": 5549
+          },
+          "is_abstract": false,
+          "start": 5317,
+          "end": 5549
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "setHalted",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "bool",
+                "members": [],
+                "array_parts": [],
+                "start": 5662,
+                "end": 5666
+              },
+              "id": "_halted",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 5662,
+              "end": 5674
+            }
+          ],
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 5676,
+              "end": 5683
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "only_admin",
+              "params": [],
+              "start": 5683,
+              "end": 5694
+            }
+          ],
+          "returnParams": null,
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "halted",
+                    "start": 5696,
+                    "end": 5702
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "_halted",
+                    "start": 5705,
+                    "end": 5712
+                  },
+                  "start": 5696,
+                  "end": 5712
+                },
+                "start": 5696,
+                "end": 5713
+              }
+            ],
+            "start": 5694,
+            "end": 5715
+          },
+          "is_abstract": false,
+          "start": 5643,
+          "end": 5715
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "drain",
+          "params": null,
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 5801,
+              "end": 5808
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "only_admin",
+              "params": [],
+              "start": 5808,
+              "end": 5819
+            }
+          ],
+          "returnParams": null,
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "MemberExpression",
+                    "object": {
+                      "type": "Identifier",
+                      "name": "treasury",
+                      "start": 5821,
+                      "end": 5829
+                    },
+                    "property": {
+                      "type": "Identifier",
+                      "name": "transfer",
+                      "start": 5830,
+                      "end": 5838
+                    },
+                    "computed": false,
+                    "start": 5821,
+                    "end": 5838
+                  },
+                  "arguments": [
+                    {
+                      "type": "MemberExpression",
+                      "object": {
+                        "type": "ThisExpression",
+                        "start": 5839,
+                        "end": 5843
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "balance",
+                        "start": 5844,
+                        "end": 5851
+                      },
+                      "computed": false,
+                      "start": 5839,
+                      "end": 5851
+                    }
+                  ],
+                  "start": 5821,
+                  "end": 5852
+                },
+                "start": 5821,
+                "end": 5853
+              }
+            ],
+            "start": 5819,
+            "end": 5855
+          },
+          "is_abstract": false,
+          "start": 5784,
+          "end": 5855
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "calculateEndTime",
+          "params": null,
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 6739,
+              "end": 6746
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "constant",
+              "params": [],
+              "start": 6746,
+              "end": 6755
+            }
+          ],
+          "returnParams": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 6764,
+                "end": 6768
+              },
+              "id": null,
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 6764,
+              "end": 6768
+            }
+          ],
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "VariableDeclaration",
+                "declarations": [
+                  {
+                    "type": "VariableDeclarator",
+                    "id": {
+                      "type": "Identifier",
+                      "name": "factor",
+                      "start": 6784,
+                      "end": 6790
+                    },
+                    "init": {
+                      "type": "BinaryExpression",
+                      "operator": "*",
+                      "left": {
+                        "type": "BinaryExpression",
+                        "operator": "/",
+                        "left": {
+                          "type": "Identifier",
+                          "name": "tokenCap",
+                          "start": 6793,
+                          "end": 6801
+                        },
+                        "right": {
+                          "type": "Identifier",
+                          "name": "DIVISOR",
+                          "start": 6804,
+                          "end": 6811
+                        },
+                        "start": 6793,
+                        "end": 6820
+                      },
+                      "right": {
+                        "type": "Identifier",
+                        "name": "USDWEI",
+                        "start": 6814,
+                        "end": 6820
+                      },
+                      "start": 6793,
+                      "end": 6820
+                    },
+                    "start": 6784,
+                    "end": 6820
+                  }
+                ],
+                "start": 6780,
+                "end": 6821
+              },
+              {
+                "type": "ReturnStatement",
+                "argument": {
+                  "type": "BinaryExpression",
+                  "operator": "-",
+                  "left": {
+                    "type": "BinaryExpression",
+                    "operator": "+",
+                    "left": {
+                      "type": "Identifier",
+                      "name": "beginTime",
+                      "start": 6837,
+                      "end": 6846
+                    },
+                    "right": {
+                      "type": "BinaryExpression",
+                      "operator": "/",
+                      "left": {
+                        "type": "BinaryExpression",
+                        "operator": "*",
+                        "left": {
+                          "type": "Literal",
+                          "value": 40000000,
+                          "start": 6849,
+                          "end": 6857
+                        },
+                        "right": {
+                          "type": "Identifier",
+                          "name": "factor",
+                          "start": 6860,
+                          "end": 6866
+                        },
+                        "start": 6849,
+                        "end": 6898
+                      },
+                      "right": {
+                        "type": "BinaryExpression",
+                        "operator": "+",
+                        "left": {
+                          "type": "Identifier",
+                          "name": "totalAccounted",
+                          "start": 6870,
+                          "end": 6884
+                        },
+                        "right": {
+                          "type": "BinaryExpression",
+                          "operator": "*",
+                          "left": {
+                            "type": "Literal",
+                            "value": 5,
+                            "start": 6887,
+                            "end": 6888
+                          },
+                          "right": {
+                            "type": "Identifier",
+                            "name": "factor",
+                            "start": 6891,
+                            "end": 6897
+                          },
+                          "start": 6887,
+                          "end": 6897
+                        },
+                        "start": 6869,
+                        "end": 6898
+                      },
+                      "start": 6849,
+                      "end": 6898
+                    },
+                    "start": 6837,
+                    "end": 6905
+                  },
+                  "right": {
+                    "type": "Literal",
+                    "value": 5760,
+                    "start": 6901,
+                    "end": 6905
+                  },
+                  "start": 6837,
+                  "end": 6905
+                },
+                "start": 6830,
+                "end": 6906
+              }
+            ],
+            "start": 6770,
+            "end": 6912
+          },
+          "is_abstract": false,
+          "start": 6711,
+          "end": 6912
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "currentPrice",
+          "params": null,
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 7186,
+              "end": 7193
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "constant",
+              "params": [],
+              "start": 7193,
+              "end": 7202
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "when_active",
+              "params": [],
+              "start": 7202,
+              "end": 7214
+            }
+          ],
+          "returnParams": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 7223,
+                "end": 7227
+              },
+              "id": "weiPerIndivisibleTokenPart",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 7223,
+              "end": 7254
+            }
+          ],
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ReturnStatement",
+                "argument": {
+                  "type": "BinaryExpression",
+                  "operator": "/",
+                  "left": {
+                    "type": "BinaryExpression",
+                    "operator": "-",
+                    "left": {
+                      "type": "BinaryExpression",
+                      "operator": "/",
+                      "left": {
+                        "type": "BinaryExpression",
+                        "operator": "*",
+                        "left": {
+                          "type": "Identifier",
+                          "name": "USDWEI",
+                          "start": 7274,
+                          "end": 7280
+                        },
+                        "right": {
+                          "type": "Literal",
+                          "value": 40000000,
+                          "start": 7283,
+                          "end": 7291
+                        },
+                        "start": 7274,
+                        "end": 7318
+                      },
+                      "right": {
+                        "type": "BinaryExpression",
+                        "operator": "+",
+                        "left": {
+                          "type": "BinaryExpression",
+                          "operator": "-",
+                          "left": {
+                            "type": "Identifier",
+                            "name": "now",
+                            "start": 7295,
+                            "end": 7298
+                          },
+                          "right": {
+                            "type": "Identifier",
+                            "name": "beginTime",
+                            "start": 7301,
+                            "end": 7310
+                          },
+                          "start": 7295,
+                          "end": 7317
+                        },
+                        "right": {
+                          "type": "Literal",
+                          "value": 5760,
+                          "start": 7313,
+                          "end": 7317
+                        },
+                        "start": 7294,
+                        "end": 7318
+                      },
+                      "start": 7274,
+                      "end": 7318
+                    },
+                    "right": {
+                      "type": "BinaryExpression",
+                      "operator": "*",
+                      "left": {
+                        "type": "Identifier",
+                        "name": "USDWEI",
+                        "start": 7321,
+                        "end": 7327
+                      },
+                      "right": {
+                        "type": "Literal",
+                        "value": 5,
+                        "start": 7330,
+                        "end": 7331
+                      },
+                      "start": 7321,
+                      "end": 7331
+                    },
+                    "start": 7273,
+                    "end": 7332
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "DIVISOR",
+                    "start": 7335,
+                    "end": 7342
+                  },
+                  "start": 7273,
+                  "end": 7342
+                },
+                "start": 7266,
+                "end": 7343
+              }
+            ],
+            "start": 7256,
+            "end": 7349
+          },
+          "is_abstract": false,
+          "start": 7162,
+          "end": 7349
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "tokensAvailable",
+          "params": null,
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 7466,
+              "end": 7473
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "constant",
+              "params": [],
+              "start": 7473,
+              "end": 7482
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "when_active",
+              "params": [],
+              "start": 7482,
+              "end": 7494
+            }
+          ],
+          "returnParams": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 7503,
+                "end": 7507
+              },
+              "id": "tokens",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 7503,
+              "end": 7514
+            }
+          ],
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "DeclarativeExpression",
+                    "name": "_currentCap",
+                    "literal": {
+                      "type": "Type",
+                      "literal": "uint",
+                      "members": [],
+                      "array_parts": [],
+                      "start": 7526,
+                      "end": 7530
+                    },
+                    "storage_location": null,
+                    "start": 7526,
+                    "end": 7542
+                  },
+                  "right": {
+                    "type": "BinaryExpression",
+                    "operator": "/",
+                    "left": {
+                      "type": "Identifier",
+                      "name": "totalAccounted",
+                      "start": 7545,
+                      "end": 7559
+                    },
+                    "right": {
+                      "type": "CallExpression",
+                      "callee": {
+                        "type": "Identifier",
+                        "name": "currentPrice",
+                        "start": 7562,
+                        "end": 7574
+                      },
+                      "arguments": [],
+                      "start": 7562,
+                      "end": 7576
+                    },
+                    "start": 7545,
+                    "end": 7576
+                  },
+                  "start": 7526,
+                  "end": 7576
+                },
+                "start": 7526,
+                "end": 7577
+              },
+              {
+                "type": "IfStatement",
+                "test": {
+                  "type": "BinaryExpression",
+                  "operator": ">=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "_currentCap",
+                    "start": 7590,
+                    "end": 7601
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "tokenCap",
+                    "start": 7605,
+                    "end": 7613
+                  },
+                  "start": 7590,
+                  "end": 7613
+                },
+                "consequent": {
+                  "type": "BlockStatement",
+                  "body": [
+                    {
+                      "type": "ReturnStatement",
+                      "argument": {
+                        "type": "Literal",
+                        "value": 0,
+                        "start": 7636,
+                        "end": 7637
+                      },
+                      "start": 7629,
+                      "end": 7638
+                    }
+                  ],
+                  "start": 7615,
+                  "end": 7648
+                },
+                "alternate": null,
+                "start": 7586,
+                "end": 7648
+              },
+              {
+                "type": "ReturnStatement",
+                "argument": {
+                  "type": "BinaryExpression",
+                  "operator": "-",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "tokenCap",
+                    "start": 7664,
+                    "end": 7672
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "_currentCap",
+                    "start": 7675,
+                    "end": 7686
+                  },
+                  "start": 7664,
+                  "end": 7686
+                },
+                "start": 7657,
+                "end": 7687
+              }
+            ],
+            "start": 7516,
+            "end": 7693
+          },
+          "is_abstract": false,
+          "start": 7439,
+          "end": 7693
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "maxPurchase",
+          "params": null,
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 7816,
+              "end": 7823
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "constant",
+              "params": [],
+              "start": 7823,
+              "end": 7832
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "when_active",
+              "params": [],
+              "start": 7832,
+              "end": 7844
+            }
+          ],
+          "returnParams": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 7853,
+                "end": 7857
+              },
+              "id": "spend",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 7853,
+              "end": 7863
+            }
+          ],
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ReturnStatement",
+                "argument": {
+                  "type": "BinaryExpression",
+                  "operator": "-",
+                  "left": {
+                    "type": "BinaryExpression",
+                    "operator": "*",
+                    "left": {
+                      "type": "Identifier",
+                      "name": "tokenCap",
+                      "start": 7882,
+                      "end": 7890
+                    },
+                    "right": {
+                      "type": "CallExpression",
+                      "callee": {
+                        "type": "Identifier",
+                        "name": "currentPrice",
+                        "start": 7893,
+                        "end": 7905
+                      },
+                      "arguments": [],
+                      "start": 7893,
+                      "end": 7907
+                    },
+                    "start": 7882,
+                    "end": 7907
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "totalAccounted",
+                    "start": 7910,
+                    "end": 7924
+                  },
+                  "start": 7882,
+                  "end": 7924
+                },
+                "start": 7875,
+                "end": 7925
+              }
+            ],
+            "start": 7865,
+            "end": 7931
+          },
+          "is_abstract": false,
+          "start": 7793,
+          "end": 7931
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "theDeal",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 8111,
+                "end": 8115
+              },
+              "id": "_value",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 8111,
+              "end": 8122
+            }
+          ],
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 8132,
+              "end": 8147
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "constant",
+              "params": [],
+              "start": 8147,
+              "end": 8164
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "when_active",
+              "params": [],
+              "start": 8164,
+              "end": 8184
+            }
+          ],
+          "returnParams": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 8193,
+                "end": 8197
+              },
+              "id": "accounted",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 8193,
+              "end": 8207
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "bool",
+                "members": [],
+                "array_parts": [],
+                "start": 8209,
+                "end": 8213
+              },
+              "id": "refund",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 8209,
+              "end": 8220
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 8222,
+                "end": 8226
+              },
+              "id": "price",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 8222,
+              "end": 8232
+            }
+          ],
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "DeclarativeExpression",
+                    "name": "_bonus",
+                    "literal": {
+                      "type": "Type",
+                      "literal": "uint",
+                      "members": [],
+                      "array_parts": [],
+                      "start": 8248,
+                      "end": 8252
+                    },
+                    "storage_location": null,
+                    "start": 8248,
+                    "end": 8259
+                  },
+                  "right": {
+                    "type": "CallExpression",
+                    "callee": {
+                      "type": "Identifier",
+                      "name": "bonus",
+                      "start": 8262,
+                      "end": 8267
+                    },
+                    "arguments": [
+                      {
+                        "type": "Identifier",
+                        "name": "_value",
+                        "start": 8268,
+                        "end": 8274
+                      }
+                    ],
+                    "start": 8262,
+                    "end": 8275
+                  },
+                  "start": 8248,
+                  "end": 8275
+                },
+                "start": 8248,
+                "end": 8276
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "price",
+                    "start": 8286,
+                    "end": 8291
+                  },
+                  "right": {
+                    "type": "CallExpression",
+                    "callee": {
+                      "type": "Identifier",
+                      "name": "currentPrice",
+                      "start": 8294,
+                      "end": 8306
+                    },
+                    "arguments": [],
+                    "start": 8294,
+                    "end": 8308
+                  },
+                  "start": 8286,
+                  "end": 8308
+                },
+                "start": 8286,
+                "end": 8309
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "accounted",
+                    "start": 8318,
+                    "end": 8327
+                  },
+                  "right": {
+                    "type": "BinaryExpression",
+                    "operator": "+",
+                    "left": {
+                      "type": "Identifier",
+                      "name": "_value",
+                      "start": 8330,
+                      "end": 8336
+                    },
+                    "right": {
+                      "type": "Identifier",
+                      "name": "_bonus",
+                      "start": 8339,
+                      "end": 8345
+                    },
+                    "start": 8330,
+                    "end": 8345
+                  },
+                  "start": 8318,
+                  "end": 8345
+                },
+                "start": 8318,
+                "end": 8346
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "DeclarativeExpression",
+                    "name": "available",
+                    "literal": {
+                      "type": "Type",
+                      "literal": "uint",
+                      "members": [],
+                      "array_parts": [],
+                      "start": 8356,
+                      "end": 8360
+                    },
+                    "storage_location": null,
+                    "start": 8356,
+                    "end": 8370
+                  },
+                  "right": {
+                    "type": "CallExpression",
+                    "callee": {
+                      "type": "Identifier",
+                      "name": "tokensAvailable",
+                      "start": 8373,
+                      "end": 8388
+                    },
+                    "arguments": [],
+                    "start": 8373,
+                    "end": 8390
+                  },
+                  "start": 8356,
+                  "end": 8390
+                },
+                "start": 8356,
+                "end": 8391
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "DeclarativeExpression",
+                    "name": "tokens",
+                    "literal": {
+                      "type": "Type",
+                      "literal": "uint",
+                      "members": [],
+                      "array_parts": [],
+                      "start": 8400,
+                      "end": 8404
+                    },
+                    "storage_location": null,
+                    "start": 8400,
+                    "end": 8411
+                  },
+                  "right": {
+                    "type": "BinaryExpression",
+                    "operator": "/",
+                    "left": {
+                      "type": "Identifier",
+                      "name": "accounted",
+                      "start": 8414,
+                      "end": 8423
+                    },
+                    "right": {
+                      "type": "Identifier",
+                      "name": "price",
+                      "start": 8426,
+                      "end": 8431
+                    },
+                    "start": 8414,
+                    "end": 8431
+                  },
+                  "start": 8400,
+                  "end": 8431
+                },
+                "start": 8400,
+                "end": 8432
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "AssignmentExpression",
+                  "operator": "=",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "refund",
+                    "start": 8441,
+                    "end": 8447
+                  },
+                  "right": {
+                    "type": "BinaryExpression",
+                    "operator": ">",
+                    "left": {
+                      "type": "Identifier",
+                      "name": "tokens",
+                      "start": 8451,
+                      "end": 8457
+                    },
+                    "right": {
+                      "type": "Identifier",
+                      "name": "available",
+                      "start": 8460,
+                      "end": 8469
+                    },
+                    "start": 8450,
+                    "end": 8470
+                  },
+                  "start": 8441,
+                  "end": 8470
+                },
+                "start": 8441,
+                "end": 8471
+              }
+            ],
+            "start": 8238,
+            "end": 8477
+          },
+          "is_abstract": false,
+          "start": 8094,
+          "end": 8477
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "bonus",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 8540,
+                "end": 8544
+              },
+              "id": "_value",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 8540,
+              "end": 8551
+            }
+          ],
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 8561,
+              "end": 8576
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "constant",
+              "params": [],
+              "start": 8576,
+              "end": 8593
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "when_active",
+              "params": [],
+              "start": 8593,
+              "end": 8613
+            }
+          ],
+          "returnParams": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint",
+                "members": [],
+                "array_parts": [],
+                "start": 8622,
+                "end": 8626
+              },
+              "id": "extra",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 8622,
+              "end": 8632
+            }
+          ],
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ReturnStatement",
+                "argument": {
+                  "type": "BinaryExpression",
+                  "operator": "/",
+                  "left": {
+                    "type": "BinaryExpression",
+                    "operator": "*",
+                    "left": {
+                      "type": "Identifier",
+                      "name": "_value",
+                      "start": 8655,
+                      "end": 8661
+                    },
+                    "right": {
+                      "type": "CallExpression",
+                      "callee": {
+                        "type": "Identifier",
+                        "name": "uint",
+                        "start": 8664,
+                        "end": 8668
+                      },
+                      "arguments": [
+                        {
+                          "type": "Identifier",
+                          "name": "currentBonus",
+                          "start": 8669,
+                          "end": 8681
+                        }
+                      ],
+                      "start": 8664,
+                      "end": 8682
+                    },
+                    "start": 8655,
+                    "end": 8688
+                  },
+                  "right": {
+                    "type": "Literal",
+                    "value": 100,
+                    "start": 8685,
+                    "end": 8688
+                  },
+                  "start": 8655,
+                  "end": 8688
+                },
+                "start": 8648,
+                "end": 8689
+              }
+            ],
+            "start": 8638,
+            "end": 8695
+          },
+          "is_abstract": false,
+          "start": 8525,
+          "end": 8695
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "isActive",
+          "params": null,
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 8758,
+              "end": 8765
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "constant",
+              "params": [],
+              "start": 8765,
+              "end": 8774
+            }
+          ],
+          "returnParams": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "bool",
+                "members": [],
+                "array_parts": [],
+                "start": 8783,
+                "end": 8787
+              },
+              "id": null,
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 8783,
+              "end": 8787
+            }
+          ],
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ReturnStatement",
+                "argument": {
+                  "type": "BinaryExpression",
+                  "operator": "&&",
+                  "left": {
+                    "type": "BinaryExpression",
+                    "operator": ">=",
+                    "left": {
+                      "type": "Identifier",
+                      "name": "now",
+                      "start": 8798,
+                      "end": 8801
+                    },
+                    "right": {
+                      "type": "Identifier",
+                      "name": "beginTime",
+                      "start": 8805,
+                      "end": 8814
+                    },
+                    "start": 8798,
+                    "end": 8814
+                  },
+                  "right": {
+                    "type": "BinaryExpression",
+                    "operator": "<",
+                    "left": {
+                      "type": "Identifier",
+                      "name": "now",
+                      "start": 8818,
+                      "end": 8821
+                    },
+                    "right": {
+                      "type": "Identifier",
+                      "name": "endTime",
+                      "start": 8824,
+                      "end": 8831
+                    },
+                    "start": 8818,
+                    "end": 8831
+                  },
+                  "start": 8798,
+                  "end": 8831
+                },
+                "start": 8791,
+                "end": 8832
+              }
+            ],
+            "start": 8789,
+            "end": 8834
+          },
+          "is_abstract": false,
+          "start": 8738,
+          "end": 8834
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "allFinalised",
+          "params": null,
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "public",
+              "params": [],
+              "start": 8907,
+              "end": 8914
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "constant",
+              "params": [],
+              "start": 8914,
+              "end": 8923
+            }
+          ],
+          "returnParams": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "bool",
+                "members": [],
+                "array_parts": [],
+                "start": 8932,
+                "end": 8936
+              },
+              "id": null,
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 8932,
+              "end": 8936
+            }
+          ],
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ReturnStatement",
+                "argument": {
+                  "type": "BinaryExpression",
+                  "operator": "&&",
+                  "left": {
+                    "type": "BinaryExpression",
+                    "operator": ">=",
+                    "left": {
+                      "type": "Identifier",
+                      "name": "now",
+                      "start": 8947,
+                      "end": 8950
+                    },
+                    "right": {
+                      "type": "Identifier",
+                      "name": "endTime",
+                      "start": 8954,
+                      "end": 8961
+                    },
+                    "start": 8947,
+                    "end": 8961
+                  },
+                  "right": {
+                    "type": "BinaryExpression",
+                    "operator": "==",
+                    "left": {
+                      "type": "Identifier",
+                      "name": "totalAccounted",
+                      "start": 8965,
+                      "end": 8979
+                    },
+                    "right": {
+                      "type": "Identifier",
+                      "name": "totalFinalised",
+                      "start": 8983,
+                      "end": 8997
+                    },
+                    "start": 8965,
+                    "end": 8997
+                  },
+                  "start": 8947,
+                  "end": 8997
+                },
+                "start": 8940,
+                "end": 8998
+              }
+            ],
+            "start": 8938,
+            "end": 9000
+          },
+          "is_abstract": false,
+          "start": 8883,
+          "end": 9000
+        },
+        {
+          "type": "FunctionDeclaration",
+          "name": "isBasicAccount",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 9105,
+                "end": 9112
+              },
+              "id": "_who",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 9105,
+              "end": 9117
+            }
+          ],
+          "modifiers": [
+            {
+              "type": "ModifierArgument",
+              "name": "internal",
+              "params": [],
+              "start": 9119,
+              "end": 9128
+            },
+            {
+              "type": "ModifierArgument",
+              "name": "constant",
+              "params": [],
+              "start": 9128,
+              "end": 9137
+            }
+          ],
+          "returnParams": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "bool",
+                "members": [],
+                "array_parts": [],
+                "start": 9146,
+                "end": 9150
+              },
+              "id": null,
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 9146,
+              "end": 9150
+            }
+          ],
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "DeclarativeExpression",
+                  "name": "senderCodeSize",
+                  "literal": {
+                    "type": "Type",
+                    "literal": "uint",
+                    "members": [],
+                    "array_parts": [],
+                    "start": 9162,
+                    "end": 9166
+                  },
+                  "storage_location": null,
+                  "start": 9162,
+                  "end": 9181
+                },
+                "start": 9162,
+                "end": 9182
+              },
+              {
+                "type": "InlineAssemblyStatement",
+                "body": {
+                  "type": "InlineAssemblyBlock",
+                  "items": [
+                    {
+                      "type": "AssemblyAssignment",
+                      "name": {
+                        "type": "Identifier",
+                        "name": "senderCodeSize",
+                        "start": 9214,
+                        "end": 9228
+                      },
+                      "expression": {
+                        "type": "FunctionalAssemblyInstruction",
+                        "name": {
+                          "type": "Identifier",
+                          "name": "extcodesize",
+                          "start": 9232,
+                          "end": 9243
+                        },
+                        "arguments": [
+                          {
+                            "type": "Identifier",
+                            "name": "_who",
+                            "start": 9244,
+                            "end": 9248
+                          }
+                        ],
+                        "start": 9232,
+                        "end": 9249
+                      },
+                      "start": 9214,
+                      "end": 9249
+                    }
+                  ],
+                  "start": 9200,
+                  "end": 9259
+                },
+                "start": 9191,
+                "end": 9259
+              },
+              {
+                "type": "ReturnStatement",
+                "argument": {
+                  "type": "BinaryExpression",
+                  "operator": "==",
+                  "left": {
+                    "type": "Identifier",
+                    "name": "senderCodeSize",
+                    "start": 9275,
+                    "end": 9289
+                  },
+                  "right": {
+                    "type": "Literal",
+                    "value": 0,
+                    "start": 9293,
+                    "end": 9294
+                  },
+                  "start": 9275,
+                  "end": 9294
+                },
+                "start": 9268,
+                "end": 9295
+              }
+            ],
+            "start": 9152,
+            "end": 9301
+          },
+          "is_abstract": false,
+          "start": 9081,
+          "end": 9301
+        },
+        {
+          "type": "ModifierDeclaration",
+          "name": "when_active",
+          "params": [],
+          "modifiers": null,
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "Identifier",
+                    "name": "require",
+                    "start": 9385,
+                    "end": 9392
+                  },
+                  "arguments": [
+                    {
+                      "type": "CallExpression",
+                      "callee": {
+                        "type": "Identifier",
+                        "name": "isActive",
+                        "start": 9394,
+                        "end": 9402
+                      },
+                      "arguments": [],
+                      "start": 9394,
+                      "end": 9404
+                    }
+                  ],
+                  "start": 9385,
+                  "end": 9405
+                },
+                "start": 9385,
+                "end": 9406
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "Identifier",
+                  "name": "_",
+                  "start": 9407,
+                  "end": 9408
+                },
+                "start": 9407,
+                "end": 9409
+              }
+            ],
+            "start": 9383,
+            "end": 9411
+          },
+          "start": 9362,
+          "end": 9411
+        },
+        {
+          "type": "ModifierDeclaration",
+          "name": "before_beginning",
+          "params": [],
+          "modifiers": null,
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "Identifier",
+                    "name": "require",
+                    "start": 9484,
+                    "end": 9491
+                  },
+                  "arguments": [
+                    {
+                      "type": "BinaryExpression",
+                      "operator": "<",
+                      "left": {
+                        "type": "Identifier",
+                        "name": "now",
+                        "start": 9493,
+                        "end": 9496
+                      },
+                      "right": {
+                        "type": "Identifier",
+                        "name": "beginTime",
+                        "start": 9499,
+                        "end": 9508
+                      },
+                      "start": 9493,
+                      "end": 9508
+                    }
+                  ],
+                  "start": 9484,
+                  "end": 9509
+                },
+                "start": 9484,
+                "end": 9510
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "Identifier",
+                  "name": "_",
+                  "start": 9511,
+                  "end": 9512
+                },
+                "start": 9511,
+                "end": 9513
+              }
+            ],
+            "start": 9482,
+            "end": 9515
+          },
+          "start": 9456,
+          "end": 9515
+        },
+        {
+          "type": "ModifierDeclaration",
+          "name": "when_ended",
+          "params": [],
+          "modifiers": null,
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "Identifier",
+                    "name": "require",
+                    "start": 9577,
+                    "end": 9584
+                  },
+                  "arguments": [
+                    {
+                      "type": "BinaryExpression",
+                      "operator": ">=",
+                      "left": {
+                        "type": "Identifier",
+                        "name": "now",
+                        "start": 9586,
+                        "end": 9589
+                      },
+                      "right": {
+                        "type": "Identifier",
+                        "name": "endTime",
+                        "start": 9593,
+                        "end": 9600
+                      },
+                      "start": 9586,
+                      "end": 9600
+                    }
+                  ],
+                  "start": 9577,
+                  "end": 9601
+                },
+                "start": 9577,
+                "end": 9602
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "Identifier",
+                  "name": "_",
+                  "start": 9603,
+                  "end": 9604
+                },
+                "start": 9603,
+                "end": 9605
+              }
+            ],
+            "start": 9575,
+            "end": 9607
+          },
+          "start": 9555,
+          "end": 9607
+        },
+        {
+          "type": "ModifierDeclaration",
+          "name": "when_not_halted",
+          "params": [],
+          "modifiers": null,
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "Identifier",
+                    "name": "require",
+                    "start": 9673,
+                    "end": 9680
+                  },
+                  "arguments": [
+                    {
+                      "type": "UnaryExpression",
+                      "operator": "!",
+                      "argument": {
+                        "type": "Identifier",
+                        "name": "halted",
+                        "start": 9683,
+                        "end": 9689
+                      },
+                      "prefix": true,
+                      "start": 9682,
+                      "end": 9689
+                    }
+                  ],
+                  "start": 9673,
+                  "end": 9690
+                },
+                "start": 9673,
+                "end": 9691
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "Identifier",
+                  "name": "_",
+                  "start": 9692,
+                  "end": 9693
+                },
+                "start": 9692,
+                "end": 9694
+              }
+            ],
+            "start": 9671,
+            "end": 9696
+          },
+          "start": 9646,
+          "end": 9696
+        },
+        {
+          "type": "ModifierDeclaration",
+          "name": "only_buyins",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 9763,
+                "end": 9770
+              },
+              "id": "_who",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 9763,
+              "end": 9775
+            }
+          ],
+          "modifiers": null,
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "Identifier",
+                    "name": "require",
+                    "start": 9779,
+                    "end": 9786
+                  },
+                  "arguments": [
+                    {
+                      "type": "BinaryExpression",
+                      "operator": "!=",
+                      "left": {
+                        "type": "MemberExpression",
+                        "object": {
+                          "type": "MemberExpression",
+                          "object": {
+                            "type": "Identifier",
+                            "name": "buyins",
+                            "start": 9788,
+                            "end": 9794
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "_who",
+                            "start": 9795,
+                            "end": 9799
+                          },
+                          "computed": true,
+                          "start": 9788,
+                          "end": 9810
+                        },
+                        "property": {
+                          "type": "Identifier",
+                          "name": "accounted",
+                          "start": 9801,
+                          "end": 9810
+                        },
+                        "computed": false,
+                        "start": 9788,
+                        "end": 9810
+                      },
+                      "right": {
+                        "type": "Literal",
+                        "value": 0,
+                        "start": 9814,
+                        "end": 9815
+                      },
+                      "start": 9788,
+                      "end": 9815
+                    }
+                  ],
+                  "start": 9779,
+                  "end": 9816
+                },
+                "start": 9779,
+                "end": 9817
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "Identifier",
+                  "name": "_",
+                  "start": 9818,
+                  "end": 9819
+                },
+                "start": 9818,
+                "end": 9820
+              }
+            ],
+            "start": 9777,
+            "end": 9822
+          },
+          "start": 9742,
+          "end": 9822
+        },
+        {
+          "type": "ModifierDeclaration",
+          "name": "only_admin",
+          "params": [],
+          "modifiers": null,
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "Identifier",
+                    "name": "require",
+                    "start": 9882,
+                    "end": 9889
+                  },
+                  "arguments": [
+                    {
+                      "type": "BinaryExpression",
+                      "operator": "==",
+                      "left": {
+                        "type": "MemberExpression",
+                        "object": {
+                          "type": "Identifier",
+                          "name": "msg",
+                          "start": 9891,
+                          "end": 9894
+                        },
+                        "property": {
+                          "type": "Identifier",
+                          "name": "sender",
+                          "start": 9895,
+                          "end": 9901
+                        },
+                        "computed": false,
+                        "start": 9891,
+                        "end": 9901
+                      },
+                      "right": {
+                        "type": "Identifier",
+                        "name": "admin",
+                        "start": 9905,
+                        "end": 9910
+                      },
+                      "start": 9891,
+                      "end": 9910
+                    }
+                  ],
+                  "start": 9882,
+                  "end": 9911
+                },
+                "start": 9882,
+                "end": 9912
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "Identifier",
+                  "name": "_",
+                  "start": 9913,
+                  "end": 9914
+                },
+                "start": 9913,
+                "end": 9915
+              }
+            ],
+            "start": 9880,
+            "end": 9917
+          },
+          "start": 9860,
+          "end": 9917
+        },
+        {
+          "type": "ModifierDeclaration",
+          "name": "only_eligible",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 10105,
+                "end": 10112
+              },
+              "id": "who",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 10105,
+              "end": 10116
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "uint8",
+                "members": [],
+                "array_parts": [],
+                "start": 10118,
+                "end": 10123
+              },
+              "id": "v",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 10118,
+              "end": 10125
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "bytes32",
+                "members": [],
+                "array_parts": [],
+                "start": 10127,
+                "end": 10134
+              },
+              "id": "r",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 10127,
+              "end": 10136
+            },
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "bytes32",
+                "members": [],
+                "array_parts": [],
+                "start": 10138,
+                "end": 10145
+              },
+              "id": "s",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 10138,
+              "end": 10147
+            }
+          ],
+          "modifiers": null,
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "Identifier",
+                    "name": "require",
+                    "start": 10159,
+                    "end": 10166
+                  },
+                  "arguments": [
+                    {
+                      "type": "BinaryExpression",
+                      "operator": "&&",
+                      "left": {
+                        "type": "BinaryExpression",
+                        "operator": "&&",
+                        "left": {
+                          "type": "BinaryExpression",
+                          "operator": "&&",
+                          "left": {
+                            "type": "BinaryExpression",
+                            "operator": "==",
+                            "left": {
+                              "type": "CallExpression",
+                              "callee": {
+                                "type": "Identifier",
+                                "name": "ecrecover",
+                                "start": 10181,
+                                "end": 10190
+                              },
+                              "arguments": [
+                                {
+                                  "type": "Identifier",
+                                  "name": "STATEMENT_HASH",
+                                  "start": 10191,
+                                  "end": 10205
+                                },
+                                {
+                                  "type": "Identifier",
+                                  "name": "v",
+                                  "start": 10207,
+                                  "end": 10208
+                                },
+                                {
+                                  "type": "Identifier",
+                                  "name": "r",
+                                  "start": 10210,
+                                  "end": 10211
+                                },
+                                {
+                                  "type": "Identifier",
+                                  "name": "s",
+                                  "start": 10213,
+                                  "end": 10214
+                                }
+                              ],
+                              "start": 10181,
+                              "end": 10215
+                            },
+                            "right": {
+                              "type": "Identifier",
+                              "name": "who",
+                              "start": 10219,
+                              "end": 10222
+                            },
+                            "start": 10181,
+                            "end": 10222
+                          },
+                          "right": {
+                            "type": "CallExpression",
+                            "callee": {
+                              "type": "MemberExpression",
+                              "object": {
+                                "type": "Identifier",
+                                "name": "certifier",
+                                "start": 10238,
+                                "end": 10247
+                              },
+                              "property": {
+                                "type": "Identifier",
+                                "name": "certified",
+                                "start": 10248,
+                                "end": 10257
+                              },
+                              "computed": false,
+                              "start": 10238,
+                              "end": 10257
+                            },
+                            "arguments": [
+                              {
+                                "type": "Identifier",
+                                "name": "who",
+                                "start": 10258,
+                                "end": 10261
+                              }
+                            ],
+                            "start": 10238,
+                            "end": 10262
+                          },
+                          "start": 10181,
+                          "end": 10336
+                        },
+                        "right": {
+                          "type": "CallExpression",
+                          "callee": {
+                            "type": "Identifier",
+                            "name": "isBasicAccount",
+                            "start": 10278,
+                            "end": 10292
+                          },
+                          "arguments": [
+                            {
+                              "type": "Identifier",
+                              "name": "who",
+                              "start": 10293,
+                              "end": 10296
+                            }
+                          ],
+                          "start": 10278,
+                          "end": 10297
+                        },
+                        "start": 10181,
+                        "end": 10336
+                      },
+                      "right": {
+                        "type": "BinaryExpression",
+                        "operator": ">=",
+                        "left": {
+                          "type": "MemberExpression",
+                          "object": {
+                            "type": "Identifier",
+                            "name": "msg",
+                            "start": 10313,
+                            "end": 10316
+                          },
+                          "property": {
+                            "type": "Identifier",
+                            "name": "value",
+                            "start": 10317,
+                            "end": 10322
+                          },
+                          "computed": false,
+                          "start": 10313,
+                          "end": 10322
+                        },
+                        "right": {
+                          "type": "Identifier",
+                          "name": "DUST_LIMIT",
+                          "start": 10326,
+                          "end": 10336
+                        },
+                        "start": 10313,
+                        "end": 10336
+                      },
+                      "start": 10181,
+                      "end": 10336
+                    }
+                  ],
+                  "start": 10159,
+                  "end": 10346
+                },
+                "start": 10159,
+                "end": 10347
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "Identifier",
+                  "name": "_",
+                  "start": 10356,
+                  "end": 10357
+                },
+                "start": 10356,
+                "end": 10358
+              }
+            ],
+            "start": 10149,
+            "end": 10364
+          },
+          "start": 10082,
+          "end": 10364
+        },
+        {
+          "type": "ModifierDeclaration",
+          "name": "only_basic",
+          "params": [
+            {
+              "type": "InformalParameter",
+              "literal": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 10431,
+                "end": 10438
+              },
+              "id": "who",
+              "is_indexed": false,
+              "is_storage": false,
+              "is_memory": false,
+              "start": 10431,
+              "end": 10442
+            }
+          ],
+          "modifiers": null,
+          "body": {
+            "type": "BlockStatement",
+            "body": [
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "CallExpression",
+                  "callee": {
+                    "type": "Identifier",
+                    "name": "require",
+                    "start": 10446,
+                    "end": 10453
+                  },
+                  "arguments": [
+                    {
+                      "type": "CallExpression",
+                      "callee": {
+                        "type": "Identifier",
+                        "name": "isBasicAccount",
+                        "start": 10455,
+                        "end": 10469
+                      },
+                      "arguments": [
+                        {
+                          "type": "Identifier",
+                          "name": "who",
+                          "start": 10470,
+                          "end": 10473
+                        }
+                      ],
+                      "start": 10455,
+                      "end": 10474
+                    }
+                  ],
+                  "start": 10446,
+                  "end": 10475
+                },
+                "start": 10446,
+                "end": 10476
+              },
+              {
+                "type": "ExpressionStatement",
+                "expression": {
+                  "type": "Identifier",
+                  "name": "_",
+                  "start": 10477,
+                  "end": 10478
+                },
+                "start": 10477,
+                "end": 10479
+              }
+            ],
+            "start": 10444,
+            "end": 10481
+          },
+          "start": 10411,
+          "end": 10481
+        },
+        {
+          "type": "StructDeclaration",
+          "name": "Account",
+          "body": [
+            {
+              "type": "DeclarativeExpression",
+              "name": "accounted",
+              "literal": {
+                "type": "Type",
+                "literal": "uint128",
+                "members": [],
+                "array_parts": [],
+                "start": 10527,
+                "end": 10534
+              },
+              "storage_location": null,
+              "start": 10527,
+              "end": 10544
+            },
+            {
+              "type": "DeclarativeExpression",
+              "name": "received",
+              "literal": {
+                "type": "Type",
+                "literal": "uint128",
+                "members": [],
+                "array_parts": [],
+                "start": 10580,
+                "end": 10587
+              },
+              "storage_location": null,
+              "start": 10580,
+              "end": 10596
+            }
+          ],
+          "start": 10502,
+          "end": 10654
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "buyins",
+          "literal": {
+            "type": "Type",
+            "literal": {
+              "type": "MappingExpression",
+              "from": {
+                "type": "Type",
+                "literal": "address",
+                "members": [],
+                "array_parts": [],
+                "start": 10718,
+                "end": 10725
+              },
+              "to": {
+                "type": "Type",
+                "literal": "Account",
+                "members": [],
+                "array_parts": [],
+                "start": 10729,
+                "end": 10736
+              },
+              "start": 10709,
+              "end": 10737
+            },
+            "members": [],
+            "array_parts": [],
+            "start": 10709,
+            "end": 10737
+          },
+          "visibility": "public",
+          "is_constant": false,
+          "value": null,
+          "start": 10709,
+          "end": 10752
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "totalReceived",
+          "literal": {
+            "type": "Type",
+            "literal": "uint",
+            "members": [],
+            "array_parts": [],
+            "start": 10831,
+            "end": 10835
+          },
+          "visibility": "public",
+          "is_constant": false,
+          "value": {
+            "type": "Literal",
+            "value": 0,
+            "start": 10859,
+            "end": 10860
+          },
+          "start": 10831,
+          "end": 10861
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "totalAccounted",
+          "literal": {
+            "type": "Type",
+            "literal": "uint",
+            "members": [],
+            "array_parts": [],
+            "start": 10945,
+            "end": 10949
+          },
+          "visibility": "public",
+          "is_constant": false,
+          "value": {
+            "type": "Literal",
+            "value": 0,
+            "start": 10974,
+            "end": 10975
+          },
+          "start": 10945,
+          "end": 10976
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "totalFinalised",
+          "literal": {
+            "type": "Type",
+            "literal": "uint",
+            "members": [],
+            "array_parts": [],
+            "start": 11038,
+            "end": 11042
+          },
+          "visibility": "public",
+          "is_constant": false,
+          "value": {
+            "type": "Literal",
+            "value": 0,
+            "start": 11067,
+            "end": 11068
+          },
+          "start": 11038,
+          "end": 11069
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "endTime",
+          "literal": {
+            "type": "Type",
+            "literal": "uint",
+            "members": [],
+            "array_parts": [],
+            "start": 11147,
+            "end": 11151
+          },
+          "visibility": "public",
+          "is_constant": false,
+          "value": null,
+          "start": 11147,
+          "end": 11167
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "endPrice",
+          "literal": {
+            "type": "Type",
+            "literal": "uint",
+            "members": [],
+            "array_parts": [],
+            "start": 11289,
+            "end": 11293
+          },
+          "visibility": "public",
+          "is_constant": false,
+          "value": null,
+          "start": 11289,
+          "end": 11310
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "halted",
+          "literal": {
+            "type": "Type",
+            "literal": "bool",
+            "members": [],
+            "array_parts": [],
+            "start": 11376,
+            "end": 11380
+          },
+          "visibility": "public",
+          "is_constant": false,
+          "value": null,
+          "start": 11376,
+          "end": 11395
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "currentBonus",
+          "literal": {
+            "type": "Type",
+            "literal": "uint8",
+            "members": [],
+            "array_parts": [],
+            "start": 11462,
+            "end": 11467
+          },
+          "visibility": "public",
+          "is_constant": false,
+          "value": {
+            "type": "Literal",
+            "value": 15,
+            "start": 11490,
+            "end": 11492
+          },
+          "start": 11462,
+          "end": 11493
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "lastNewInterest",
+          "literal": {
+            "type": "Type",
+            "literal": "uint32",
+            "members": [],
+            "array_parts": [],
+            "start": 11550,
+            "end": 11556
+          },
+          "visibility": "public",
+          "is_constant": false,
+          "value": null,
+          "start": 11550,
+          "end": 11580
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "tokenContract",
+          "literal": {
+            "type": "Type",
+            "literal": "Token",
+            "members": [],
+            "array_parts": [],
+            "start": 11652,
+            "end": 11657
+          },
+          "visibility": "public",
+          "is_constant": false,
+          "value": null,
+          "start": 11652,
+          "end": 11679
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "certifier",
+          "literal": {
+            "type": "Type",
+            "literal": "Certifier",
+            "members": [],
+            "array_parts": [],
+            "start": 11708,
+            "end": 11717
+          },
+          "visibility": "public",
+          "is_constant": false,
+          "value": null,
+          "start": 11708,
+          "end": 11735
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "treasury",
+          "literal": {
+            "type": "Type",
+            "literal": "address",
+            "members": [],
+            "array_parts": [],
+            "start": 11797,
+            "end": 11804
+          },
+          "visibility": "public",
+          "is_constant": false,
+          "value": null,
+          "start": 11797,
+          "end": 11821
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "admin",
+          "literal": {
+            "type": "Type",
+            "literal": "address",
+            "members": [],
+            "array_parts": [],
+            "start": 11907,
+            "end": 11914
+          },
+          "visibility": "public",
+          "is_constant": false,
+          "value": null,
+          "start": 11907,
+          "end": 11928
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "beginTime",
+          "literal": {
+            "type": "Type",
+            "literal": "uint",
+            "members": [],
+            "array_parts": [],
+            "start": 11977,
+            "end": 11981
+          },
+          "visibility": "public",
+          "is_constant": false,
+          "value": null,
+          "start": 11977,
+          "end": 11999
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "tokenCap",
+          "literal": {
+            "type": "Type",
+            "literal": "uint",
+            "members": [],
+            "array_parts": [],
+            "start": 12127,
+            "end": 12131
+          },
+          "visibility": "public",
+          "is_constant": false,
+          "value": null,
+          "start": 12127,
+          "end": 12148
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "eraIndex",
+          "literal": {
+            "type": "Type",
+            "literal": "uint",
+            "members": [],
+            "array_parts": [],
+            "start": 12250,
+            "end": 12254
+          },
+          "visibility": "public",
+          "is_constant": false,
+          "value": null,
+          "start": 12250,
+          "end": 12271
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "ERA_PERIOD",
+          "literal": {
+            "type": "Type",
+            "literal": "uint",
+            "members": [],
+            "array_parts": [],
+            "start": 12317,
+            "end": 12321
+          },
+          "visibility": "public",
+          "is_constant": true,
+          "value": {
+            "type": "DenominationLiteral",
+            "literal": 5,
+            "denomination": "minutes",
+            "start": 12351,
+            "end": 12360
+          },
+          "start": 12317,
+          "end": 12361
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "DUST_LIMIT",
+          "literal": {
+            "type": "Type",
+            "literal": "uint",
+            "members": [],
+            "array_parts": [],
+            "start": 12474,
+            "end": 12478
+          },
+          "visibility": "public",
+          "is_constant": true,
+          "value": {
+            "type": "DenominationLiteral",
+            "literal": 5,
+            "denomination": "finney",
+            "start": 12508,
+            "end": 12516
+          },
+          "start": 12474,
+          "end": 12517
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "STATEMENT_HASH",
+          "literal": {
+            "type": "Type",
+            "literal": "bytes32",
+            "members": [],
+            "array_parts": [],
+            "start": 12597,
+            "end": 12604
+          },
+          "visibility": "public",
+          "is_constant": true,
+          "value": {
+            "type": "CallExpression",
+            "callee": {
+              "type": "Identifier",
+              "name": "keccak256",
+              "start": 12638,
+              "end": 12647
+            },
+            "arguments": [
+              {
+                "type": "Identifier",
+                "name": "STATEMENT",
+                "start": 12648,
+                "end": 12657
+              }
+            ],
+            "start": 12638,
+            "end": 12658
+          },
+          "start": 12597,
+          "end": 12659
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "STATEMENT",
+          "literal": {
+            "type": "Type",
+            "literal": "string",
+            "members": [],
+            "array_parts": [],
+            "start": 12711,
+            "end": 12717
+          },
+          "visibility": "public",
+          "is_constant": true,
+          "value": {
+            "type": "Literal",
+            "value": "\u0019Ethereum Signed Message:\n47Please take my Ether and try to build Polkadot.",
+            "start": 12746,
+            "end": 12827
+          },
+          "start": 12711,
+          "end": 12828
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "BONUS_MIN_DURATION",
+          "literal": {
+            "type": "Type",
+            "literal": "uint",
+            "members": [],
+            "array_parts": [],
+            "start": 13037,
+            "end": 13041
+          },
+          "visibility": "public",
+          "is_constant": true,
+          "value": {
+            "type": "DenominationLiteral",
+            "literal": 1,
+            "denomination": "hours",
+            "start": 13079,
+            "end": 13086
+          },
+          "start": 13037,
+          "end": 13087
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "BONUS_MAX_DURATION",
+          "literal": {
+            "type": "Type",
+            "literal": "uint",
+            "members": [],
+            "array_parts": [],
+            "start": 13158,
+            "end": 13162
+          },
+          "visibility": "public",
+          "is_constant": true,
+          "value": {
+            "type": "DenominationLiteral",
+            "literal": 24,
+            "denomination": "hours",
+            "start": 13200,
+            "end": 13208
+          },
+          "start": 13158,
+          "end": 13209
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "BONUS_LATCH",
+          "literal": {
+            "type": "Type",
+            "literal": "uint",
+            "members": [],
+            "array_parts": [],
+            "start": 13307,
+            "end": 13311
+          },
+          "visibility": "public",
+          "is_constant": true,
+          "value": {
+            "type": "Literal",
+            "value": 2,
+            "start": 13342,
+            "end": 13343
+          },
+          "start": 13307,
+          "end": 13344
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "USDWEI",
+          "literal": {
+            "type": "Type",
+            "literal": "uint",
+            "members": [],
+            "array_parts": [],
+            "start": 13394,
+            "end": 13398
+          },
+          "visibility": "public",
+          "is_constant": true,
+          "value": {
+            "type": "DenominationLiteral",
+            "literal": 3226,
+            "denomination": "szabo",
+            "start": 13424,
+            "end": 13434
+          },
+          "start": 13394,
+          "end": 13435
+        },
+        {
+          "type": "StateVariableDeclaration",
+          "name": "DIVISOR",
+          "literal": {
+            "type": "Type",
+            "literal": "uint",
+            "members": [],
+            "array_parts": [],
+            "start": 13471,
+            "end": 13475
+          },
+          "visibility": "public",
+          "is_constant": true,
+          "value": {
+            "type": "Literal",
+            "value": 1000,
+            "start": 13502,
+            "end": 13506
+          },
+          "start": 13471,
+          "end": 13507
+        }
+      ],
+      "start": 962,
+      "end": 13509
+    }
+  ],
+  "start": 83,
+  "end": 13509
+}
