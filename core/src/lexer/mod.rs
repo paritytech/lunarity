@@ -351,7 +351,7 @@ const SLH: ByteHandler = Some(|lex| {
             unwind_loop!({
                 match lex.next_byte() {
                     0 | b'\n' => {
-                        return lex.advance();
+                        return lex.consume();
                     }
                     _ => {}
                 }
@@ -367,7 +367,7 @@ const SLH: ByteHandler = Some(|lex| {
                     _ => {
                         if lex.read_pair() == *b"*/" {
                             lex.index += 2;
-                            return lex.advance();
+                            return lex.consume();
                         }
                     }
                 }
@@ -530,14 +530,14 @@ impl<'arena> Lexer<'arena> {
             _phantom: PhantomData,
         };
 
-        lexer.advance();
+        lexer.consume();
 
         lexer
     }
 
     /// Advances the lexer, produces a new `Token` and stores it on `self.token`.
     #[inline]
-    pub fn advance(&mut self) {
+    pub fn consume(&mut self) {
         let mut ch;
 
         loop {
@@ -561,7 +561,7 @@ impl<'arena> Lexer<'arena> {
 
     #[inline]
     fn handler_from_byte(&mut self, byte: u8) -> ByteHandler {
-        unsafe { *(&BYTE_HANDLERS as *const ByteHandler).offset(byte as isize) }
+        BYTE_HANDLERS[byte as usize]
     }
 
     /// Get the start and end positions of the current token.
@@ -582,19 +582,19 @@ impl<'arena> Lexer<'arena> {
         self.index as u32
     }
 
-    /// Get the start position of the current token, then advance the lexer.
+    /// Get the start position of the current token, then consume the lexer.
     #[inline]
-    pub fn start_then_advance(&mut self) -> u32 {
+    pub fn start_then_consume(&mut self) -> u32 {
         let start = self.start();
-        self.advance();
+        self.consume();
         start
     }
 
-    /// Get the end position of the current token, then advance the lexer.
+    /// Get the end position of the current token, then consume the lexer.
     #[inline]
     pub fn end_then_advance(&mut self) -> u32 {
         let end = self.end();
-        self.advance();
+        self.consume();
         end
     }
 
@@ -604,7 +604,7 @@ impl<'arena> Lexer<'arena> {
         let token = self.token;
 
         if token != EndOfProgram {
-            self.advance();
+            self.consume();
         }
 
         Error {
@@ -805,7 +805,7 @@ mod test {
                 lex.token == *token && lex.token_as_str() == slice,
                 "\n\n\n\tExpected {:?}({:?}), found {:?}({:?}) instead!\n\n\n", token, slice, lex.token, lex.token_as_str()
             );
-            lex.advance();
+            lex.consume();
         }
 
         assert_eq!(lex.token, EndOfProgram);
@@ -1319,7 +1319,7 @@ mod test {
 
             tokens += 1;
 
-            lex.advance();
+            lex.consume();
         }
 
         assert_eq!(tokens, 1300);

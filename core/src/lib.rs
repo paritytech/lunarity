@@ -6,3 +6,7 @@ mod parser;
 mod error;
 
 pub use parser::parse;
+
+#[cfg(test)]
+#[macro_use]
+extern crate pretty_assertions;

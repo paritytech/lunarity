@@ -8,6 +8,9 @@ use lexer::Token::*;
 use error::Error;
 use ast::*;
 
+#[cfg(test)]
+mod mock;
+
 
 pub struct Parser<'ast> {
     arena: &'ast Arena,
@@ -35,10 +38,52 @@ impl<'ast> Parser<'ast> {
     #[inline]
     fn expect(&mut self, token: Token) {
         if self.lexer.token == token {
-            self.lexer.advance();
+            self.lexer.consume();
         } else {
             self.error();
         }
+    }
+
+    #[inline]
+    fn expect_exact(&mut self, token: Token, expected: &str) {
+        if self.lexer.token == token && self.lexer.token_as_str() == expected {
+            self.lexer.consume();
+        } else {
+            self.error();
+        }
+    }
+
+    #[inline]
+    fn expect_end(&mut self, token: Token) -> u32 {
+        let end = self.lexer.end();
+
+        if self.lexer.token == token {
+            self.lexer.consume();
+        } else {
+            self.error();
+        }
+
+        end
+    }
+
+    #[inline]
+    fn str_node(&mut self) -> Node<'ast, &'ast str> {
+        let node = self.lexer.token_as_str();
+        let node = self.node_at_token(node);
+
+        self.lexer.consume();
+
+        node
+    }
+
+    #[inline]
+    fn expect_str_node(&mut self, token: Token) -> Node<'ast, &'ast str> {
+        let node = self.lexer.token_as_str();
+        let node = self.node_at_token(node);
+
+        self.expect(token);
+
+        node
     }
 
     fn error(&mut self) {

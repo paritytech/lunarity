@@ -18,7 +18,7 @@ fn tokenize(b: &mut Bencher) {
         let mut lexer = unsafe { lunaris::lexer::Lexer::from_ptr(ptr) };
 
         while lexer.token != lunaris::lexer::Token::EndOfProgram {
-            lexer.advance()
+            lexer.consume()
         }
     });
 }

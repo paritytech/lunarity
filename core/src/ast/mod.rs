@@ -8,6 +8,10 @@ use std::marker::PhantomData;
 pub use ast::source::*;
 pub use ast::node::{Node, NodeInner};
 
+pub type Identifier<'ast> = &'ast str;
+pub type StringLiteral<'ast> = &'ast str;
+pub type VersionLiteral<'ast> = &'ast str;
+
 pub type NodeList<'ast, T> = List<'ast, Node<'ast, T>>;
 pub type SourceUnitNode<'ast> = Node<'ast, SourceUnit<'ast>>;
 pub type SourceUnitList<'ast> = NodeList<'ast, SourceUnit<'ast>>;

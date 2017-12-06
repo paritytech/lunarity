@@ -11,21 +11,18 @@ pub struct Node<'ast, T: 'ast> {
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct NodeInner<T> {
-    start: u32,
-    end: u32,
-    value: T,
+    pub start: u32,
+    pub end: u32,
+    pub value: T,
 }
 
 impl<T> NodeInner<T> {
     #[inline]
-    pub fn new<I>(start: u32, end: u32, value: I) -> Self
-    where
-        I: Into<T>
-    {
+    pub fn new(start: u32, end: u32, value: T) -> Self {
         NodeInner {
             start,
             end,
-            value: value.into()
+            value,
         }
     }
 }
@@ -78,8 +75,8 @@ mod node {
 
     #[test]
     fn ptr() {
-        let foo: NodeInner<&str> = NodeInner::new(0, 0, "foo");
-        let bar: NodeInner<&str> = NodeInner::new(0, 0, "bar");
+        let foo = NodeInner::new(0, 0, "foo");
+        let bar = NodeInner::new(0, 0, "bar");
 
         let foo_ptr = Node::new(&foo);
         let bar_ptr = foo_ptr.clone();
