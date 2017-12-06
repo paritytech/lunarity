@@ -1,5 +1,6 @@
-use ast::{Node, NodeInner, NodeList};
 use toolshed::Arena;
+
+use ast::*;
 
 pub struct Mock {
     arena: Arena
@@ -27,4 +28,28 @@ impl Mock {
     {
         NodeList::from_iter(&self.arena, list.as_ref().iter().cloned())
     }
+}
+
+
+pub fn assert_units<'mock, E>(source: &str, expected: E)
+where
+    E: AsRef<[SourceUnitNode<'mock>]>
+{
+    use parser::parse;
+
+    let program = parse(source).unwrap();
+
+    let iter = program
+                .body()
+                .iter()
+                .zip(expected.as_ref().iter());
+
+    for (got, expected) in iter {
+        assert_eq!(got, expected);
+    }
+
+    let got = program.body().iter().count();
+    let expected = expected.as_ref().iter().count();
+
+    assert_eq!(got, expected, "Expected {} units, got {}", expected, got);
 }

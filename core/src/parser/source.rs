@@ -1,107 +1,107 @@
 use toolshed::list::ListBuilder;
-use parser::Parser;
+
 use ast::*;
-use lexer::Token::*;
+use parser::Parser;
+use lexer::Token;
 
 impl<'ast> Parser<'ast> {
     #[inline]
-    pub fn source_unit(&mut self) -> SourceUnitNode<'ast> {
+    pub fn source_unit(&mut self) -> Option<SourceUnitNode<'ast>> {
         match self.lexer.token {
-            KeywordPragma => self.pragma_directive(),
-            KeywordImport => self.import_directive(),
-            _ => panic!("Unimplemented, lexer at {:?} {:?}", self.lexer.token, self.lexer.loc())
+            Token::KeywordPragma => self.pragma_directive(),
+            Token::KeywordImport => self.import_directive(),
+            Token::DeclarationContract => self.contract_definition(),
+            _ => None,
         }
     }
 
-    fn pragma_directive(&mut self) -> SourceUnitNode<'ast> {
+    fn pragma_directive(&mut self) -> Option<SourceUnitNode<'ast>> {
         let start = self.lexer.start_then_consume();
 
-        if self.lexer.token != Identifier || self.lexer.token_as_str() != "solidity" {
+        if self.lexer.token != Token::Identifier || self.lexer.token_as_str() != "solidity" {
             self.error();
         }
 
         let version = self.lexer.read_pragma();
-        let end     = self.expect_end(Semicolon);
+        let end     = self.expect_end(Token::Semicolon);
 
-        self.node_at(start, end, PragmaDirective {
+        Some(self.node_at(start, end, PragmaDirective {
             version
-        })
+        }))
     }
 
-    fn import_directive(&mut self) -> SourceUnitNode<'ast> {
+    fn import_directive(&mut self) -> Option<SourceUnitNode<'ast>> {
         let start = self.lexer.start_then_consume();
 
         let symbol = match self.lexer.token {
-            OperatorMultiplication => {
+            Token::OperatorMultiplication => {
                 self.lexer.consume();
 
                 None
             },
-            Identifier    => Some(self.str_node()),
-            LiteralString => return self.import_directive_from(start),
-            BraceOpen     => return self.import_directive_from_many(start),
-            _             => return self.invalid_import_directive(start),
+            Token::Identifier    => Some(self.str_node()),
+            Token::LiteralString => return self.import_directive_from(start),
+            Token::BraceOpen     => return self.import_directive_from_many(start),
+            _                    => return None,
         };
 
         let alias = self.allow_alias();
 
-        self.expect_exact(Identifier, "from");
+        self.expect_exact(Token::Identifier, "from");
 
-        let source = self.expect_str_node(LiteralString);
-        let end    = self.expect_end(Semicolon);
+        let source = self.expect_str_node(Token::LiteralString);
+        let end    = self.expect_end(Token::Semicolon);
 
-        self.node_at(start, end, ImportDirective::From {
+        Some(self.node_at(start, end, ImportDirective::From {
             symbol,
             alias,
             source,
-        })
+        }))
     }
 
-    fn import_directive_from(&mut self, start: u32) -> SourceUnitNode<'ast> {
+    fn import_directive_from(&mut self, start: u32) -> Option<SourceUnitNode<'ast>> {
         let source = self.str_node();
         let alias  = self.allow_alias();
-        let end    = self.expect_end(Semicolon);
+        let end    = self.expect_end(Token::Semicolon);
 
-        self.node_at(start, end, ImportDirective::Global {
+        Some(self.node_at(start, end, ImportDirective::Global {
             source,
             alias,
-        })
+        }))
     }
 
-    fn import_directive_from_many(&mut self, start: u32) -> SourceUnitNode<'ast> {
+    fn import_directive_from_many(&mut self, start: u32) -> Option<SourceUnitNode<'ast>> {
         self.lexer.consume();
 
         let builder = ListBuilder::new(self.arena, self.import_node());
 
         loop {
             match self.lexer.token {
-                Comma => {
+                Token::Comma => {
                     self.lexer.consume();
 
                     builder.push(self.arena, self.import_node());
                 },
-                BraceClose => break self.lexer.consume(),
-                _          => break self.error(),
+                Token::BraceClose => break self.lexer.consume(),
+                _                 => break self.error(),
             }
         }
 
         let imports = builder.as_list();
 
-        self.expect_exact(Identifier, "from");
+        self.expect_exact(Token::Identifier, "from");
 
-        let source = self.expect_str_node(LiteralString);
-        let end    = self.expect_end(Semicolon);
+        let source = self.expect_str_node(Token::LiteralString);
+        let end    = self.expect_end(Token::Semicolon);
 
-        self.node_at(start, end, ImportDirective::ManyFrom {
+        Some(self.node_at(start, end, ImportDirective::ManyFrom {
             imports,
             source,
-        })
+        }))
     }
 
     fn import_node(&mut self) -> Node<'ast, Import<'ast>> {
-        debug_assert_eq!(self.lexer.token, Identifier);
-
-        let symbol = self.expect_str_node(Identifier);
+        let symbol = self.expect_str_node(Token::Identifier);
         let alias = self.allow_alias();
 
         let end = match alias {
@@ -115,55 +115,19 @@ impl<'ast> Parser<'ast> {
         })
     }
 
-    fn allow_alias(&mut self) -> Option<Node<'ast, &'ast str>> {
-        match self.lexer.token {
-            KeywordAs => {
-                self.lexer.consume();
-
-                Some(self.expect_str_node(Identifier))
-            },
-            _ => None
+    fn allow_alias(&mut self) -> Option<IdentifierNode<'ast>> {
+        if self.allow(Token::KeywordAs) {
+            Some(self.expect_str_node(Token::Identifier))
+        } else {
+            None
         }
-    }
-
-    fn invalid_import_directive(&mut self, start: u32) -> SourceUnitNode<'ast> {
-        let end = self.lexer.end();
-
-        let source = self.lexer.token_as_str();
-        let source = self.node_at_token(source);
-
-        self.error();
-
-        self.node_at(start, end, ImportDirective::Global {
-            source,
-            alias: None
-        })
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use parse;
-    use parser::mock::Mock;
-
-    fn assert_units<'mock, E>(source: &str, expected: E)
-    where
-        E: AsRef<[SourceUnitNode<'mock>]>
-    {
-        let program = parse(source).unwrap();
-
-        let iter = program
-                    .body()
-                    .iter()
-                    .zip(expected.as_ref().iter());
-
-        for (got, expected) in iter {
-            assert_eq!(got, expected);
-        }
-
-        assert_eq!(program.body().iter().count(), expected.as_ref().iter().count());
-    }
+    use parser::mock::{Mock, assert_units};
 
     #[test]
     fn pragma() {

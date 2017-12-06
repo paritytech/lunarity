@@ -1,11 +1,15 @@
-pub mod node;
-pub mod source;
+#[macro_use]
+mod impl_from;
+mod node;
+mod source;
+mod contract;
 
 use toolshed::list::{List, UnsafeList};
 use toolshed::Arena;
 use std::marker::PhantomData;
 
 pub use ast::source::*;
+pub use ast::contract::*;
 pub use ast::node::{Node, NodeInner};
 
 pub type Identifier<'ast> = &'ast str;
@@ -15,6 +19,8 @@ pub type VersionLiteral<'ast> = &'ast str;
 pub type NodeList<'ast, T> = List<'ast, Node<'ast, T>>;
 pub type SourceUnitNode<'ast> = Node<'ast, SourceUnit<'ast>>;
 pub type SourceUnitList<'ast> = NodeList<'ast, SourceUnit<'ast>>;
+pub type IdentifierNode<'ast> = Node<'ast, Identifier<'ast>>;
+pub type IdentifierList<'ast> = NodeList<'ast, Identifier<'ast>>;
 
 
 /// A Solidity source code parsed to an AST

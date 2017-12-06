@@ -5,9 +5,7 @@ use ast::*;
 pub enum SourceUnit<'ast> {
     PragmaDirective(PragmaDirective<'ast>),
     ImportDirective(ImportDirective<'ast>),
-    ContractDefinition,
-    LibraryDefinition,
-    InterfaceDefinition,
+    ContractDefinition(ContractDefinition<'ast>),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -17,8 +15,8 @@ pub struct PragmaDirective<'ast> {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Import<'ast> {
-    pub symbol: Node<'ast, Identifier<'ast>>,
-    pub alias: Option<Node<'ast, Identifier<'ast>>>,
+    pub symbol: IdentifierNode<'ast>,
+    pub alias: Option<IdentifierNode<'ast>>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -26,13 +24,13 @@ pub enum ImportDirective<'ast> {
     /// 'import' StringLiteral ('as' Identifier)? ';'
     Global {
         source: Node<'ast, StringLiteral<'ast>>,
-        alias: Option<Node<'ast, Identifier<'ast>>>,
+        alias: Option<IdentifierNode<'ast>>,
     },
 
     /// 'import' ('*' | Identifier) ('as' Identifier)? 'from' StringLiteral ';'
     From {
-        symbol: Option<Node<'ast, Identifier<'ast>>>,
-        alias: Option<Node<'ast, Identifier<'ast>>>,
+        symbol: Option<IdentifierNode<'ast>>,
+        alias: Option<IdentifierNode<'ast>>,
         source: Node<'ast, StringLiteral<'ast>>,
     },
 
@@ -43,18 +41,8 @@ pub enum ImportDirective<'ast> {
     },
 }
 
-macro_rules! impl_from {
-    ($( $type:ident => $variant:ident, )*) => ($(
-        impl<'ast> From<$type<'ast>> for SourceUnit<'ast> {
-            #[inline]
-            fn from(val: $type<'ast>) -> Self {
-                SourceUnit::$variant(val)
-            }
-        }
-    )*)
-}
-
 impl_from! {
-    PragmaDirective => PragmaDirective,
-    ImportDirective => ImportDirective,
+    PragmaDirective => SourceUnit::PragmaDirective,
+    ImportDirective => SourceUnit::ImportDirective,
+    ContractDefinition => SourceUnit::ContractDefinition,
 }

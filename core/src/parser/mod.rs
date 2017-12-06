@@ -1,15 +1,15 @@
+#[cfg(test)]
+mod mock;
 mod source;
+mod contract;
 
 use toolshed::Arena;
-use toolshed::list::ListBuilder;
+use toolshed::list::GrowableList;
 
+use ast::*;
 use lexer::{Lexer, Token};
 use lexer::Token::*;
 use error::Error;
-use ast::*;
-
-#[cfg(test)]
-mod mock;
 
 
 pub struct Parser<'ast> {
@@ -32,6 +32,16 @@ impl<'ast> Parser<'ast> {
             lexer: Lexer::new(arena, source),
             errors: Vec::new(),
             body: NodeList::empty(),
+        }
+    }
+
+    #[inline]
+    fn allow(&mut self, token: Token) -> bool {
+        if self.lexer.token == token {
+            self.lexer.consume();
+            true
+        } else {
+            false
         }
     }
 
@@ -120,18 +130,15 @@ impl<'ast> Parser<'ast> {
 
     #[inline]
     fn parse(&mut self) {
-        if self.lexer.token == EndOfProgram {
-            return;
-        }
+        let builder = GrowableList::new();
 
-        let unit = self.source_unit();
-        let builder = ListBuilder::new(self.arena, unit);
-
-        while self.lexer.token != EndOfProgram {
-            builder.push(self.arena, self.source_unit());
+        while let Some(unit) = self.source_unit() {
+            builder.push(self.arena, unit);
         }
 
         self.body = builder.as_list();
+
+        self.expect(EndOfProgram);
     }
 
     // #[inline]
