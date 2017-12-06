@@ -5,7 +5,6 @@ use parser::Parser;
 use lexer::Token;
 
 impl<'ast> Parser<'ast> {
-    #[inline]
     pub fn source_unit(&mut self) -> Option<SourceUnitNode<'ast>> {
         match self.lexer.token {
             Token::KeywordPragma => self.pragma_directive(),
@@ -73,29 +72,20 @@ impl<'ast> Parser<'ast> {
     fn import_directive_from_many(&mut self, start: u32) -> Option<SourceUnitNode<'ast>> {
         self.lexer.consume();
 
-        let builder = ListBuilder::new(self.arena, self.import_node());
+        let imports = ListBuilder::new(self.arena, self.import_node());
 
-        loop {
-            match self.lexer.token {
-                Token::Comma => {
-                    self.lexer.consume();
-
-                    builder.push(self.arena, self.import_node());
-                },
-                Token::BraceClose => break self.lexer.consume(),
-                _                 => break self.error(),
-            }
+        while self.allow(Token::Comma) {
+            imports.push(self.arena, self.import_node());
         }
 
-        let imports = builder.as_list();
-
+        self.expect(Token::BraceClose);
         self.expect_exact(Token::Identifier, "from");
 
         let source = self.expect_str_node(Token::LiteralString);
         let end    = self.expect_end(Token::Semicolon);
 
         Some(self.node_at(start, end, ImportDirective::ManyFrom {
-            imports,
+            imports: imports.as_list(),
             source,
         }))
     }

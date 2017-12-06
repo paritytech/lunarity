@@ -490,7 +490,8 @@ impl<'arena> Lexer<'arena> {
 
         // First digit has to be 1...9, so we don't need to check for zero.
         if n % 8 == 0 && n <= 256 && self.end_of_label() {
-            self.token = token;
+            self.token       = token;
+            self.type_size.0 = (n / 8) as u8;
 
             return true;
         }
@@ -532,7 +533,8 @@ impl<'arena> Lexer<'arena> {
         }
 
         if n <= 80 && self.end_of_label() {
-            self.token = token;
+            self.token     = token;
+            self.type_size = ((m / 8) as u8, n);
 
             return true;
         }

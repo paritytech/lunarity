@@ -1,6 +1,7 @@
 #[macro_use]
 mod impl_from;
 mod node;
+mod type_name;
 mod source;
 mod contract;
 
@@ -9,6 +10,7 @@ use toolshed::Arena;
 use std::marker::PhantomData;
 
 pub use ast::source::*;
+pub use ast::type_name::*;
 pub use ast::contract::*;
 pub use ast::node::{Node, NodeInner};
 

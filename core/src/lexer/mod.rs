@@ -492,6 +492,17 @@ pub struct Lexer<'arena> {
     /// Current `Token` from the source.
     pub token: Token,
 
+    /// If the current token is an elementary type,
+    /// this will hold it's size, if applicable.
+    ///
+    /// The first number is size in bytes, the second is
+    /// decimal offset for fixed point numbers.
+    ///
+    /// - For `int64` this will be set to `(8, _)`
+    /// - For `bytes20` this will be set to `(20, _)`
+    /// - For 'ufixed128x40` this will be set to `(16, 40)`
+    pub type_size: (u8, u8),
+
     /// Source to parse, must be a C-style buffer ending with 0 byte
     ptr: *const u8,
 
@@ -524,6 +535,7 @@ impl<'arena> Lexer<'arena> {
     pub unsafe fn from_ptr(ptr: *const u8) -> Self {
         let mut lexer = Lexer {
             token: UnexpectedToken,
+            type_size: (0, 0),
             ptr,
             index: 0,
             token_start: 0,
