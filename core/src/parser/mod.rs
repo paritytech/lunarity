@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod mock;
 mod source;
+mod type_name;
 mod contract;
 
 use toolshed::Arena;

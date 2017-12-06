@@ -38,43 +38,83 @@ impl<'ast> Parser<'ast> {
         }))
     }
 
-    fn contract_part(&mut self) -> Option<Node<'ast, ContractPart<'ast>>> {
+    fn contract_part(&mut self) -> Option<ContractPartNode<'ast>> {
         match self.lexer.token {
-            Token::DeclarationEvent => {
-                let start  = self.lexer.start_then_consume();
-                let name   = self.expect_str_node(Token::Identifier);
-
-                self.expect(Token::ParenOpen);
-
-                let params = match self.indexed_parameter() {
-                    Some(param) => {
-                        let builder = ListBuilder::new(self.arena, param);
-
-                        while self.allow(Token::Comma) {
-                            match self.indexed_parameter() {
-                                Some(param) => builder.push(self.arena, param),
-                                None        => self.error(),
-                            }
-                        }
-
-                        builder.as_list()
-                    },
-                    None => NodeList::empty(),
-                };
-
-                self.expect(Token::ParenClose);
-
-                let anonymous = self.allow(Token::KeywordAnonymous);
-                let end       = self.expect_end(Token::Semicolon);
-
-                Some(self.node_at(start, end, EventDefinition {
-                    anonymous,
-                    name,
-                    params,
-                }))
-            },
-            _ => None,
+            Token::DeclarationEvent => return self.event_definition(),
+            _ => {},
         }
+
+        let type_name  = self.type_name()?;
+        let visibility = self.visibility();
+        let name       = self.expect_str_node(Token::Identifier);
+        let end        = self.expect_end(Token::Semicolon);
+
+        Some(self.node_at(type_name.start, end, StateVariableDeclaration {
+            type_name,
+            visibility,
+            name,
+            init: None,
+        }))
+    }
+
+    fn visibility(&mut self) -> Visibility {
+        match self.lexer.token {
+            Token::KeywordPublic   => {
+                self.lexer.consume();
+
+                Visibility::Public
+            },
+            Token::KeywordInternal => {
+                self.lexer.consume();
+
+                Visibility::Internal
+            },
+            Token::KeywordPrivate  => {
+                self.lexer.consume();
+
+                Visibility::Private
+            },
+            Token::KeywordConstant => {
+                self.lexer.consume();
+
+                Visibility::Constant
+            },
+            _ => Visibility::Unspecified,
+        }
+    }
+
+    fn event_definition(&mut self) -> Option<ContractPartNode<'ast>> {
+        let start  = self.lexer.start_then_consume();
+        let name   = self.expect_str_node(Token::Identifier);
+
+        self.expect(Token::ParenOpen);
+
+        let params = match self.indexed_parameter() {
+            Some(param) => {
+                let builder = ListBuilder::new(self.arena, param);
+
+                while self.allow(Token::Comma) {
+                    match self.indexed_parameter() {
+                        Some(param) => builder.push(self.arena, param),
+                        None        => self.error(),
+                    }
+                }
+
+                builder.as_list()
+            },
+            None => NodeList::empty(),
+        };
+
+        self.expect(Token::ParenClose);
+
+        let anonymous = self.allow(Token::KeywordAnonymous);
+        let end       = self.expect_end(Token::Semicolon);
+
+        Some(self.node_at(start, end, EventDefinition {
+            anonymous,
+            name,
+            params,
+        }))
     }
 
     fn indexed_parameter(&mut self) -> Option<Node<'ast, IndexedParameter<'ast>>> {
@@ -87,32 +127,6 @@ impl<'ast> Parser<'ast> {
             type_name,
             name,
         }))
-    }
-
-    // TODO: it's own file.
-    fn type_name(&mut self) -> Option<TypeNameNode<'ast>> {
-        let elementary = {
-            let ref size = self.lexer.type_size;
-
-            match self.lexer.token {
-                Token::TypeBool       => ElementaryTypeName::Bool,
-                Token::TypeAddress    => ElementaryTypeName::Address,
-                Token::TypeString     => ElementaryTypeName::String,
-                Token::DeclarationVar => ElementaryTypeName::Var,
-                Token::TypeBytes      => ElementaryTypeName::Byte(size.0),
-                Token::TypeInt        => ElementaryTypeName::Int(size.0),
-                Token::TypeUint       => ElementaryTypeName::Uint(size.0),
-                Token::TypeFixed      => ElementaryTypeName::Fixed(size.0, size.1),
-                Token::TypeUfixed     => ElementaryTypeName::Ufixed(size.0, size.1),
-                _                     => return None,
-            }
-        };
-
-        let node = self.node_at_token(elementary);
-
-        self.lexer.consume();
-
-        Some(node)
     }
 }
 
@@ -216,6 +230,39 @@ mod test {
                                 name: m.node(83, 86, "bar"),
                             }),
                         ]),
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
+    #[test]
+    fn state_variable_declaration() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                int32 foo;
+                bytes10 public doge;
+            }
+
+        "#, [
+            m.node(14, 106, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 55, StateVariableDeclaration {
+                        type_name: m.node(45, 50, ElementaryTypeName::Int(4)),
+                        visibility: Visibility::Unspecified,
+                        name: m.node(51, 54, "foo"),
+                        init: None,
+                    }),
+                    m.node(72, 92, StateVariableDeclaration {
+                        type_name: m.node(72, 79, ElementaryTypeName::Byte(10)),
+                        visibility: Visibility::Public,
+                        name: m.node(87, 91, "doge"),
+                        init: None,
                     }),
                 ]),
             }),

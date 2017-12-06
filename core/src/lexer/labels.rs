@@ -22,16 +22,9 @@ macro_rules! byte {
 }
 
 macro_rules! match_label {
-    // Check if the label is followed by a 0..256 number divisible by 8
-    ($lex:ident [ $( $byte:ident )* @ bits256 => $token:expr ]) => {
-        if $lex.read_bits256($token) {
-            return;
-        }
-    };
-
-    // Check if the label is followed by a fixed number range
-    ($lex:ident [ $( $byte:ident )* @ bits256x80 => $token:expr ]) => {
-        if $lex.read_bits256x80($token) {
+    // Run a modifier after
+    ($lex:ident [ $( $byte:ident )* @ $mod:ident => $token:expr ]) => {
+        if $lex.$mod($token) {
             return;
         }
     };
@@ -129,22 +122,10 @@ pub const L_B: ByteHandler = Some(|lex| {
         [ r e a k => KeywordBreak ]
         [ o o l   => TypeBool ]
         [ y t e
-            [     => TypeBytes ]        // byte
+            [     => { lex.type_size.0 = 1; TypeBytes } ]
             [ s
-                [       => TypeBytes ]  // bytes
-                [ _1
-                    [               => TypeBytes ] // bytes1
-                    [ (b'0'...b'9') => TypeBytes ] // bytes10 - bytes19
-                ]
-                [ _2
-                    [               => TypeBytes ] // bytes2
-                    [ (b'0'...b'9') => TypeBytes ] // bytes20 - bytes29
-                ]
-                [ _3
-                    [               => TypeBytes ] // bytes3
-                    [ (b'0'...b'2') => TypeBytes ] // bytes30 - bytes32
-                ]
-                [ (b'4'...b'9')     => TypeBytes ] // bytes4 - bytes9
+                [                         => TypeBytes ] // FIXME: default size?
+                [ (b'1'...b'9') @ bytes32 => TypeBytes ]
             ]
         ]
     ]);
@@ -471,7 +452,30 @@ impl<'arena> Lexer<'arena> {
         !legal_in_label(self.read_byte())
     }
 
-    fn read_bits256(&mut self, token: Token) -> bool {
+    fn bytes32(&mut self, token: Token) -> bool {
+         let mut n = self.read_byte() - b'0';
+
+        match self.next_byte() {
+            byte @ b'0'...b'9' => {
+                n = n * 10 + (byte - b'0');
+
+                self.bump();
+            },
+            _ => {},
+        }
+
+        // First digit has to be 1...9, so we don't need to check for zero.
+        if n <= 32 && self.end_of_label() {
+            self.token       = token;
+            self.type_size.0 = n;
+
+            return true;
+        }
+
+        false
+    }
+
+    fn bits256(&mut self, token: Token) -> bool {
         let mut n = (self.read_byte() - b'0') as u16;
 
         self.bump();
@@ -499,7 +503,7 @@ impl<'arena> Lexer<'arena> {
         false
     }
 
-    fn read_bits256x80(&mut self, token: Token) -> bool {
+    fn bits256x80(&mut self, token: Token) -> bool {
         let mut m = (self.read_byte() - b'0') as u16;
         let mut byte = self.next_byte();
 

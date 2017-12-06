@@ -1,18 +1,20 @@
 #[macro_use]
 mod impl_from;
 mod node;
-mod type_name;
 mod source;
 mod contract;
+mod type_name;
+mod expression;
 
 use toolshed::list::{List, UnsafeList};
 use toolshed::Arena;
 use std::marker::PhantomData;
 
-pub use ast::source::*;
-pub use ast::type_name::*;
-pub use ast::contract::*;
 pub use ast::node::{Node, NodeInner};
+pub use ast::source::*;
+pub use ast::contract::*;
+pub use ast::type_name::*;
+pub use ast::expression::*;
 
 pub type Identifier<'ast> = &'ast str;
 pub type StringLiteral<'ast> = &'ast str;
