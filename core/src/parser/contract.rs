@@ -41,6 +41,7 @@ impl<'ast> Parser<'ast> {
     fn contract_part(&mut self) -> Option<ContractPartNode<'ast>> {
         match self.lexer.token {
             Token::DeclarationEvent    => return self.event_definition(),
+            Token::KeywordUsing        => return self.using_for_declaration(),
             Token::DeclarationFunction => return self.function_definition(),
             _ => {},
         }
@@ -70,6 +71,29 @@ impl<'ast> Parser<'ast> {
         self.lexer.consume();
 
         visibility
+    }
+
+    fn using_for_declaration(&mut self) -> Option<ContractPartNode<'ast>> {
+        let start = self.lexer.start_then_consume();
+        let id    = self.expect_str_node(Token::Identifier);
+
+        self.expect(Token::KeywordFor);
+
+        let type_name = match self.type_name() {
+            None => {
+                self.expect(Token::OperatorMultiplication);
+
+                None
+            },
+            type_name => type_name,
+        };
+
+        let end = self.expect_end(Token::Semicolon);
+
+        Some(self.node_at(start, end, UsingForDeclaration {
+            id,
+            type_name,
+        }))
     }
 
     fn event_definition(&mut self) -> Option<ContractPartNode<'ast>> {
@@ -158,6 +182,35 @@ mod test {
                     m.node(106, 111, "Kinda"),
                 ]),
                 body: NodeList::empty(),
+            }),
+        ]);
+    }
+
+    #[test]
+    fn using_for_declaration() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                using foo for *;
+                using bar for int32;
+            }
+
+        "#, [
+            m.node(14, 112, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 61, UsingForDeclaration {
+                        id: m.node(51, 54, "foo"),
+                        type_name: None,
+                    }),
+                    m.node(78, 98, UsingForDeclaration {
+                        id: m.node(84, 87, "bar"),
+                        type_name: m.node(92, 97, ElementaryTypeName::Int(4)),
+                    }),
+                ]),
             }),
         ]);
     }

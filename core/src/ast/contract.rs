@@ -10,12 +10,20 @@ pub struct ContractDefinition<'ast> {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ContractPart<'ast> {
     StateVariableDeclaration(StateVariableDeclaration<'ast>),
-    UsingForDeclaration,
+    UsingForDeclaration(UsingForDeclaration<'ast>),
     StructDefinition,
     ModifierDefinition,
     FunctionDefinition(FunctionDefinition<'ast>),
     EventDefinition(EventDefinition<'ast>),
     EnumDefinition,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct StateVariableDeclaration<'ast> {
+    pub type_name: TypeNameNode<'ast>,
+    pub visibility: Option<StateVariableVisibility>,
+    pub name: IdentifierNode<'ast>,
+    pub init: Option<ExpressionNode<'ast>>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -27,11 +35,9 @@ pub enum StateVariableVisibility {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct StateVariableDeclaration<'ast> {
-    pub type_name: TypeNameNode<'ast>,
-    pub visibility: Option<StateVariableVisibility>,
-    pub name: IdentifierNode<'ast>,
-    pub init: Option<ExpressionNode<'ast>>,
+pub struct UsingForDeclaration<'ast> {
+    pub id: IdentifierNode<'ast>,
+    pub type_name: Option<TypeNameNode<'ast>>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -54,6 +60,7 @@ pub type ContractPartList<'ast> = NodeList<'ast, ContractPart<'ast>>;
 
 impl_from! {
     StateVariableDeclaration => ContractPart::StateVariableDeclaration,
+    UsingForDeclaration => ContractPart::UsingForDeclaration,
     FunctionDefinition => ContractPart::FunctionDefinition,
     EventDefinition => ContractPart::EventDefinition,
 }
