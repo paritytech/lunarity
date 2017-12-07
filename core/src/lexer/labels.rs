@@ -122,10 +122,10 @@ pub const L_B: ByteHandler = Some(|lex| {
         [ r e a k => KeywordBreak ]
         [ o o l   => TypeBool ]
         [ y t e
-            [     => { lex.type_size.0 = 1; TypeBytes } ]
+            [     => { lex.type_size.0 = 1; TypeByte } ]
             [ s
-                [                         => TypeBytes ] // FIXME: default size?
-                [ (b'1'...b'9') @ bytes32 => TypeBytes ]
+                [                         => TypeByte ] // FIXME: default size?
+                [ (b'1'...b'9') @ bytes32 => TypeByte ]
             ]
         ]
     ]);

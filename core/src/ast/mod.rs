@@ -3,8 +3,10 @@ mod impl_from;
 mod node;
 mod source;
 mod contract;
+mod function;
 mod type_name;
 mod expression;
+mod statement;
 
 use toolshed::list::{List, UnsafeList};
 use toolshed::Arena;
@@ -13,8 +15,10 @@ use std::marker::PhantomData;
 pub use ast::node::{Node, NodeInner};
 pub use ast::source::*;
 pub use ast::contract::*;
+pub use ast::function::*;
 pub use ast::type_name::*;
 pub use ast::expression::*;
+pub use ast::statement::*;
 
 pub type Identifier<'ast> = &'ast str;
 pub type StringLiteral<'ast> = &'ast str;
@@ -29,8 +33,14 @@ pub type IdentifierList<'ast> = NodeList<'ast, Identifier<'ast>>;
 
 /// A Solidity source code parsed to an AST
 pub struct Program<'ast> {
+    /// `SourceUnitList<'ast>` converted to an `UnsafeList` to deal with
+    /// the fact that the `Arena` on which it lives is also in this struct.
     body: UnsafeList,
+
+    /// `Arena` on which the entire AST is allocated.
     arena: Arena,
+
+    /// For lifetime safety :).
     _phantom: PhantomData<SourceUnitList<'ast>>
 }
 

@@ -61,7 +61,7 @@ pub enum Token {
     TypeBool,
     TypeAddress,
     TypeString,
-    TypeBytes,
+    TypeByte,
     TypeInt,
     TypeUint,
     TypeFixed,

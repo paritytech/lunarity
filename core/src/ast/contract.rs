@@ -13,24 +13,23 @@ pub enum ContractPart<'ast> {
     UsingForDeclaration,
     StructDefinition,
     ModifierDefinition,
-    FunctionDefinition,
+    FunctionDefinition(FunctionDefinition<'ast>),
     EventDefinition(EventDefinition<'ast>),
     EnumDefinition,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Visibility {
+pub enum StateVariableVisibility {
     Public,
     Internal,
     Private,
     Constant,
-    Unspecified,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct StateVariableDeclaration<'ast> {
     pub type_name: TypeNameNode<'ast>,
-    pub visibility: Visibility,
+    pub visibility: Option<StateVariableVisibility>,
     pub name: IdentifierNode<'ast>,
     pub init: Option<ExpressionNode<'ast>>,
 }
@@ -55,5 +54,6 @@ pub type ContractPartList<'ast> = NodeList<'ast, ContractPart<'ast>>;
 
 impl_from! {
     StateVariableDeclaration => ContractPart::StateVariableDeclaration,
+    FunctionDefinition => ContractPart::FunctionDefinition,
     EventDefinition => ContractPart::EventDefinition,
 }

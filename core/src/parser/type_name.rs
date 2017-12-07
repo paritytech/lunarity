@@ -12,7 +12,7 @@ impl<'ast> Parser<'ast> {
                 Token::TypeAddress    => ElementaryTypeName::Address,
                 Token::TypeString     => ElementaryTypeName::String,
                 Token::DeclarationVar => ElementaryTypeName::Var,
-                Token::TypeBytes      => ElementaryTypeName::Byte(size.0),
+                Token::TypeByte       => ElementaryTypeName::Byte(size.0),
                 Token::TypeInt        => ElementaryTypeName::Int(size.0),
                 Token::TypeUint       => ElementaryTypeName::Uint(size.0),
                 Token::TypeFixed      => ElementaryTypeName::Fixed(size.0, size.1),

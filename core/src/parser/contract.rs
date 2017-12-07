@@ -40,12 +40,13 @@ impl<'ast> Parser<'ast> {
 
     fn contract_part(&mut self) -> Option<ContractPartNode<'ast>> {
         match self.lexer.token {
-            Token::DeclarationEvent => return self.event_definition(),
+            Token::DeclarationEvent    => return self.event_definition(),
+            Token::DeclarationFunction => return self.function_definition(),
             _ => {},
         }
 
         let type_name  = self.type_name()?;
-        let visibility = self.visibility();
+        let visibility = self.state_variable_visibility();
         let name       = self.expect_str_node(Token::Identifier);
         let end        = self.expect_end(Token::Semicolon);
 
@@ -57,30 +58,18 @@ impl<'ast> Parser<'ast> {
         }))
     }
 
-    fn visibility(&mut self) -> Visibility {
-        match self.lexer.token {
-            Token::KeywordPublic   => {
-                self.lexer.consume();
+    fn state_variable_visibility(&mut self) -> Option<StateVariableVisibility> {
+        let visibility = match self.lexer.token {
+            Token::KeywordPublic   => Some(StateVariableVisibility::Public),
+            Token::KeywordInternal => Some(StateVariableVisibility::Internal),
+            Token::KeywordPrivate  => Some(StateVariableVisibility::Private),
+            Token::KeywordConstant => Some(StateVariableVisibility::Constant),
+            _                      => return None,
+        };
 
-                Visibility::Public
-            },
-            Token::KeywordInternal => {
-                self.lexer.consume();
+        self.lexer.consume();
 
-                Visibility::Internal
-            },
-            Token::KeywordPrivate  => {
-                self.lexer.consume();
-
-                Visibility::Private
-            },
-            Token::KeywordConstant => {
-                self.lexer.consume();
-
-                Visibility::Constant
-            },
-            _ => Visibility::Unspecified,
-        }
+        visibility
     }
 
     fn event_definition(&mut self) -> Option<ContractPartNode<'ast>> {
@@ -254,13 +243,13 @@ mod test {
                 body: m.list([
                     m.node(45, 55, StateVariableDeclaration {
                         type_name: m.node(45, 50, ElementaryTypeName::Int(4)),
-                        visibility: Visibility::Unspecified,
+                        visibility: None,
                         name: m.node(51, 54, "foo"),
                         init: None,
                     }),
                     m.node(72, 92, StateVariableDeclaration {
                         type_name: m.node(72, 79, ElementaryTypeName::Byte(10)),
-                        visibility: Visibility::Public,
+                        visibility: Some(StateVariableVisibility::Public),
                         name: m.node(87, 91, "doge"),
                         init: None,
                     }),

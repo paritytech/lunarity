@@ -3,6 +3,7 @@ mod mock;
 mod source;
 mod type_name;
 mod contract;
+mod function;
 
 use toolshed::Arena;
 use toolshed::list::GrowableList;
