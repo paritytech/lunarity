@@ -5,7 +5,7 @@ pub struct FunctionDefinition<'ast> {
     pub name: Option<IdentifierNode<'ast>>,
     pub params: ParameterList<'ast>,
     pub visibility: Option<FunctionVisibility>,
-    pub state: Option<StateMutability>,
+    pub mutability: Option<StateMutability>,
     pub returns: ParameterList<'ast>,
     pub body: Option<BlockStatement<'ast>>,
 }
