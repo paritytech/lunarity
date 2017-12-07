@@ -15,21 +15,7 @@ impl<'ast> Parser<'ast> {
 
         self.expect(Token::ParenOpen);
 
-        let params = match self.parameter() {
-            Some(param) => {
-                let builder = ListBuilder::new(self.arena, param);
-
-                while self.allow(Token::Comma) {
-                    match self.parameter() {
-                        Some(param) => builder.push(self.arena, param),
-                        None        => self.error(),
-                    }
-                }
-
-                builder.as_list()
-            },
-            None => NodeList::empty(),
-        };
+        let params = self.parameter_list();
 
         self.expect(Token::ParenClose);
 
@@ -52,6 +38,18 @@ impl<'ast> Parser<'ast> {
             }
         }
 
+        let returns;
+
+        if self.allow(Token::KeywordReturns) {
+            self.expect(Token::ParenOpen);
+
+            returns = self.parameter_list();
+
+            self.expect(Token::ParenClose);
+        } else {
+            returns = NodeList::empty();
+        }
+
         let end = self.expect_end(Token::Semicolon);
 
         Some(self.node_at(start, end, FunctionDefinition {
@@ -59,24 +57,42 @@ impl<'ast> Parser<'ast> {
             params,
             visibility,
             mutability,
-            returns: NodeList::empty(),
+            returns,
             body: None,
         }))
     }
 
     #[inline]
-    fn unique_flag<M>(&mut self, marker: M, at: &mut Option<Node<'ast, M>>)
+    fn unique_flag<F>(&mut self, flag: F, at: &mut Option<Node<'ast, F>>)
     where
-        M: Copy,
+        F: Copy,
     {
         if at.is_some() {
-            // TODO: More descriptive error, something like "Can't re-define visibility/mutability"
+            // TODO: More descriptive errors, something like "Can't redeclare visibility/mutability"
             return self.error();
         }
 
-        *at = Some(self.node_at_token(marker));
+        *at = Some(self.node_at_token(flag));
 
         self.lexer.consume();
+    }
+
+    fn parameter_list(&mut self) -> ParameterList<'ast> {
+        match self.parameter() {
+            Some(param) => {
+                let builder = ListBuilder::new(self.arena, param);
+
+                while self.allow(Token::Comma) {
+                    match self.parameter() {
+                        Some(param) => builder.push(self.arena, param),
+                        None        => self.error(),
+                    }
+                }
+
+                builder.as_list()
+            },
+            None => NodeList::empty(),
+        }
     }
 
     fn parameter(&mut self) -> Option<Node<'ast, Parameter<'ast>>> {
@@ -141,6 +157,43 @@ mod test {
         assert_units(r#"
 
             contract Foo {
+                function(uint56, bool);
+            }
+
+        "#, [
+            m.node(14, 82, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 68, FunctionDefinition {
+                        name: None,
+                        params: m.list([
+                            m.node(54, 60, Parameter {
+                                type_name: m.node(54, 60, ElementaryTypeName::Uint(7)),
+                                name: None,
+                            }),
+                            m.node(62, 66, Parameter {
+                                type_name: m.node(62, 66, ElementaryTypeName::Bool),
+                                name: None,
+                            }),
+                        ]),
+                        visibility: None,
+                        mutability: None,
+                        returns: NodeList::empty(),
+                        body: None,
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
+    #[test]
+    fn function_named_parameters() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
                 function doge(uint56 wow, bool moon);
             }
 
@@ -164,6 +217,43 @@ mod test {
                         visibility: None,
                         mutability: None,
                         returns: NodeList::empty(),
+                        body: None,
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
+    #[test]
+    fn function_returns() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                function doge() returns (uint56, bool);
+            }
+
+        "#, [
+            m.node(14, 98, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 84, FunctionDefinition {
+                        name: m.node(54, 58, "doge"),
+                        params: NodeList::empty(),
+                        visibility: None,
+                        mutability: None,
+                        returns: m.list([
+                            m.node(70, 76, Parameter {
+                                type_name: m.node(70, 76, ElementaryTypeName::Uint(7)),
+                                name: None,
+                            }),
+                            m.node(78, 82, Parameter {
+                                type_name: m.node(78, 82, ElementaryTypeName::Bool),
+                                name: None,
+                            }),
+                        ]),
                         body: None,
                     }),
                 ]),
