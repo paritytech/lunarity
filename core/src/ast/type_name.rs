@@ -10,6 +10,19 @@ pub enum TypeName<'ast> {
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
+pub struct VariableDeclaration<'ast> {
+    pub type_name: TypeNameNode<'ast>,
+    pub location: Option<Node<'ast, StorageLocation>>,
+    pub id: IdentifierNode<'ast>,
+}
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum StorageLocation {
+    Memory,
+    Storage,
+}
+
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum ElementaryTypeName {
     Address,
     Bool,
@@ -23,6 +36,8 @@ pub enum ElementaryTypeName {
 }
 
 pub type TypeNameNode<'ast> = Node<'ast, TypeName<'ast>>;
+pub type VariableDeclarationNode<'ast> = Node<'ast, VariableDeclaration<'ast>>;
+pub type VariableDeclarationList<'ast> = NodeList<'ast, VariableDeclaration<'ast>>;
 
 impl<'ast> From<ElementaryTypeName> for TypeName<'ast> {
     #[inline]

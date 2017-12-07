@@ -78,9 +78,7 @@ impl<'ast> Parser<'ast> {
             return self.error();
         }
 
-        *at = Some(self.node_at_token(flag));
-
-        self.lexer.consume();
+        *at = Some(self.node_at_token_then_consume(flag));
     }
 
     fn modifier_invocation(&mut self) -> Option<Node<'ast, ModifierInvocation<'ast>>> {

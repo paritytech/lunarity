@@ -124,7 +124,7 @@ pub const L_B: ByteHandler = Some(|lex| {
         [ y t e
             [     => { lex.type_size.0 = 1; TypeByte } ]
             [ s
-                [                         => TypeByte ] // FIXME: default size?
+                [                         => { lex.type_size.0 = 32; TypeByte } ]
                 [ (b'1'...b'9') @ bytes32 => TypeByte ]
             ]
         ]
@@ -193,7 +193,7 @@ pub const L_F: ByteHandler = Some(|lex| {
                 [ n e y => UnitEther ]    // finney
             ]
             [ x e d
-                [                            => TypeFixed ]
+                [                            => { lex.type_size = (32, 80); TypeFixed } ]
                 [ (b'1'...b'9') @ bits256x80 => TypeFixed ]
             ]
         ]
@@ -225,7 +225,7 @@ pub const L_I: ByteHandler = Some(|lex| {
             [               => ReservedWord ] // in
             [ l i n e       => ReservedWord ] // inline
             [ t
-                [             => TypeInt ]
+                [             => { lex.type_size.0 = 32; TypeInt } ] // int
                 [ e r
                     [ f a c e => DeclarationInterface ]
                     [ n a l   => KeywordInternal ]
@@ -400,11 +400,11 @@ pub const L_U: ByteHandler = Some(|lex| {
     match_label!(lex [
         [ s i n g                        => KeywordUsing ]
         [ i n t
-            [                            => TypeUint ]
+            [                            => { lex.type_size.0 = 32; TypeUint } ]
             [ (b'1'...b'9') @ bits256    => TypeUint ]
         ]
         [ f i x e d
-            [                            => TypeUfixed ]
+            [                            => { lex.type_size = (32, 80); TypeUfixed } ]
             [ (b'1'...b'9') @ bits256x80 => TypeUfixed ]
         ]
     ]);

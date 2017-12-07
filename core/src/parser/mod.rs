@@ -81,11 +81,8 @@ impl<'ast> Parser<'ast> {
     #[inline]
     fn str_node(&mut self) -> Node<'ast, &'ast str> {
         let node = self.lexer.token_as_str();
-        let node = self.node_at_token(node);
 
-        self.lexer.consume();
-
-        node
+        self.node_at_token_then_consume(node)
     }
 
     #[inline]
@@ -110,11 +107,7 @@ impl<'ast> Parser<'ast> {
     #[inline]
     fn allow_flag_node(&mut self, token: Token) -> Option<FlagNode<'ast>> {
         if self.lexer.token == token {
-            let node = self.node_at_token(Flag);
-
-            self.lexer.consume();
-
-            Some(node)
+            Some(self.node_at_token_then_consume(Flag))
         } else {
             None
         }
@@ -150,6 +143,19 @@ impl<'ast> Parser<'ast> {
         let (start, end) = self.lexer.loc();
 
         self.node_at(start, end, item)
+    }
+
+    #[inline]
+    fn node_at_token_then_consume<T, I>(&mut self, item: I) -> Node<'ast, T>
+    where
+        T: Copy,
+        I: Into<T>,
+    {
+        let node = self.node_at_token(item);
+
+        self.lexer.consume();
+
+        node
     }
 
     #[inline]

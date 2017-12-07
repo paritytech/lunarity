@@ -42,6 +42,7 @@ impl<'ast> Parser<'ast> {
         match self.lexer.token {
             Token::DeclarationEvent    => return self.event_definition(),
             Token::KeywordUsing        => return self.using_for_declaration(),
+            Token::DeclarationStruct   => return self.struct_defintion(),
             Token::DeclarationFunction => return self.function_definition(),
             _ => {},
         }
@@ -93,6 +94,38 @@ impl<'ast> Parser<'ast> {
         Some(self.node_at(start, end, UsingForDeclaration {
             id,
             type_name,
+        }))
+    }
+
+    fn struct_defintion(&mut self) -> Option<ContractPartNode<'ast>> {
+        let start = self.lexer.start_then_consume();
+        let name  = self.expect_str_node(Token::Identifier);
+
+        self.expect(Token::BraceOpen);
+
+        let body = match self.variable_declaration() {
+            Some(declaration) => {
+                let builder = ListBuilder::new(self.arena, declaration);
+
+                while let Some(declaration) = self.variable_declaration() {
+                    builder.push(self.arena, declaration);
+                }
+
+                builder.as_list()
+            },
+            None => {
+                // Must have at least one element
+                self.error();
+
+                NodeList::empty()
+            }
+        };
+
+        let end = self.expect_end(Token::BraceClose);
+
+        Some(self.node_at(start, end, StructDefinition {
+            name,
+            body,
         }))
     }
 
@@ -214,6 +247,52 @@ mod test {
             }),
         ]);
     }
+
+
+    #[test]
+    fn struct_defintion() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                struct Doge {
+                    uint wows;
+                    bool memory amaze;
+                    address storage moon;
+                }
+            }
+
+        "#, [
+            m.node(14, 202, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 188, StructDefinition {
+                        name: m.node(52, 56, "Doge"),
+                        body: m.list([
+                            m.node(79, 89, VariableDeclaration {
+                                type_name: m.node(79, 83, ElementaryTypeName::Uint(32)),
+                                location: None,
+                                id: m.node(84, 88, "wows"),
+                            }),
+                            m.node(110, 128, VariableDeclaration {
+                                type_name: m.node(110, 114, ElementaryTypeName::Bool),
+                                location: m.node(115, 121, StorageLocation::Memory),
+                                id: m.node(122, 127, "amaze"),
+                            }),
+                            m.node(149, 170, VariableDeclaration {
+                                type_name: m.node(149, 156, ElementaryTypeName::Address),
+                                location: m.node(157, 164, StorageLocation::Storage),
+                                id: m.node(165, 169, "moon"),
+                            }),
+                        ])
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
 
     #[test]
     fn empty_events() {

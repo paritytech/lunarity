@@ -21,10 +21,25 @@ impl<'ast> Parser<'ast> {
             }
         };
 
-        let node = self.node_at_token(elementary);
+        Some(self.node_at_token_then_consume(elementary))
+    }
 
-        self.lexer.consume();
+    pub fn variable_declaration(&mut self) -> Option<VariableDeclarationNode<'ast>> {
+        let type_name = self.type_name()?;
 
-        Some(node)
+        let location = match self.lexer.token {
+            Token::KeywordStorage => Some(self.node_at_token_then_consume(StorageLocation::Storage)),
+            Token::KeywordMemory  => Some(self.node_at_token_then_consume(StorageLocation::Memory)),
+            _                     => None,
+        };
+
+        let id  = self.expect_str_node(Token::Identifier);
+        let end = self.expect_end(Token::Semicolon);
+
+        Some(self.node_at(type_name.start, end, VariableDeclaration {
+            type_name,
+            location,
+            id,
+        }))
     }
 }

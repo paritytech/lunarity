@@ -11,7 +11,7 @@ pub struct ContractDefinition<'ast> {
 pub enum ContractPart<'ast> {
     StateVariableDeclaration(StateVariableDeclaration<'ast>),
     UsingForDeclaration(UsingForDeclaration<'ast>),
-    StructDefinition,
+    StructDefinition(StructDefinition<'ast>),
     ModifierDefinition,
     FunctionDefinition(FunctionDefinition<'ast>),
     EventDefinition(EventDefinition<'ast>),
@@ -41,6 +41,12 @@ pub struct UsingForDeclaration<'ast> {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
+pub struct StructDefinition<'ast> {
+    pub name: IdentifierNode<'ast>,
+    pub body: VariableDeclarationList<'ast>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct EventDefinition<'ast> {
     pub anonymous: Option<FlagNode<'ast>>,
     pub name: IdentifierNode<'ast>,
@@ -61,6 +67,7 @@ pub type ContractPartList<'ast> = NodeList<'ast, ContractPart<'ast>>;
 impl_from! {
     StateVariableDeclaration => ContractPart::StateVariableDeclaration,
     UsingForDeclaration => ContractPart::UsingForDeclaration,
+    StructDefinition => ContractPart::StructDefinition,
     FunctionDefinition => ContractPart::FunctionDefinition,
     EventDefinition => ContractPart::EventDefinition,
 }
