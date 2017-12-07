@@ -1,4 +1,4 @@
-use toolshed::list::ListBuilder;
+use toolshed::list::{ListBuilder, GrowableList};
 
 use ast::*;
 use parser::Parser;
@@ -21,6 +21,7 @@ impl<'ast> Parser<'ast> {
 
         let mut mutability = None;
         let mut visibility = None;
+        let modifiers = GrowableList::new();
 
         loop {
             match self.lexer.token {
@@ -34,10 +35,14 @@ impl<'ast> Parser<'ast> {
                 Token::KeywordView     => self.unique_flag(StateMutability::View, &mut mutability),
                 Token::KeywordPayable  => self.unique_flag(StateMutability::Payable, &mut mutability),
 
-                _ => break,
+                _ => match self.modifier_invocation() {
+                    Some(modifier) => modifiers.push(self.arena, modifier),
+                    None           => break,
+                }
             }
         }
 
+        let modifiers = modifiers.as_list();
         let returns;
 
         if self.allow(Token::KeywordReturns) {
@@ -57,6 +62,7 @@ impl<'ast> Parser<'ast> {
             params,
             visibility,
             mutability,
+            modifiers,
             returns,
             body: None,
         }))
@@ -75,6 +81,31 @@ impl<'ast> Parser<'ast> {
         *at = Some(self.node_at_token(flag));
 
         self.lexer.consume();
+    }
+
+    fn modifier_invocation(&mut self) -> Option<Node<'ast, ModifierInvocation<'ast>>> {
+        let id = self.allow_str_node(Token::Identifier)?;
+
+        let arguments;
+        let end;
+
+        if self.allow(Token::ParenOpen) {
+            arguments = self.expression_list();
+            end       = self.expect_end(Token::ParenClose);
+        } else {
+            arguments = NodeList::empty();
+            end       = id.end;
+        };
+
+        Some(self.node_at(id.start, end, ModifierInvocation {
+            id,
+            arguments,
+        }))
+    }
+
+    fn expression_list(&mut self) -> ExpressionList<'ast> {
+        // TODO
+        NodeList::empty()
     }
 
     fn parameter_list(&mut self) -> ParameterList<'ast> {
@@ -134,6 +165,7 @@ mod test {
                         params: NodeList::empty(),
                         visibility: None,
                         mutability: None,
+                        modifiers: NodeList::empty(),
                         returns: NodeList::empty(),
                         body: None,
                     }),
@@ -142,6 +174,7 @@ mod test {
                         params: NodeList::empty(),
                         visibility: None,
                         mutability: None,
+                        modifiers: NodeList::empty(),
                         returns: NodeList::empty(),
                         body: None,
                     }),
@@ -179,6 +212,7 @@ mod test {
                         ]),
                         visibility: None,
                         mutability: None,
+                        modifiers: NodeList::empty(),
                         returns: NodeList::empty(),
                         body: None,
                     }),
@@ -216,6 +250,7 @@ mod test {
                         ]),
                         visibility: None,
                         mutability: None,
+                        modifiers: NodeList::empty(),
                         returns: NodeList::empty(),
                         body: None,
                     }),
@@ -244,6 +279,7 @@ mod test {
                         params: NodeList::empty(),
                         visibility: None,
                         mutability: None,
+                        modifiers: NodeList::empty(),
                         returns: m.list([
                             m.node(70, 76, Parameter {
                                 type_name: m.node(70, 76, ElementaryTypeName::Uint(7)),
@@ -284,6 +320,7 @@ mod test {
                         params: NodeList::empty(),
                         visibility: m.node(65, 73, FunctionVisibility::External),
                         mutability: m.node(60, 64, StateMutability::Pure),
+                        modifiers: NodeList::empty(),
                         returns: NodeList::empty(),
                         body: None,
                     }),
@@ -292,6 +329,7 @@ mod test {
                         params: NodeList::empty(),
                         visibility: m.node(107, 115, FunctionVisibility::Internal),
                         mutability: m.node(116, 120, StateMutability::View),
+                        modifiers: NodeList::empty(),
                         returns: NodeList::empty(),
                         body: None,
                     }),
@@ -300,6 +338,7 @@ mod test {
                         params: NodeList::empty(),
                         visibility: m.node(154, 161, FunctionVisibility::Private),
                         mutability: None,
+                        modifiers: NodeList::empty(),
                         returns: NodeList::empty(),
                         body: None,
                     }),
@@ -308,6 +347,49 @@ mod test {
                         params: NodeList::empty(),
                         visibility: None,
                         mutability: m.node(195, 202, StateMutability::Payable),
+                        modifiers: NodeList::empty(),
+                        returns: NodeList::empty(),
+                        body: None,
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
+    #[test]
+    fn function_modifiers() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                function() only_doges such pure moon;
+            }
+
+        "#, [
+            m.node(14, 96, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 82, FunctionDefinition {
+                        name: None,
+                        params: NodeList::empty(),
+                        visibility: None,
+                        mutability: m.node(72, 76, StateMutability::Pure),
+                        modifiers: m.list([
+                            m.node(56, 66, ModifierInvocation {
+                                id: m.node(56, 66, "only_doges"),
+                                arguments: NodeList::empty(),
+                            }),
+                            m.node(67, 71, ModifierInvocation {
+                                id: m.node(67, 71, "such"),
+                                arguments: NodeList::empty(),
+                            }),
+                            m.node(77, 81, ModifierInvocation {
+                                id: m.node(77, 81, "moon"),
+                                arguments: NodeList::empty(),
+                            }),
+                        ]),
                         returns: NodeList::empty(),
                         body: None,
                     }),
@@ -320,6 +402,7 @@ mod test {
     fn function_flags_are_unique_per_kind() {
         use parser::parse;
 
+        // TODO: Better errors
         assert!(parse("contract Foo { function() public public; }").is_err());
         assert!(parse("contract Foo { function() pure pure; }").is_err());
         assert!(parse("contract Foo { function() internal external; }").is_err());
