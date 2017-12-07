@@ -12,7 +12,7 @@ use toolshed::list::{List, UnsafeList};
 use toolshed::Arena;
 use std::marker::PhantomData;
 
-pub use ast::node::{Node, NodeInner};
+pub use ast::node::{Node, NodeInner, OptionalLocation};
 pub use ast::source::*;
 pub use ast::contract::*;
 pub use ast::function::*;
@@ -20,10 +20,16 @@ pub use ast::type_name::*;
 pub use ast::expression::*;
 pub use ast::statement::*;
 
+/// Useful for boolean flags that need location information via FlagNode,
+/// for example: `indexed` or `anonymous`.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Flag;
+
 pub type Identifier<'ast> = &'ast str;
 pub type StringLiteral<'ast> = &'ast str;
 pub type VersionLiteral<'ast> = &'ast str;
 
+pub type FlagNode<'ast> = Node<'ast, Flag>;
 pub type NodeList<'ast, T> = List<'ast, Node<'ast, T>>;
 pub type SourceUnitNode<'ast> = Node<'ast, SourceUnit<'ast>>;
 pub type SourceUnitList<'ast> = NodeList<'ast, SourceUnit<'ast>>;

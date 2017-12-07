@@ -1,4 +1,4 @@
-// use toolshed::list::{ListBuilder, GrowableList};
+use toolshed::list::ListBuilder;
 
 use ast::*;
 use parser::Parser;
@@ -14,6 +14,23 @@ impl<'ast> Parser<'ast> {
         };
 
         self.expect(Token::ParenOpen);
+
+        let params = match self.parameter() {
+            Some(param) => {
+                let builder = ListBuilder::new(self.arena, param);
+
+                while self.allow(Token::Comma) {
+                    match self.parameter() {
+                        Some(param) => builder.push(self.arena, param),
+                        None        => self.error(),
+                    }
+                }
+
+                builder.as_list()
+            },
+            None => NodeList::empty(),
+        };
+
         self.expect(Token::ParenClose);
 
         let mut mutability = None;
@@ -39,7 +56,7 @@ impl<'ast> Parser<'ast> {
 
         Some(self.node_at(start, end, FunctionDefinition {
             name,
-            params: NodeList::empty(),
+            params,
             visibility,
             mutability,
             returns: NodeList::empty(),
@@ -48,14 +65,30 @@ impl<'ast> Parser<'ast> {
     }
 
     #[inline]
-    fn unique_flag<M>(&mut self, marker: M, at: &mut Option<M>) {
+    fn unique_flag<M>(&mut self, marker: M, at: &mut Option<Node<'ast, M>>)
+    where
+        M: Copy,
+    {
         if at.is_some() {
+            // TODO: More descriptive error, something like "Can't re-define visibility/mutability"
             return self.error();
         }
 
-        *at = Some(marker);
+        *at = Some(self.node_at_token(marker));
 
         self.lexer.consume();
+    }
+
+    fn parameter(&mut self) -> Option<Node<'ast, Parameter<'ast>>> {
+        let type_name = self.type_name()?;
+        let name      = self.allow_str_node(Token::Identifier);
+
+        let end = name.end().unwrap_or_else(|| type_name.end);
+
+        Some(self.node_at(type_name.start, end, Parameter {
+            type_name,
+            name,
+        }))
     }
 }
 
@@ -102,6 +135,43 @@ mod test {
     }
 
     #[test]
+    fn function_parameters() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                function doge(uint56 wow, bool moon);
+            }
+
+        "#, [
+            m.node(14, 96, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 82, FunctionDefinition {
+                        name: m.node(54, 58, "doge"),
+                        params: m.list([
+                            m.node(59, 69, Parameter {
+                                type_name: m.node(59, 65, ElementaryTypeName::Uint(7)),
+                                name: m.node(66, 69, "wow"),
+                            }),
+                            m.node(71, 80, Parameter {
+                                type_name: m.node(71, 75, ElementaryTypeName::Bool),
+                                name: m.node(76, 80, "moon"),
+                            }),
+                        ]),
+                        visibility: None,
+                        mutability: None,
+                        returns: NodeList::empty(),
+                        body: None,
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
+    #[test]
     fn function_mutability_and_visibility() {
         let m = Mock::new();
 
@@ -122,23 +192,23 @@ mod test {
                     m.node(45, 74, FunctionDefinition {
                         name: m.node(54, 57, "wow"),
                         params: NodeList::empty(),
-                        visibility: Some(FunctionVisibility::External),
-                        mutability: Some(StateMutability::Pure),
+                        visibility: m.node(65, 73, FunctionVisibility::External),
+                        mutability: m.node(60, 64, StateMutability::Pure),
                         returns: NodeList::empty(),
                         body: None,
                     }),
                     m.node(91, 121, FunctionDefinition {
                         name: m.node(100, 104, "such"),
                         params: NodeList::empty(),
-                        visibility: Some(FunctionVisibility::Internal),
-                        mutability: Some(StateMutability::View),
+                        visibility: m.node(107, 115, FunctionVisibility::Internal),
+                        mutability: m.node(116, 120, StateMutability::View),
                         returns: NodeList::empty(),
                         body: None,
                     }),
                     m.node(138, 162, FunctionDefinition {
                         name: m.node(147, 151, "very"),
                         params: NodeList::empty(),
-                        visibility: Some(FunctionVisibility::Private),
+                        visibility: m.node(154, 161, FunctionVisibility::Private),
                         mutability: None,
                         returns: NodeList::empty(),
                         body: None,
@@ -147,7 +217,7 @@ mod test {
                         name: m.node(188, 192, "much"),
                         params: NodeList::empty(),
                         visibility: None,
-                        mutability: Some(StateMutability::Payable),
+                        mutability: m.node(195, 202, StateMutability::Payable),
                         returns: NodeList::empty(),
                         body: None,
                     }),

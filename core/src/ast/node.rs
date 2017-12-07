@@ -2,6 +2,29 @@ use toolshed::CopyCell;
 use std::ops::Deref;
 use std::fmt::{self, Debug};
 
+pub trait OptionalLocation {
+    fn start(&self) -> Option<u32>;
+    fn end(&self) -> Option<u32>;
+}
+
+impl<'ast, T> OptionalLocation for Option<Node<'ast, T>> {
+    #[inline]
+    fn start(&self) -> Option<u32> {
+        match *self {
+            Some(ref node) => Some(node.start),
+            None           => None,
+        }
+    }
+
+    #[inline]
+    fn end(&self) -> Option<u32> {
+        match *self {
+            Some(ref node) => Some(node.end),
+            None           => None,
+        }
+    }
+}
+
 /// `Node` is a specialized `Cell` that holds a reference to T instead of T.
 /// `Node` has defined lifetime and implements `Defer<Target = T>` for convenience.
 #[derive(Clone, Copy)]

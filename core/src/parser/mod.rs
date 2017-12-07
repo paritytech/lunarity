@@ -98,6 +98,28 @@ impl<'ast> Parser<'ast> {
         node
     }
 
+    #[inline]
+    fn allow_str_node(&mut self, token: Token) -> Option<Node<'ast, &'ast str>> {
+        if self.lexer.token == token {
+            Some(self.str_node())
+        } else {
+            None
+        }
+    }
+
+    #[inline]
+    fn allow_flag_node(&mut self, token: Token) -> Option<FlagNode<'ast>> {
+        if self.lexer.token == token {
+            let node = self.node_at_token(Flag);
+
+            self.lexer.consume();
+
+            Some(node)
+        } else {
+            None
+        }
+    }
+
     fn error(&mut self) {
         self.errors.push(self.lexer.invalid_token());
     }

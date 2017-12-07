@@ -96,7 +96,7 @@ impl<'ast> Parser<'ast> {
 
         self.expect(Token::ParenClose);
 
-        let anonymous = self.allow(Token::KeywordAnonymous);
+        let anonymous = self.allow_flag_node(Token::KeywordAnonymous);
         let end       = self.expect_end(Token::Semicolon);
 
         Some(self.node_at(start, end, EventDefinition {
@@ -108,10 +108,14 @@ impl<'ast> Parser<'ast> {
 
     fn indexed_parameter(&mut self) -> Option<Node<'ast, IndexedParameter<'ast>>> {
         let type_name = self.type_name()?;
-        let indexed   = self.allow(Token::KeywordIndexed);
-        let name      = self.expect_str_node(Token::Identifier);
+        let indexed   = self.allow_flag_node(Token::KeywordIndexed);
+        let name      = self.allow_str_node(Token::Identifier);
 
-        Some(self.node_at(type_name.start, name.end, IndexedParameter {
+        let end = name.end()
+                      .or_else(|| indexed.end())
+                      .unwrap_or_else(|| type_name.end);
+
+        Some(self.node_at(type_name.start, end, IndexedParameter {
             indexed,
             type_name,
             name,
@@ -175,12 +179,12 @@ mod test {
                 inherits: NodeList::empty(),
                 body: m.list([
                     m.node(45, 61, EventDefinition {
-                        anonymous: false,
+                        anonymous: None,
                         name: m.node(51, 58, "Horizon"),
                         params: NodeList::empty(),
                     }),
                     m.node(78, 107, EventDefinition {
-                        anonymous: true,
+                        anonymous: m.node(97, 106, Flag),
                         name: m.node(84, 94, "Alcoholics"),
                         params: NodeList::empty(),
                     }),
@@ -196,6 +200,42 @@ mod test {
         assert_units(r#"
 
             contract Foo {
+                event Horizon(int32 indexed, bool);
+            }
+
+        "#, [
+            m.node(14, 94, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 80, EventDefinition {
+                        anonymous: None,
+                        name: m.node(51, 58, "Horizon"),
+                        params: m.list([
+                            m.node(59, 72, IndexedParameter {
+                                type_name: m.node(59, 64, ElementaryTypeName::Int(4)),
+                                indexed: m.node(65, 72, Flag),
+                                name: None,
+                            }),
+                            m.node(74, 78, IndexedParameter {
+                                indexed: None,
+                                type_name: m.node(74, 78, ElementaryTypeName::Bool),
+                                name: None,
+                            }),
+                        ]),
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
+    #[test]
+    fn event_with_named_parameters() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
                 event Horizon(int32 indexed foo, bool bar);
             }
 
@@ -205,16 +245,16 @@ mod test {
                 inherits: NodeList::empty(),
                 body: m.list([
                     m.node(45, 88, EventDefinition {
-                        anonymous: false,
+                        anonymous: None,
                         name: m.node(51, 58, "Horizon"),
                         params: m.list([
                             m.node(59, 76, IndexedParameter {
-                                indexed: true,
                                 type_name: m.node(59, 64, ElementaryTypeName::Int(4)),
+                                indexed: m.node(65, 72, Flag),
                                 name: m.node(73, 76, "foo"),
                             }),
                             m.node(78, 86, IndexedParameter {
-                                indexed: false,
+                                indexed: None,
                                 type_name: m.node(78, 82, ElementaryTypeName::Bool),
                                 name: m.node(83, 86, "bar"),
                             }),

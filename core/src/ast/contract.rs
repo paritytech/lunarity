@@ -36,16 +36,16 @@ pub struct StateVariableDeclaration<'ast> {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct EventDefinition<'ast> {
-    pub anonymous: bool,
+    pub anonymous: Option<FlagNode<'ast>>,
     pub name: IdentifierNode<'ast>,
     pub params: IndexedParameterList<'ast>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct IndexedParameter<'ast> {
-    pub indexed: bool,
     pub type_name: TypeNameNode<'ast>,
-    pub name: IdentifierNode<'ast>,
+    pub indexed: Option<FlagNode<'ast>>,
+    pub name: Option<IdentifierNode<'ast>>,
 }
 
 pub type IndexedParameterList<'ast> = NodeList<'ast, IndexedParameter<'ast>>;

@@ -4,8 +4,8 @@ use ast::*;
 pub struct FunctionDefinition<'ast> {
     pub name: Option<IdentifierNode<'ast>>,
     pub params: ParameterList<'ast>,
-    pub visibility: Option<FunctionVisibility>,
-    pub mutability: Option<StateMutability>,
+    pub visibility: Option<Node<'ast, FunctionVisibility>>,
+    pub mutability: Option<Node<'ast, StateMutability>>,
     pub returns: ParameterList<'ast>,
     pub body: Option<BlockStatement<'ast>>,
 }
@@ -29,7 +29,7 @@ pub enum StateMutability {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Parameter<'ast> {
     pub type_name: TypeNameNode<'ast>,
-    pub name: IdentifierNode<'ast>,
+    pub name: Option<IdentifierNode<'ast>>,
 }
 
 pub type ParameterList<'ast> = NodeList<'ast, Parameter<'ast>>;
