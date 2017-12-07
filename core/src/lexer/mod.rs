@@ -754,7 +754,7 @@ impl<'arena> Lexer<'arena> {
         }
 
         self.token = if floating < 0 {
-            LiteralDecimal
+            LiteralRational
         } else {
             LiteralInteger
         }
@@ -794,7 +794,7 @@ impl<'arena> Lexer<'arena> {
         if neg { e *= -1; }
 
         self.token = if floating + e < 0 {
-            LiteralDecimal
+            LiteralRational
         } else {
             LiteralInteger
         };
@@ -896,13 +896,13 @@ mod test {
                 (LiteralInteger, "42"),
                 (LiteralHex, "0xDEAD"),
                 (LiteralHex, "0Xdead"),
-                (LiteralDecimal, "3.14"),
+                (LiteralRational, "3.14"),
                 (LiteralInteger, "3.14E+2"),
-                (LiteralDecimal, ".12345"),
+                (LiteralRational, ".12345"),
                 (LiteralInteger, "5.1e2"),
-                (LiteralDecimal, "42e-3"),
+                (LiteralRational, "42e-3"),
                 (LiteralInteger, "500E-1"),
-                (LiteralDecimal, "500.1"),
+                (LiteralRational, "500.1"),
                 (LiteralInteger, "10.000"),
                 (LiteralString, "'foo bar'"),
                 (LiteralString, "\"doge to the moon\""),

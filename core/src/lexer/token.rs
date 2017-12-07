@@ -70,7 +70,7 @@ pub enum Token {
     LiteralFalse,
     LiteralHex,
     LiteralInteger,
-    LiteralDecimal,
+    LiteralRational,
     LiteralString,
     UnitEther,                // wei | szabo | finney | ether
     UnitTime,                 // seconds | minutes | hours | days | weeks | years

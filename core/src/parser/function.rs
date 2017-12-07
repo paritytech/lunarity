@@ -55,7 +55,22 @@ impl<'ast> Parser<'ast> {
             returns = NodeList::empty();
         }
 
-        let end = self.expect_end(Token::Semicolon);
+        let end;
+
+        let block = match self.lexer.token {
+            Token::BraceOpen => {
+                let block = self.block();
+
+                end   = block.end;
+
+                Some(block)
+            },
+            _ => {
+                end   = self.expect_end(Token::Semicolon);
+
+                None
+            }
+        };
 
         Some(self.node_at(start, end, FunctionDefinition {
             name,
@@ -64,7 +79,7 @@ impl<'ast> Parser<'ast> {
             mutability,
             modifiers,
             returns,
-            body: None,
+            block,
         }))
     }
 
@@ -165,7 +180,7 @@ mod test {
                         mutability: None,
                         modifiers: NodeList::empty(),
                         returns: NodeList::empty(),
-                        body: None,
+                        block: None,
                     }),
                     m.node(73, 88, FunctionDefinition {
                         name: m.node(82, 85, "bar"),
@@ -174,7 +189,7 @@ mod test {
                         mutability: None,
                         modifiers: NodeList::empty(),
                         returns: NodeList::empty(),
-                        body: None,
+                        block: None,
                     }),
                 ]),
             }),
@@ -212,7 +227,7 @@ mod test {
                         mutability: None,
                         modifiers: NodeList::empty(),
                         returns: NodeList::empty(),
-                        body: None,
+                        block: None,
                     }),
                 ]),
             }),
@@ -250,7 +265,7 @@ mod test {
                         mutability: None,
                         modifiers: NodeList::empty(),
                         returns: NodeList::empty(),
-                        body: None,
+                        block: None,
                     }),
                 ]),
             }),
@@ -288,7 +303,7 @@ mod test {
                                 name: None,
                             }),
                         ]),
-                        body: None,
+                        block: None,
                     }),
                 ]),
             }),
@@ -320,7 +335,7 @@ mod test {
                         mutability: m.node(60, 64, StateMutability::Pure),
                         modifiers: NodeList::empty(),
                         returns: NodeList::empty(),
-                        body: None,
+                        block: None,
                     }),
                     m.node(91, 121, FunctionDefinition {
                         name: m.node(100, 104, "such"),
@@ -329,7 +344,7 @@ mod test {
                         mutability: m.node(116, 120, StateMutability::View),
                         modifiers: NodeList::empty(),
                         returns: NodeList::empty(),
-                        body: None,
+                        block: None,
                     }),
                     m.node(138, 162, FunctionDefinition {
                         name: m.node(147, 151, "very"),
@@ -338,7 +353,7 @@ mod test {
                         mutability: None,
                         modifiers: NodeList::empty(),
                         returns: NodeList::empty(),
-                        body: None,
+                        block: None,
                     }),
                     m.node(179, 203, FunctionDefinition {
                         name: m.node(188, 192, "much"),
@@ -347,7 +362,7 @@ mod test {
                         mutability: m.node(195, 202, StateMutability::Payable),
                         modifiers: NodeList::empty(),
                         returns: NodeList::empty(),
-                        body: None,
+                        block: None,
                     }),
                 ]),
             }),
@@ -389,7 +404,7 @@ mod test {
                             }),
                         ]),
                         returns: NodeList::empty(),
-                        body: None,
+                        block: None,
                     }),
                 ]),
             }),

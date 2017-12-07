@@ -4,6 +4,8 @@ mod source;
 mod type_name;
 mod contract;
 mod function;
+mod expression;
+mod statement;
 
 use toolshed::Arena;
 use toolshed::list::GrowableList;
