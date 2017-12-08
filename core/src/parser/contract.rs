@@ -40,38 +40,54 @@ impl<'ast> Parser<'ast> {
 
     fn contract_part(&mut self) -> Option<ContractPartNode<'ast>> {
         match self.lexer.token {
-            Token::DeclarationEvent    => return self.event_definition(),
-            Token::KeywordUsing        => return self.using_for_declaration(),
-            Token::DeclarationStruct   => return self.struct_defintion(),
-            Token::DeclarationFunction => return self.function_definition(),
-            _ => {},
+            Token::KeywordUsing        => self.using_for_declaration(),
+            Token::DeclarationStruct   => self.struct_defintion(),
+            Token::DeclarationFunction => self.function_definition(),
+            Token::DeclarationEvent    => self.event_definition(),
+            Token::DeclarationEnum     => self.enum_definition(),
+            _                          => self.state_variable_declaration(),
         }
 
+    }
+
+    fn state_variable_declaration(&mut self) -> Option<ContractPartNode<'ast>> {
         let type_name  = self.type_name()?;
         let visibility = self.state_variable_visibility();
         let name       = self.expect_str_node(Token::Identifier);
-        let end        = self.expect_end(Token::Semicolon);
+
+        let init = if self.allow(Token::Assign) {
+            match self.expression() {
+                None => {
+                    self.error();
+
+                    None
+                },
+                init => init,
+            }
+        } else {
+            None
+        };
+
+        let end = self.expect_end(Token::Semicolon);
 
         self.node_at(type_name.start, end, StateVariableDeclaration {
             type_name,
             visibility,
             name,
-            init: None,
+            init,
         })
     }
 
-    fn state_variable_visibility(&mut self) -> Option<StateVariableVisibility> {
+    fn state_variable_visibility(&mut self) -> Option<Node<'ast, StateVariableVisibility>> {
         let visibility = match self.lexer.token {
-            Token::KeywordPublic   => Some(StateVariableVisibility::Public),
-            Token::KeywordInternal => Some(StateVariableVisibility::Internal),
-            Token::KeywordPrivate  => Some(StateVariableVisibility::Private),
-            Token::KeywordConstant => Some(StateVariableVisibility::Constant),
+            Token::KeywordPublic   => StateVariableVisibility::Public,
+            Token::KeywordInternal => StateVariableVisibility::Internal,
+            Token::KeywordPrivate  => StateVariableVisibility::Private,
+            Token::KeywordConstant => StateVariableVisibility::Constant,
             _                      => return None,
         };
 
-        self.lexer.consume();
-
-        visibility
+        self.node_at_token(visibility)
     }
 
     fn using_for_declaration(&mut self) -> Option<ContractPartNode<'ast>> {
@@ -182,6 +198,32 @@ impl<'ast> Parser<'ast> {
             name,
         })
     }
+
+    fn enum_definition(&mut self) -> Option<ContractPartNode<'ast>> {
+        let start = self.lexer.start_then_consume();
+        let name  = self.expect_str_node(Token::Identifier);
+
+        self.expect(Token::BraceOpen);
+
+        let variants = if let Some(variant) = self.allow_str_node(Token::Identifier) {
+            let builder = ListBuilder::new(self.arena, variant);
+
+            while self.allow(Token::Comma) {
+                builder.push(self.arena, self.expect_str_node(Token::Identifier))
+            }
+
+            builder.as_list()
+        } else {
+            NodeList::empty()
+        };
+
+        let end = self.expect_end(Token::BraceClose);
+
+        self.node_at(start, end, EnumDefinition {
+            name,
+            variants,
+        })
+    }
 }
 
 #[cfg(test)]
@@ -219,6 +261,39 @@ mod test {
                     m.node(106, 111, "Kinda"),
                 ]),
                 body: NodeList::empty(),
+            }),
+        ]);
+    }
+
+    #[test]
+    fn state_variable_declaration() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                int32 foo = 10;
+                bytes10 public doge;
+            }
+
+        "#, [
+            m.node(14, 111, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 60, StateVariableDeclaration {
+                        type_name: m.node(45, 50, ElementaryTypeName::Int(4)),
+                        visibility: None,
+                        name: m.node(51, 54, "foo"),
+                        init: m.node(57, 59, Primitive::IntegerNumber("10")),
+                    }),
+                    m.node(77, 97, StateVariableDeclaration {
+                        type_name: m.node(77, 84, ElementaryTypeName::Byte(10)),
+                        visibility: m.node(85, 91, StateVariableVisibility::Public),
+                        name: m.node(92, 96, "doge"),
+                        init: None,
+                    }),
+                ]),
             }),
         ]);
     }
@@ -402,32 +477,32 @@ mod test {
     }
 
     #[test]
-    fn state_variable_declaration() {
+    fn enum_definition() {
         let m = Mock::new();
 
         assert_units(r#"
 
             contract Foo {
-                int32 foo;
-                bytes10 public doge;
+                enum Empty {}
+                enum Doge { To, The, Moon }
             }
 
         "#, [
-            m.node(14, 106, ContractDefinition {
+            m.node(14, 116, ContractDefinition {
                 name: m.node(23, 26, "Foo"),
                 inherits: NodeList::empty(),
                 body: m.list([
-                    m.node(45, 55, StateVariableDeclaration {
-                        type_name: m.node(45, 50, ElementaryTypeName::Int(4)),
-                        visibility: None,
-                        name: m.node(51, 54, "foo"),
-                        init: None,
+                    m.node(45, 58, EnumDefinition {
+                        name: m.node(50, 55, "Empty"),
+                        variants: NodeList::empty(),
                     }),
-                    m.node(72, 92, StateVariableDeclaration {
-                        type_name: m.node(72, 79, ElementaryTypeName::Byte(10)),
-                        visibility: Some(StateVariableVisibility::Public),
-                        name: m.node(87, 91, "doge"),
-                        init: None,
+                    m.node(75, 102, EnumDefinition {
+                        name: m.node(80, 84, "Doge"),
+                        variants: m.list([
+                            m.node(87, 89, "To"),
+                            m.node(91, 94, "The"),
+                            m.node(96, 100, "Moon"),
+                        ])
                     }),
                 ]),
             }),

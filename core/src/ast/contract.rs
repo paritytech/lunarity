@@ -15,13 +15,13 @@ pub enum ContractPart<'ast> {
     ModifierDefinition,
     FunctionDefinition(FunctionDefinition<'ast>),
     EventDefinition(EventDefinition<'ast>),
-    EnumDefinition,
+    EnumDefinition(EnumDefinition<'ast>),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct StateVariableDeclaration<'ast> {
     pub type_name: TypeNameNode<'ast>,
-    pub visibility: Option<StateVariableVisibility>,
+    pub visibility: Option<Node<'ast, StateVariableVisibility>>,
     pub name: IdentifierNode<'ast>,
     pub init: Option<ExpressionNode<'ast>>,
 }
@@ -60,6 +60,12 @@ pub struct IndexedParameter<'ast> {
     pub name: Option<IdentifierNode<'ast>>,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct EnumDefinition<'ast> {
+    pub name: IdentifierNode<'ast>,
+    pub variants: IdentifierList<'ast>,
+}
+
 pub type IndexedParameterList<'ast> = NodeList<'ast, IndexedParameter<'ast>>;
 pub type ContractPartNode<'ast> = Node<'ast, ContractPart<'ast>>;
 pub type ContractPartList<'ast> = NodeList<'ast, ContractPart<'ast>>;
@@ -70,4 +76,5 @@ impl_from! {
     StructDefinition => ContractPart::StructDefinition,
     FunctionDefinition => ContractPart::FunctionDefinition,
     EventDefinition => ContractPart::EventDefinition,
+    EnumDefinition => ContractPart::EnumDefinition,
 }
