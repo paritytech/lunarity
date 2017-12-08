@@ -45,6 +45,7 @@ impl<'ast> Parser<'ast> {
             Token::BraceOpen      => Some(self.block::<Context, _>()),
             Token::KeywordIf      => self.if_statement::<Context>(),
             Token::KeywordWhile   => self.while_statement::<Context>(),
+            Token::KeywordFor     => self.for_statement::<Context>(),
             Token::DeclarationVar => self.inferred_definition_statement(),
 
             _ => match self.variable_definition_statement() {
@@ -131,11 +132,43 @@ impl<'ast> Parser<'ast> {
 
         self.expect(Token::ParenClose);
 
-        let step = self.block::<Context, _>();
+        let body = expect!(self, self.statement::<Context>());
 
-        self.node_at(start, step.end, WhileStatement {
+        self.node_at(start, body.end, WhileStatement {
             test,
-            step,
+            body,
+        })
+    }
+
+    fn for_statement<Context>(&mut self) -> Option<StatementNode<'ast>>
+    where
+        Context: StatementContext<'ast>,
+    {
+        let start = self.lexer.start_then_consume();
+
+        self.expect(Token::ParenOpen);
+
+        let init  = self.simple_statement();
+
+        if init.is_none() {
+            self.expect(Token::Semicolon);
+        }
+
+        let test = self.expression();
+
+        self.expect(Token::Semicolon);
+
+        let update = self.expression();
+
+        self.expect(Token::ParenClose);
+
+        let body   = expect!(self, self.statement::<Context>());
+
+        self.node_at(start, body.end, ForStatement {
+            init,
+            test,
+            update,
+            body,
         })
     }
 
@@ -413,10 +446,112 @@ mod test {
                             body: m.list([
                                 m.node(82, 161, WhileStatement {
                                     test: m.node(89, 93, Primitive::Bool(true)),
-                                    step: m.node(95, 161, Block {
+                                    body: m.node(95, 161, Block {
                                         body: m.list([
                                             m.stmt_expr(121, 138, 139, "neverStopStopping"),
                                         ]),
+                                    }),
+                                }),
+                            ]),
+                        }),
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
+    #[test]
+    fn for_statement() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                function bar() {
+                    for (uint32 i = 0; i < 9000; i++) {
+                        whatIsThePowerLevel;
+                    }
+                }
+            }
+
+        "#, [
+            m.node(14, 216, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 202, FunctionDefinition {
+                        name: m.node(54, 57, "bar"),
+                        params: NodeList::empty(),
+                        visibility: None,
+                        mutability: None,
+                        modifiers: NodeList::empty(),
+                        returns: NodeList::empty(),
+                        block: m.node(60, 202, Block {
+                            body: m.list([
+                                m.node(82, 184, ForStatement {
+                                    init: m.node(87, 100, VariableDefinitionStatement {
+                                        declaration: m.node(87, 95, VariableDeclaration {
+                                            type_name: m.node(87, 93, ElementaryTypeName::Uint(4)),
+                                            location: None,
+                                            id: m.node(94, 95, "i"),
+                                        }),
+                                        init: m.node(98, 99, Primitive::IntegerNumber("0")),
+                                    }),
+                                    test: m.node(101, 109, BinaryExpression {
+                                        left: m.node(101, 102, "i"),
+                                        operator: m.node(103, 104, BinaryOperator::Lesser),
+                                        right: m.node(104, 109, Primitive::IntegerNumber("9000")),
+                                    }),
+                                    update: m.node(111, 114, PostfixExpression {
+                                        operand: m.node(111, 112, "i"),
+                                        operator: m.node(112, 114, PostfixOperator::Increment),
+                                    }),
+                                    body: m.node(116, 184, Block {
+                                        body: m.list([
+                                            m.stmt_expr(142, 161, 162, "whatIsThePowerLevel"),
+                                        ]),
+                                    }),
+                                }),
+                            ]),
+                        }),
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
+    #[test]
+    fn empty_for_statement() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                function bar() {
+                    for (;;) {}
+                }
+            }
+
+        "#, [
+            m.node(14, 125, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 111, FunctionDefinition {
+                        name: m.node(54, 57, "bar"),
+                        params: NodeList::empty(),
+                        visibility: None,
+                        mutability: None,
+                        modifiers: NodeList::empty(),
+                        returns: NodeList::empty(),
+                        block: m.node(60, 111, Block {
+                            body: m.list([
+                                m.node(82, 93, ForStatement {
+                                    init: None,
+                                    test: None,
+                                    update: None,
+                                    body: m.node(91, 93, Block {
+                                        body: NodeList::empty(),
                                     }),
                                 }),
                             ]),
