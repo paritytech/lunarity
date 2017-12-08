@@ -1,48 +1,52 @@
+use toolshed::list::List;
+
 use ast::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Statement<'ast> {
     PlaceholderStatement,
     VariableDefinitionStatement(VariableDefinitionStatement<'ast>),
-    TupleDeconstructionStatement(TupleDeconstructionStatement<'ast>),
+    InferredDefinitionStatement(InferredDefinitionStatement<'ast>),
     ExpressionStatement(ExpressionNode<'ast>),
-    BlockStatement(BlockStatement<'ast>),
+    BlockStatement(Block<'ast>),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum SimpleStatement<'ast> {
     VariableDefinitionStatement(VariableDefinitionStatement<'ast>),
-    TupleDeconstructionStatement(TupleDeconstructionStatement<'ast>),
+    InferredDefinitionStatement(InferredDefinitionStatement<'ast>),
     ExpressionStatement(ExpressionNode<'ast>),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct BlockStatement<'ast> {
+pub struct Block<'ast> {
     pub body: StatementList<'ast>,
 }
 
+/// explicitly typed, can have storage flag, init is optional
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct VariableDefinitionStatement<'ast> {
     pub declaration: VariableDeclarationNode<'ast>,
     pub init: Option<ExpressionNode<'ast>>,
 }
 
+/// type inferred via `var`, cannot have storage flag, init is mandatory
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct TupleDeconstructionStatement<'ast> {
-    pub ids: IdentifierList<'ast>,
+pub struct InferredDefinitionStatement<'ast> {
+    pub ids: List<'ast, Option<IdentifierNode<'ast>>>,
     pub init: ExpressionNode<'ast>,
 }
 
 pub type StatementNode<'ast> = Node<'ast, Statement<'ast>>;
 pub type StatementList<'ast> = NodeList<'ast, Statement<'ast>>;
-pub type BlockStatementNode<'ast> = Node<'ast, BlockStatement<'ast>>;
+pub type BlockNode<'ast> = Node<'ast, Block<'ast>>;
 
 impl_from! {
     VariableDefinitionStatement => Statement::VariableDefinitionStatement,
     VariableDefinitionStatement => SimpleStatement::VariableDefinitionStatement,
-    TupleDeconstructionStatement => Statement::TupleDeconstructionStatement,
-    TupleDeconstructionStatement => SimpleStatement::TupleDeconstructionStatement,
+    InferredDefinitionStatement => Statement::InferredDefinitionStatement,
+    InferredDefinitionStatement => SimpleStatement::InferredDefinitionStatement,
     ExpressionNode => Statement::ExpressionStatement,
     ExpressionNode => SimpleStatement::ExpressionStatement,
-    BlockStatement => Statement::BlockStatement,
+    Block => Statement::BlockStatement,
 }

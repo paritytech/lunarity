@@ -27,7 +27,6 @@ pub enum ElementaryTypeName {
     Address,
     Bool,
     String,
-    Var,
     Int(u8),
     Uint(u8),
     Byte(u8),

@@ -107,8 +107,12 @@ impl<'ast> Parser<'ast> {
             Some(declaration) => {
                 let builder = ListBuilder::new(self.arena, declaration);
 
+                self.expect(Token::Semicolon);
+
                 while let Some(declaration) = self.variable_declaration() {
                     builder.push(self.arena, declaration);
+
+                    self.expect(Token::Semicolon);
                 }
 
                 builder.as_list()
@@ -271,17 +275,17 @@ mod test {
                     m.node(45, 188, StructDefinition {
                         name: m.node(52, 56, "Doge"),
                         body: m.list([
-                            m.node(79, 89, VariableDeclaration {
+                            m.node(79, 88, VariableDeclaration {
                                 type_name: m.node(79, 83, ElementaryTypeName::Uint(32)),
                                 location: None,
                                 id: m.node(84, 88, "wows"),
                             }),
-                            m.node(110, 128, VariableDeclaration {
+                            m.node(110, 127, VariableDeclaration {
                                 type_name: m.node(110, 114, ElementaryTypeName::Bool),
                                 location: m.node(115, 121, StorageLocation::Memory),
                                 id: m.node(122, 127, "amaze"),
                             }),
-                            m.node(149, 170, VariableDeclaration {
+                            m.node(149, 169, VariableDeclaration {
                                 type_name: m.node(149, 156, ElementaryTypeName::Address),
                                 location: m.node(157, 164, StorageLocation::Storage),
                                 id: m.node(165, 169, "moon"),

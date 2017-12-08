@@ -32,7 +32,7 @@ pub struct Node<'ast, T: 'ast> {
     inner: CopyCell<&'ast NodeInner<T>>
 }
 
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq)]
 pub struct NodeInner<T> {
     pub start: u32,
     pub end: u32,
@@ -89,6 +89,14 @@ impl<'ast, T: 'ast + Debug> Debug for Node<'ast, T> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         Debug::fmt(self.deref(), f)
+    }
+}
+
+impl<T: Debug> Debug for NodeInner<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({}:{}) ", self.start, self.end)?;
+
+        Debug::fmt(&self.value, f)
     }
 }
 

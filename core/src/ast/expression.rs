@@ -8,6 +8,16 @@ pub enum Expression<'ast> {
     PostfixExpression(PostfixExpression<'ast>),
     BinaryExpression(BinaryExpression<'ast>),
     AssignmentExpression(AssignmentExpression<'ast>),
+    TupleExpression(TupleExpression<'ast>),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Primitive<'ast> {
+    Bool(bool),
+    HexNumber(&'ast str),
+    IntegerNumber(&'ast str),
+    RationalNumber(&'ast str),
+    String(&'ast str),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -92,11 +102,8 @@ pub struct AssignmentExpression<'ast> {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Primitive<'ast> {
-    BooleanLiteral(bool),
-    IntegerLiteral(&'ast str),
-    RationalLiteral(&'ast str),
-    StringLiteral(&'ast str),
+pub struct TupleExpression<'ast> {
+    pub expressions: ExpressionList<'ast>,
 }
 
 pub type ExpressionNode<'ast> = Node<'ast, Expression<'ast>>;
@@ -109,4 +116,5 @@ impl_from! {
     PostfixExpression => Expression::PostfixExpression,
     BinaryExpression => Expression::BinaryExpression,
     AssignmentExpression => Expression::AssignmentExpression,
+    TupleExpression => Expression::TupleExpression,
 }

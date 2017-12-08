@@ -11,7 +11,6 @@ impl<'ast> Parser<'ast> {
                 Token::TypeBool       => ElementaryTypeName::Bool,
                 Token::TypeAddress    => ElementaryTypeName::Address,
                 Token::TypeString     => ElementaryTypeName::String,
-                Token::DeclarationVar => ElementaryTypeName::Var,
                 Token::TypeByte       => ElementaryTypeName::Byte(size.0),
                 Token::TypeInt        => ElementaryTypeName::Int(size.0),
                 Token::TypeUint       => ElementaryTypeName::Uint(size.0),
@@ -33,10 +32,9 @@ impl<'ast> Parser<'ast> {
             _                     => None,
         };
 
-        let id  = self.expect_str_node(Token::Identifier);
-        let end = self.expect_end(Token::Semicolon);
+        let id = self.expect_str_node(Token::Identifier);
 
-        Some(self.node_at(type_name.start, end, VariableDeclaration {
+        Some(self.node_at(type_name.start, id.end, VariableDeclaration {
             type_name,
             location,
             id,

@@ -8,7 +8,7 @@ pub struct FunctionDefinition<'ast> {
     pub mutability: Option<Node<'ast, StateMutability>>,
     pub modifiers: ModifierInvocationList<'ast>,
     pub returns: ParameterList<'ast>,
-    pub block: Option<BlockStatementNode<'ast>>,
+    pub block: Option<BlockNode<'ast>>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

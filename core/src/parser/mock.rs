@@ -1,4 +1,5 @@
 use toolshed::Arena;
+use toolshed::list::List;
 
 use ast::*;
 
@@ -22,11 +23,11 @@ impl Mock {
         Node::new(self.arena.alloc(NodeInner::new(start, end, val.into()))).into()
     }
 
-    pub fn list<'a, T, L>(&'a self, list: L) -> NodeList<'a, T> where
+    pub fn list<'a, T, L>(&'a self, list: L) -> List<T> where
         T: 'a + Copy,
-        L: AsRef<[Node<'a, T>]>,
+        L: AsRef<[T]>,
     {
-        NodeList::from_iter(&self.arena, list.as_ref().iter().cloned())
+        List::from_iter(&self.arena, list.as_ref().iter().cloned())
     }
 }
 
