@@ -7,6 +7,7 @@ use lexer::Token;
 impl<'ast> Parser<'ast> {
     pub fn expression(&mut self) -> Option<ExpressionNode<'ast>> {
         let primitive = match self.lexer.token {
+            Token::Identifier      => return self.identifier_expression(),
             Token::ParenOpen       => return self.tuple_expression(),
             Token::LiteralTrue     => Primitive::Bool(true),
             Token::LiteralFalse    => Primitive::Bool(false),
@@ -19,6 +20,12 @@ impl<'ast> Parser<'ast> {
         };
 
         self.node_at_token(primitive)
+    }
+
+    pub fn identifier_expression(&mut self) -> Option<ExpressionNode<'ast>> {
+        let ident = self.lexer.token_as_str();
+
+        self.node_at_token(ident)
     }
 
     #[inline]

@@ -407,6 +407,47 @@ mod test {
     }
 
     #[test]
+    fn function_modifiers_with_arguments() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                function() only(moon, "doges") such() pure;
+            }
+
+        "#, [
+            m.node(14, 102, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 88, FunctionDefinition {
+                        name: None,
+                        params: NodeList::empty(),
+                        visibility: None,
+                        mutability: m.node(83, 87, StateMutability::Pure),
+                        modifiers: m.list([
+                            m.node(56, 75, ModifierInvocation {
+                                id: m.node(56, 60, "only"),
+                                arguments: m.list([
+                                    m.node(61, 65, "moon"),
+                                    m.node(67, 74, Primitive::String("\"doges\"")),
+                                ]),
+                            }),
+                            m.node(76, 82, ModifierInvocation {
+                                id: m.node(76, 80, "such"),
+                                arguments: NodeList::empty(),
+                            }),
+                        ]),
+                        returns: NodeList::empty(),
+                        block: None,
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
+    #[test]
     fn function_flags_are_unique_per_kind() {
         use parser::parse;
 
