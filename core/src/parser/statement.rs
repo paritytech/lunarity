@@ -7,14 +7,15 @@ use lexer::Token;
 impl<'ast> Parser<'ast> {
     pub fn statement(&mut self) -> Option<StatementNode<'ast>> {
         match self.lexer.token {
-            Token::DeclarationVar  => self.inferred_definition_statement(),
-            _                      => self.variable_definition_statement(),
+            Token::DeclarationVar => self.inferred_definition_statement(),
+            _                     => self.variable_definition_statement(),
         }
     }
 
-    pub fn block<B>(&mut self) -> Node<'ast, B>
+    /// `S` should be either `Statement` or `SimpleStatement`
+    pub fn block<S>(&mut self) -> Node<'ast, S>
     where
-        B: From<Block<'ast>> + Copy,
+        S: From<Block<'ast>> + Copy,
     {
         let start = self.lexer.start_then_consume();
         let body  = GrowableList::new();
@@ -30,7 +31,11 @@ impl<'ast> Parser<'ast> {
         })
     }
 
-    fn variable_definition_statement(&mut self) -> Option<StatementNode<'ast>> {
+    /// `S` should be either `Statement` or `SimpleStatement`
+    fn variable_definition_statement<S>(&mut self) -> Option<Node<'ast, S>>
+    where
+        S: From<VariableDefinitionStatement<'ast>> + Copy,
+    {
         let declaration = self.variable_declaration()?;
 
         let init;
@@ -47,13 +52,17 @@ impl<'ast> Parser<'ast> {
 
         let end = self.expect_end(Token::Semicolon);
 
-        Some(self.node_at(declaration.start, end, VariableDefinitionStatement {
+        self.node_at(declaration.start, end, VariableDefinitionStatement {
             declaration,
             init,
-        }))
+        })
     }
 
-    fn inferred_definition_statement(&mut self) -> Option<StatementNode<'ast>> {
+    /// `S` should be either `Statement` or `SimpleStatement`
+    fn inferred_definition_statement<S>(&mut self) -> Option<Node<'ast, S>>
+    where
+        S: From<InferredDefinitionStatement<'ast>> + Copy,
+    {
         let start = self.lexer.start_then_consume();
 
         let ids = if self.allow(Token::ParenOpen) {
@@ -64,13 +73,13 @@ impl<'ast> Parser<'ast> {
 
         self.expect(Token::Assign);
 
-        let init = self.expect_expression()?;
+        let init = expect!(self, self.expression());
         let end  = self.expect_end(Token::Semicolon);
 
-        Some(self.node_at(start, end, InferredDefinitionStatement {
+        self.node_at(start, end, InferredDefinitionStatement {
             ids,
             init,
-        }))
+        })
     }
 
     fn tuple_destructing(&mut self) -> List<'ast, Option<IdentifierNode<'ast>>> {

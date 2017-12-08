@@ -24,9 +24,9 @@ impl<'ast> Parser<'ast> {
         let version = self.lexer.read_pragma();
         let end     = self.expect_end(Token::Semicolon);
 
-        Some(self.node_at(start, end, PragmaDirective {
+        self.node_at(start, end, PragmaDirective {
             version
-        }))
+        })
     }
 
     fn import_directive(&mut self) -> Option<SourceUnitNode<'ast>> {
@@ -38,7 +38,7 @@ impl<'ast> Parser<'ast> {
 
                 None
             },
-            Token::Identifier    => Some(self.str_node()),
+            Token::Identifier    => self.str_node(),
             Token::LiteralString => return self.import_directive_from(start),
             Token::BraceOpen     => return self.import_directive_from_many(start),
             _                    => return None,
@@ -51,11 +51,11 @@ impl<'ast> Parser<'ast> {
         let source = self.expect_str_node(Token::LiteralString);
         let end    = self.expect_end(Token::Semicolon);
 
-        Some(self.node_at(start, end, ImportDirective::From {
+        self.node_at(start, end, ImportDirective::From {
             symbol,
             alias,
             source,
-        }))
+        })
     }
 
     fn import_directive_from(&mut self, start: u32) -> Option<SourceUnitNode<'ast>> {
@@ -63,10 +63,10 @@ impl<'ast> Parser<'ast> {
         let alias  = self.allow_alias();
         let end    = self.expect_end(Token::Semicolon);
 
-        Some(self.node_at(start, end, ImportDirective::Global {
+        self.node_at(start, end, ImportDirective::Global {
             source,
             alias,
-        }))
+        })
     }
 
     fn import_directive_from_many(&mut self, start: u32) -> Option<SourceUnitNode<'ast>> {
@@ -84,10 +84,10 @@ impl<'ast> Parser<'ast> {
         let source = self.expect_str_node(Token::LiteralString);
         let end    = self.expect_end(Token::Semicolon);
 
-        Some(self.node_at(start, end, ImportDirective::ManyFrom {
+        self.node_at(start, end, ImportDirective::ManyFrom {
             imports: imports.as_list(),
             source,
-        }))
+        })
     }
 
     fn import_node(&mut self) -> Node<'ast, Import<'ast>> {

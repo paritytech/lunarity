@@ -18,43 +18,33 @@ impl<'ast> Parser<'ast> {
             _ => return None,
         };
 
-        Some(self.node_at_token_then_consume(primitive))
+        self.node_at_token(primitive)
     }
 
-    /// Same as `expression`, but produces an error on `None` variant. Safe to treat with `?`.
     #[inline]
-    pub fn expect_expression(&mut self) -> Option<ExpressionNode<'ast>> {
-        match self.expression() {
-            None => {
-                self.error();
+    pub fn expression_list(&mut self) -> ExpressionList<'ast> {
+        let builder = match self.expression() {
+            Some(expression) => ListBuilder::new(self.arena, expression),
+            None             => return NodeList::empty(),
+        };
 
-                None
-            },
-            expression => expression,
+        while self.allow(Token::Comma) {
+            match self.expression() {
+                Some(expression) => builder.push(self.arena, expression),
+                None             => self.error(),
+            }
         }
+
+        builder.as_list()
     }
 
     fn tuple_expression(&mut self) -> Option<ExpressionNode<'ast>> {
         let start       = self.lexer.start_then_consume();
+        let expressions = self.expression_list();
+        let end         = self.expect_end(Token::ParenClose);
 
-        let expressions = match self.expression() {
-            Some(expression) => {
-                let builder = ListBuilder::new(self.arena, expression);
-
-                while self.allow(Token::Comma) {
-                    self.expect_expression()
-                        .map(|expression| builder.push(self.arena, expression));
-                }
-
-                builder.as_list()
-            },
-            None => NodeList::empty(),
-        };
-
-        let end = self.expect_end(Token::ParenClose);
-
-        Some(self.node_at(start, end, TupleExpression {
+        self.node_at(start, end, TupleExpression {
             expressions,
-        }))
+        })
     }
 }

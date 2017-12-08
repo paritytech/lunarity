@@ -9,7 +9,7 @@ impl<'ast> Parser<'ast> {
         let start = self.lexer.start_then_consume();
 
         let name = match self.lexer.token {
-            Token::Identifier => Some(self.str_node()),
+            Token::Identifier => self.str_node(),
             _                 => None,
         };
 
@@ -25,15 +25,15 @@ impl<'ast> Parser<'ast> {
 
         loop {
             match self.lexer.token {
-                Token::KeywordExternal => self.unique_flag(FunctionVisibility::External, &mut visibility),
-                Token::KeywordPublic   => self.unique_flag(FunctionVisibility::Public, &mut visibility),
-                Token::KeywordInternal => self.unique_flag(FunctionVisibility::Internal, &mut visibility),
-                Token::KeywordPrivate  => self.unique_flag(FunctionVisibility::Private, &mut visibility),
+                Token::KeywordExternal => self.unique_flag(&mut visibility, FunctionVisibility::External),
+                Token::KeywordPublic   => self.unique_flag(&mut visibility, FunctionVisibility::Public),
+                Token::KeywordInternal => self.unique_flag(&mut visibility, FunctionVisibility::Internal),
+                Token::KeywordPrivate  => self.unique_flag(&mut visibility, FunctionVisibility::Private),
 
-                Token::KeywordPure     => self.unique_flag(StateMutability::Pure, &mut mutability),
-                Token::KeywordConstant => self.unique_flag(StateMutability::Constant, &mut mutability),
-                Token::KeywordView     => self.unique_flag(StateMutability::View, &mut mutability),
-                Token::KeywordPayable  => self.unique_flag(StateMutability::Payable, &mut mutability),
+                Token::KeywordPure     => self.unique_flag(&mut mutability, StateMutability::Pure),
+                Token::KeywordConstant => self.unique_flag(&mut mutability, StateMutability::Constant),
+                Token::KeywordView     => self.unique_flag(&mut mutability, StateMutability::View),
+                Token::KeywordPayable  => self.unique_flag(&mut mutability, StateMutability::Payable),
 
                 _ => match self.modifier_invocation() {
                     Some(modifier) => modifiers.push(self.arena, modifier),
@@ -72,7 +72,7 @@ impl<'ast> Parser<'ast> {
             }
         };
 
-        Some(self.node_at(start, end, FunctionDefinition {
+        self.node_at(start, end, FunctionDefinition {
             name,
             params,
             visibility,
@@ -80,11 +80,11 @@ impl<'ast> Parser<'ast> {
             modifiers,
             returns,
             block,
-        }))
+        })
     }
 
     #[inline]
-    fn unique_flag<F>(&mut self, flag: F, at: &mut Option<Node<'ast, F>>)
+    fn unique_flag<F>(&mut self, at: &mut Option<Node<'ast, F>>, flag: F)
     where
         F: Copy,
     {
@@ -93,7 +93,7 @@ impl<'ast> Parser<'ast> {
             return self.error();
         }
 
-        *at = Some(self.node_at_token_then_consume(flag));
+        *at = self.node_at_token(flag);
     }
 
     fn modifier_invocation(&mut self) -> Option<Node<'ast, ModifierInvocation<'ast>>> {
@@ -110,15 +110,10 @@ impl<'ast> Parser<'ast> {
             end       = id.end;
         };
 
-        Some(self.node_at(id.start, end, ModifierInvocation {
+        self.node_at(id.start, end, ModifierInvocation {
             id,
             arguments,
-        }))
-    }
-
-    fn expression_list(&mut self) -> ExpressionList<'ast> {
-        // TODO
-        NodeList::empty()
+        })
     }
 
     fn parameter_list(&mut self) -> ParameterList<'ast> {
@@ -145,10 +140,10 @@ impl<'ast> Parser<'ast> {
 
         let end = name.end().unwrap_or_else(|| type_name.end);
 
-        Some(self.node_at(type_name.start, end, Parameter {
+        self.node_at(type_name.start, end, Parameter {
             type_name,
             name,
-        }))
+        })
     }
 }
 

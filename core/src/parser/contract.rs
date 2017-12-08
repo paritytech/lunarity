@@ -31,11 +31,11 @@ impl<'ast> Parser<'ast> {
 
         let end = self.expect_end(Token::BraceClose);
 
-        Some(self.node_at(start, end, ContractDefinition {
+        self.node_at(start, end, ContractDefinition {
             name,
             inherits,
             body: builder.as_list(),
-        }))
+        })
     }
 
     fn contract_part(&mut self) -> Option<ContractPartNode<'ast>> {
@@ -52,12 +52,12 @@ impl<'ast> Parser<'ast> {
         let name       = self.expect_str_node(Token::Identifier);
         let end        = self.expect_end(Token::Semicolon);
 
-        Some(self.node_at(type_name.start, end, StateVariableDeclaration {
+        self.node_at(type_name.start, end, StateVariableDeclaration {
             type_name,
             visibility,
             name,
             init: None,
-        }))
+        })
     }
 
     fn state_variable_visibility(&mut self) -> Option<StateVariableVisibility> {
@@ -91,10 +91,10 @@ impl<'ast> Parser<'ast> {
 
         let end = self.expect_end(Token::Semicolon);
 
-        Some(self.node_at(start, end, UsingForDeclaration {
+        self.node_at(start, end, UsingForDeclaration {
             id,
             type_name,
-        }))
+        })
     }
 
     fn struct_defintion(&mut self) -> Option<ContractPartNode<'ast>> {
@@ -127,10 +127,10 @@ impl<'ast> Parser<'ast> {
 
         let end = self.expect_end(Token::BraceClose);
 
-        Some(self.node_at(start, end, StructDefinition {
+        self.node_at(start, end, StructDefinition {
             name,
             body,
-        }))
+        })
     }
 
     fn event_definition(&mut self) -> Option<ContractPartNode<'ast>> {
@@ -160,11 +160,11 @@ impl<'ast> Parser<'ast> {
         let anonymous = self.allow_flag_node(Token::KeywordAnonymous);
         let end       = self.expect_end(Token::Semicolon);
 
-        Some(self.node_at(start, end, EventDefinition {
+        self.node_at(start, end, EventDefinition {
             anonymous,
             name,
             params,
-        }))
+        })
     }
 
     fn indexed_parameter(&mut self) -> Option<Node<'ast, IndexedParameter<'ast>>> {
@@ -176,11 +176,11 @@ impl<'ast> Parser<'ast> {
                       .or_else(|| indexed.end())
                       .unwrap_or_else(|| type_name.end);
 
-        Some(self.node_at(type_name.start, end, IndexedParameter {
+        self.node_at(type_name.start, end, IndexedParameter {
             indexed,
             type_name,
             name,
-        }))
+        })
     }
 }
 

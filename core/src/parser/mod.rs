@@ -1,5 +1,6 @@
-#[cfg(test)]
-mod mock;
+#[cfg(test)] mod mock;
+#[macro_use] mod expect_macro;
+
 mod source;
 mod type_name;
 mod contract;
@@ -28,6 +29,8 @@ pub struct Parser<'ast> {
     /// AST under construction
     body: SourceUnitList<'ast>,
 }
+
+
 
 impl<'ast> Parser<'ast> {
     pub fn new(source: &str, arena: &'ast Arena) -> Self {
@@ -81,26 +84,29 @@ impl<'ast> Parser<'ast> {
     }
 
     #[inline]
-    fn str_node(&mut self) -> Node<'ast, &'ast str> {
+    fn str_node<R>(&mut self) -> R
+    where
+        R: From<Node<'ast, &'ast str>>,
+    {
         let node = self.lexer.token_as_str();
 
-        self.node_at_token_then_consume(node)
+        self.node_at_token(node)
     }
 
     #[inline]
     fn expect_str_node(&mut self, token: Token) -> Node<'ast, &'ast str> {
-        let node = self.lexer.token_as_str();
-        let node = self.node_at_token(node);
+        let val          = self.lexer.token_as_str();
+        let (start, end) = self.lexer.loc();
 
         self.expect(token);
 
-        node
+        self.node_at(start, end, val)
     }
 
     #[inline]
     fn allow_str_node(&mut self, token: Token) -> Option<Node<'ast, &'ast str>> {
         if self.lexer.token == token {
-            Some(self.str_node())
+            self.str_node()
         } else {
             None
         }
@@ -109,7 +115,7 @@ impl<'ast> Parser<'ast> {
     #[inline]
     fn allow_flag_node(&mut self, token: Token) -> Option<FlagNode<'ast>> {
         if self.lexer.token == token {
-            Some(self.node_at_token_then_consume(Flag))
+            self.node_at_token(Flag)
         } else {
             None
         }
@@ -128,36 +134,27 @@ impl<'ast> Parser<'ast> {
     }
 
     #[inline]
-    fn node_at<T, I>(&mut self, start: u32, end: u32, item: I) -> Node<'ast, T>
+    fn node_at<T, I, R>(&mut self, start: u32, end: u32, item: I) -> R
     where
-        T: Copy,
+        T: 'ast + Copy,
         I: Into<T>,
+        R: From<Node<'ast, T>>,
     {
-        self.alloc(NodeInner::new(start, end, item.into()))
+        From::from(self.alloc(NodeInner::new(start, end, item.into())))
     }
 
     #[inline]
-    fn node_at_token<T, I>(&mut self, item: I) -> Node<'ast, T>
+    fn node_at_token<T, I, R>(&mut self, item: I) -> R
     where
-        T: Copy,
+        T: 'ast + Copy,
         I: Into<T>,
+        R: From<Node<'ast, T>>,
     {
         let (start, end) = self.lexer.loc();
 
-        self.node_at(start, end, item)
-    }
-
-    #[inline]
-    fn node_at_token_then_consume<T, I>(&mut self, item: I) -> Node<'ast, T>
-    where
-        T: Copy,
-        I: Into<T>,
-    {
-        let node = self.node_at_token(item);
-
         self.lexer.consume();
 
-        node
+        self.node_at(start, end, item)
     }
 
     #[inline]

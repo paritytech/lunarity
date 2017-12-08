@@ -20,24 +20,24 @@ impl<'ast> Parser<'ast> {
             }
         };
 
-        Some(self.node_at_token_then_consume(elementary))
+        self.node_at_token(elementary)
     }
 
     pub fn variable_declaration(&mut self) -> Option<VariableDeclarationNode<'ast>> {
         let type_name = self.type_name()?;
 
         let location = match self.lexer.token {
-            Token::KeywordStorage => Some(self.node_at_token_then_consume(StorageLocation::Storage)),
-            Token::KeywordMemory  => Some(self.node_at_token_then_consume(StorageLocation::Memory)),
+            Token::KeywordStorage => self.node_at_token(StorageLocation::Storage),
+            Token::KeywordMemory  => self.node_at_token(StorageLocation::Memory),
             _                     => None,
         };
 
         let id = self.expect_str_node(Token::Identifier);
 
-        Some(self.node_at(type_name.start, id.end, VariableDeclaration {
+        self.node_at(type_name.start, id.end, VariableDeclaration {
             type_name,
             location,
             id,
-        }))
+        })
     }
 }
