@@ -42,6 +42,7 @@ impl<'ast> Parser<'ast> {
         match self.lexer.token {
             Token::KeywordUsing        => self.using_for_declaration(),
             Token::DeclarationStruct   => self.struct_defintion(),
+            Token::DeclarationModifier => self.modifier_definition(),
             Token::DeclarationFunction => self.function_definition(),
             Token::DeclarationEvent    => self.event_definition(),
             Token::DeclarationEnum     => self.enum_definition(),
@@ -146,6 +147,44 @@ impl<'ast> Parser<'ast> {
         self.node_at(start, end, StructDefinition {
             name,
             body,
+        })
+    }
+
+    fn modifier_definition(&mut self) -> Option<ContractPartNode<'ast>> {
+        let start = self.lexer.start_then_consume();
+        let name  = self.expect_str_node(Token::Identifier);
+
+        let params;
+
+        if self.allow(Token::ParenOpen) {
+            params = self.parameter_list();
+
+            self.expect(Token::ParenClose);
+        } else {
+            params = NodeList::empty()
+        }
+
+        let block = self.modifier_block();
+
+        self.node_at(start, block.end, ModifierDefinition {
+            name,
+            params,
+            block,
+        })
+    }
+
+    fn modifier_block(&mut self) -> Node<'ast, ModifierBlock<'ast>> {
+        let start = self.expect_start(Token::BraceOpen);
+        let body  = GrowableList::new();
+
+        while let Some(statement) = self.modifier_statement() {
+            body.push(self.arena, statement);
+        }
+
+        let end = self.expect_end(Token::BraceClose);
+
+        self.node_at(start, end, ModifierBlock {
+            body: body.as_list()
         })
     }
 
@@ -327,7 +366,6 @@ mod test {
         ]);
     }
 
-
     #[test]
     fn struct_defintion() {
         let m = Mock::new();
@@ -372,6 +410,61 @@ mod test {
         ]);
     }
 
+    #[test]
+    fn modifier_definition() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                modifier only_doges { _; }
+
+                modifier foo(uint8 bar) {
+                    uint8 baz = bar;
+                    _;
+                }
+            }
+
+        "#, [
+            m.node(14, 206, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 71, ModifierDefinition {
+                        name: m.node(54, 64, "only_doges"),
+                        params: NodeList::empty(),
+                        block: m.node(65, 71, ModifierBlock {
+                            body: m.list([
+                                m.node(67, 69, ModifierStatement::Placeholder),
+                            ]),
+                        }),
+                    }),
+                    m.node(89, 192, ModifierDefinition {
+                        name: m.node(98, 101, "foo"),
+                        params: m.list([
+                            m.node(102, 111, Parameter {
+                                type_name: m.node(102, 107, ElementaryTypeName::Uint(1)),
+                                name: m.node(108, 111, "bar"),
+                            }),
+                        ]),
+                        block: m.node(113, 192, ModifierBlock {
+                            body: m.list([
+                                m.node(135, 151, VariableDefinitionStatement {
+                                    declaration: m.node(135, 144, VariableDeclaration {
+                                        type_name: m.node(135, 140, ElementaryTypeName::Uint(1)),
+                                        location: None,
+                                        id: m.node(141, 144, "baz"),
+                                    }),
+                                    init: m.node(147, 150, "bar"),
+                                }),
+                                m.node(172, 174, ModifierStatement::Placeholder),
+                            ]),
+                        }),
+                    }),
+                ]),
+            }),
+        ]);
+    }
 
     #[test]
     fn empty_events() {

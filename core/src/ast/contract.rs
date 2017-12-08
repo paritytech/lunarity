@@ -12,7 +12,7 @@ pub enum ContractPart<'ast> {
     StateVariableDeclaration(StateVariableDeclaration<'ast>),
     UsingForDeclaration(UsingForDeclaration<'ast>),
     StructDefinition(StructDefinition<'ast>),
-    ModifierDefinition,
+    ModifierDefinition(ModifierDefinition<'ast>),
     FunctionDefinition(FunctionDefinition<'ast>),
     EventDefinition(EventDefinition<'ast>),
     EnumDefinition(EnumDefinition<'ast>),
@@ -47,6 +47,24 @@ pub struct StructDefinition<'ast> {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ModifierDefinition<'ast> {
+    pub name: IdentifierNode<'ast>,
+    pub params: ParameterList<'ast>,
+    pub block: Node<'ast, ModifierBlock<'ast>>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ModifierBlock<'ast> {
+    pub body: ModifierStatementList<'ast>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum ModifierStatement<'ast> {
+    Placeholder,
+    Statement(Statement<'ast>),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct EventDefinition<'ast> {
     pub anonymous: Option<FlagNode<'ast>>,
     pub name: IdentifierNode<'ast>,
@@ -66,14 +84,27 @@ pub struct EnumDefinition<'ast> {
     pub variants: IdentifierList<'ast>,
 }
 
-pub type IndexedParameterList<'ast> = NodeList<'ast, IndexedParameter<'ast>>;
 pub type ContractPartNode<'ast> = Node<'ast, ContractPart<'ast>>;
 pub type ContractPartList<'ast> = NodeList<'ast, ContractPart<'ast>>;
+pub type ModifierStatementNode<'ast> = Node<'ast, ModifierStatement<'ast>>;
+pub type ModifierStatementList<'ast> = NodeList<'ast, ModifierStatement<'ast>>;
+pub type IndexedParameterList<'ast> = NodeList<'ast, IndexedParameter<'ast>>;
+
+impl<'ast, S> From<S> for ModifierStatement<'ast>
+where
+    S: Into<Statement<'ast>>
+{
+    #[inline]
+    fn from(statement: S) -> Self {
+        ModifierStatement::Statement(statement.into())
+    }
+}
 
 impl_from! {
     StateVariableDeclaration => ContractPart::StateVariableDeclaration,
     UsingForDeclaration => ContractPart::UsingForDeclaration,
     StructDefinition => ContractPart::StructDefinition,
+    ModifierDefinition => ContractPart::ModifierDefinition,
     FunctionDefinition => ContractPart::FunctionDefinition,
     EventDefinition => ContractPart::EventDefinition,
     EnumDefinition => ContractPart::EnumDefinition,

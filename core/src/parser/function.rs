@@ -116,7 +116,7 @@ impl<'ast> Parser<'ast> {
         })
     }
 
-    fn parameter_list(&mut self) -> ParameterList<'ast> {
+    pub fn parameter_list(&mut self) -> ParameterList<'ast> {
         match self.parameter() {
             Some(param) => {
                 let builder = ListBuilder::new(self.arena, param);

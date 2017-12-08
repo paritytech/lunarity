@@ -12,10 +12,23 @@ impl<'ast> Parser<'ast> {
         }
     }
 
-    /// `S` should be either `Statement` or `SimpleStatement`
-    pub fn block<S>(&mut self) -> Node<'ast, S>
+    pub fn modifier_statement(&mut self) -> Option<ModifierStatementNode<'ast>> {
+        match self.lexer.token {
+            Token::Identifier if self.lexer.token_as_str() == "_" => {
+                let start = self.lexer.start_then_consume();
+                let end   = self.expect_end(Token::Semicolon);
+
+                self.node_at(start, end, ModifierStatement::Placeholder)
+            },
+            Token::DeclarationVar => self.inferred_definition_statement(),
+            _                     => self.variable_definition_statement(),
+        }
+    }
+
+    /// `B` should be either `Statement` or `Block`
+    pub fn block<B>(&mut self) -> Node<'ast, B>
     where
-        S: From<Block<'ast>> + Copy,
+        B: From<Block<'ast>> + Copy,
     {
         let start = self.lexer.start_then_consume();
         let body  = GrowableList::new();

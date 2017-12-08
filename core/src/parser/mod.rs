@@ -71,14 +71,19 @@ impl<'ast> Parser<'ast> {
     }
 
     #[inline]
+    fn expect_start(&mut self, token: Token) -> u32 {
+        let start = self.lexer.start();
+
+        self.expect(token);
+
+        start
+    }
+
+    #[inline]
     fn expect_end(&mut self, token: Token) -> u32 {
         let end = self.lexer.end();
 
-        if self.lexer.token == token {
-            self.lexer.consume();
-        } else {
-            self.error();
-        }
+        self.expect(token);
 
         end
     }
