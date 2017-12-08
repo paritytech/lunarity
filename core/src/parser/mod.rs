@@ -11,6 +11,8 @@ mod statement;
 use toolshed::Arena;
 use toolshed::list::GrowableList;
 
+pub use parser::statement::{StatementContext, FunctionContext, ModifierContext};
+
 use ast::*;
 use lexer::{Lexer, Token};
 use lexer::Token::*;
@@ -29,8 +31,6 @@ pub struct Parser<'ast> {
     /// AST under construction
     body: SourceUnitList<'ast>,
 }
-
-
 
 impl<'ast> Parser<'ast> {
     pub fn new(source: &str, arena: &'ast Arena) -> Self {
@@ -68,15 +68,6 @@ impl<'ast> Parser<'ast> {
         } else {
             self.error();
         }
-    }
-
-    #[inline]
-    fn expect_start(&mut self, token: Token) -> u32 {
-        let start = self.lexer.start();
-
-        self.expect(token);
-
-        start
     }
 
     #[inline]

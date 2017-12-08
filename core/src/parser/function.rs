@@ -1,7 +1,7 @@
 use toolshed::list::{ListBuilder, GrowableList};
 
 use ast::*;
-use parser::Parser;
+use parser::{Parser, FunctionContext};
 use lexer::Token;
 
 impl<'ast> Parser<'ast> {
@@ -55,21 +55,13 @@ impl<'ast> Parser<'ast> {
             returns = NodeList::empty();
         }
 
-        let end;
-
-        let block = match self.lexer.token {
+        let (end, block) = match self.lexer.token {
             Token::BraceOpen => {
-                let block = self.block();
+                let block = self.block::<FunctionContext, _>();
 
-                end   = block.end;
-
-                Some(block)
+                (block.end, Some(block))
             },
-            _ => {
-                end   = self.expect_end(Token::Semicolon);
-
-                None
-            }
+            _ => (self.expect_end(Token::Semicolon), None),
         };
 
         self.node_at(start, end, FunctionDefinition {

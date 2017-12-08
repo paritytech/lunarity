@@ -1,7 +1,7 @@
 use toolshed::list::{ListBuilder, GrowableList};
 
 use ast::*;
-use parser::Parser;
+use parser::{Parser, ModifierContext};
 use lexer::Token;
 
 impl<'ast> Parser<'ast> {
@@ -164,27 +164,12 @@ impl<'ast> Parser<'ast> {
             params = NodeList::empty()
         }
 
-        let block = self.modifier_block();
+        let block = self.block::<ModifierContext, _>();
 
         self.node_at(start, block.end, ModifierDefinition {
             name,
             params,
             block,
-        })
-    }
-
-    fn modifier_block(&mut self) -> Node<'ast, ModifierBlock<'ast>> {
-        let start = self.expect_start(Token::BraceOpen);
-        let body  = GrowableList::new();
-
-        while let Some(statement) = self.modifier_statement() {
-            body.push(self.arena, statement);
-        }
-
-        let end = self.expect_end(Token::BraceClose);
-
-        self.node_at(start, end, ModifierBlock {
-            body: body.as_list()
         })
     }
 
@@ -433,9 +418,9 @@ mod test {
                     m.node(45, 71, ModifierDefinition {
                         name: m.node(54, 64, "only_doges"),
                         params: NodeList::empty(),
-                        block: m.node(65, 71, ModifierBlock {
+                        block: m.node(65, 71, Block {
                             body: m.list([
-                                m.node(67, 69, ModifierStatement::Placeholder),
+                                m.node(67, 69, Statement::Placeholder),
                             ]),
                         }),
                     }),
@@ -447,7 +432,7 @@ mod test {
                                 name: m.node(108, 111, "bar"),
                             }),
                         ]),
-                        block: m.node(113, 192, ModifierBlock {
+                        block: m.node(113, 192, Block {
                             body: m.list([
                                 m.node(135, 151, VariableDefinitionStatement {
                                     declaration: m.node(135, 144, VariableDeclaration {
@@ -457,7 +442,7 @@ mod test {
                                     }),
                                     init: m.node(147, 150, "bar"),
                                 }),
-                                m.node(172, 174, ModifierStatement::Placeholder),
+                                m.node(172, 174, Statement::Placeholder),
                             ]),
                         }),
                     }),

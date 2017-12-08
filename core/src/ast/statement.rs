@@ -4,13 +4,14 @@ use ast::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Statement<'ast> {
-    PlaceholderStatement,
+    Placeholder,
     VariableDefinitionStatement(VariableDefinitionStatement<'ast>),
     InferredDefinitionStatement(InferredDefinitionStatement<'ast>),
     ExpressionStatement(ExpressionNode<'ast>),
     BlockStatement(Block<'ast>),
 }
 
+/// Used in the `for` loop initialization.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum SimpleStatement<'ast> {
     VariableDefinitionStatement(VariableDefinitionStatement<'ast>),

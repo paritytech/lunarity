@@ -4,36 +4,56 @@ use ast::*;
 use parser::Parser;
 use lexer::Token;
 
-impl<'ast> Parser<'ast> {
-    pub fn statement(&mut self) -> Option<StatementNode<'ast>> {
-        match self.lexer.token {
-            Token::DeclarationVar => self.inferred_definition_statement(),
-            _                     => self.variable_definition_statement(),
+pub trait StatementContext<'ast> {
+    #[inline]
+    fn pre_parse(&mut Parser<'ast>) -> Option<StatementNode<'ast>> {
+        None
+    }
+}
+
+pub struct FunctionContext;
+pub struct ModifierContext;
+
+impl<'ast> StatementContext<'ast> for FunctionContext {}
+impl<'ast> StatementContext<'ast> for ModifierContext {
+    #[inline]
+    fn pre_parse(par: &mut Parser<'ast>) -> Option<StatementNode<'ast>> {
+        if par.lexer.token == Token::Identifier && par.lexer.token_as_str() == "_" {
+            let start = par.lexer.start_then_consume();
+            let end   = par.expect_end(Token::Semicolon);
+
+            par.node_at(start, end, Statement::Placeholder)
+        } else {
+            None
         }
     }
+}
 
-    pub fn modifier_statement(&mut self) -> Option<ModifierStatementNode<'ast>> {
+impl<'ast> Parser<'ast> {
+    pub fn statement<Context>(&mut self) -> Option<StatementNode<'ast>>
+    where
+        Context: StatementContext<'ast>,
+    {
+        if let statement @ Some(_) = Context::pre_parse(self) {
+            return statement;
+        }
+
         match self.lexer.token {
-            Token::Identifier if self.lexer.token_as_str() == "_" => {
-                let start = self.lexer.start_then_consume();
-                let end   = self.expect_end(Token::Semicolon);
-
-                self.node_at(start, end, ModifierStatement::Placeholder)
-            },
             Token::DeclarationVar => self.inferred_definition_statement(),
             _                     => self.variable_definition_statement(),
         }
     }
 
     /// `B` should be either `Statement` or `Block`
-    pub fn block<B>(&mut self) -> Node<'ast, B>
+    pub fn block<Context, B>(&mut self) -> Node<'ast, B>
     where
         B: From<Block<'ast>> + Copy,
+        Context: StatementContext<'ast>,
     {
         let start = self.lexer.start_then_consume();
         let body  = GrowableList::new();
 
-        while let Some(statement) = self.statement() {
+        while let Some(statement) = self.statement::<Context>() {
             body.push(self.arena, statement);
         }
 
