@@ -40,7 +40,11 @@ impl<'ast> Parser<'ast> {
 
         match self.lexer.token {
             Token::DeclarationVar => self.inferred_definition_statement(),
-            _                     => self.variable_definition_statement(),
+
+            _ => match self.variable_definition_statement() {
+                None => self.expression_statement(),
+                node => node,
+            }
         }
     }
 
@@ -62,6 +66,16 @@ impl<'ast> Parser<'ast> {
         self.node_at(start, end, Block {
             body: body.as_list(),
         })
+    }
+
+    fn expression_statement<S>(&mut self) -> Option<Node<'ast, S>>
+    where
+        S: From<ExpressionNode<'ast>> + Copy,
+    {
+        let expression = self.expression()?;
+        let end        = self.expect_end(Token::Semicolon);
+
+        self.node_at(expression.start, end, expression)
     }
 
     /// `S` should be either `Statement` or `SimpleStatement`
@@ -162,6 +176,41 @@ mod test {
                         returns: NodeList::empty(),
                         block: m.node(60, 62, Block {
                             body: NodeList::empty(),
+                        })
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
+    #[test]
+    fn no_placeholder_in_functions() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                function wow() {
+                    _;
+                }
+            }
+
+        "#, [
+            m.node(14, 116, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 102, FunctionDefinition {
+                        name: m.node(54, 57, "wow"),
+                        params: NodeList::empty(),
+                        visibility: None,
+                        mutability: None,
+                        modifiers: NodeList::empty(),
+                        returns: NodeList::empty(),
+                        block: m.node(60, 102, Block {
+                            body: m.list([
+                                m.node::<_, ExpressionNode, _>(82, 84, m.node(82, 83, "_"))
+                            ]),
                         })
                     }),
                 ]),
