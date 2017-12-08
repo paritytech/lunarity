@@ -4,6 +4,9 @@ use ast::*;
 use parser::Parser;
 use lexer::Token;
 
+/// A trait that allows for extra statements to be parsed in a specific context.
+/// In particular, it's used to differentiate between function and modifier
+/// bodies to allow placeholder statements (`_;`) only in the modifier definition.
 pub trait StatementContext<'ast> {
     #[inline]
     fn pre_parse(&mut Parser<'ast>) -> Option<StatementNode<'ast>> {
@@ -41,6 +44,7 @@ impl<'ast> Parser<'ast> {
         match self.lexer.token {
             Token::BraceOpen      => Some(self.block::<Context, _>()),
             Token::KeywordIf      => self.if_statement::<Context>(),
+            Token::KeywordWhile   => self.while_statement::<Context>(),
             Token::DeclarationVar => self.inferred_definition_statement(),
 
             _ => match self.variable_definition_statement() {
@@ -112,6 +116,26 @@ impl<'ast> Parser<'ast> {
             test,
             consequent,
             alternate,
+        })
+    }
+
+    fn while_statement<Context>(&mut self) -> Option<StatementNode<'ast>>
+    where
+        Context: StatementContext<'ast>,
+    {
+        let start = self.lexer.start_then_consume();
+
+        self.expect(Token::ParenOpen);
+
+        let test = expect!(self, self.expression());
+
+        self.expect(Token::ParenClose);
+
+        let step = self.block::<Context, _>();
+
+        self.node_at(start, step.end, WhileStatement {
+            test,
+            step,
         })
     }
 
@@ -351,7 +375,52 @@ mod test {
                                     }),
                                 }),
                             ]),
-                        })
+                        }),
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
+
+    #[test]
+    fn while_statement() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                function bar() {
+                    while (true) {
+                        neverStopStopping;
+                    }
+                }
+            }
+
+        "#, [
+            m.node(14, 193, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 179, FunctionDefinition {
+                        name: m.node(54, 57, "bar"),
+                        params: NodeList::empty(),
+                        visibility: None,
+                        mutability: None,
+                        modifiers: NodeList::empty(),
+                        returns: NodeList::empty(),
+                        block: m.node(60, 179, Block {
+                            body: m.list([
+                                m.node(82, 161, WhileStatement {
+                                    test: m.node(89, 93, Primitive::Bool(true)),
+                                    step: m.node(95, 161, Block {
+                                        body: m.list([
+                                            m.stmt_expr(121, 138, 139, "neverStopStopping"),
+                                        ]),
+                                    }),
+                                }),
+                            ]),
+                        }),
                     }),
                 ]),
             }),

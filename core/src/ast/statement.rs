@@ -7,7 +7,7 @@ pub enum Statement<'ast> {
     /// Only available in modifiers
     Placeholder,
     IfStatement(IfStatement<'ast>),
-    WhileStatement,
+    WhileStatement(WhileStatement<'ast>),
     ForStatement,
     BlockStatement(Block<'ast>),
     InlineAssemblyStatement,
@@ -37,6 +37,12 @@ pub struct IfStatement<'ast> {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
+pub struct WhileStatement<'ast> {
+    pub test: ExpressionNode<'ast>,
+    pub step: StatementNode<'ast>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Block<'ast> {
     pub body: StatementList<'ast>,
 }
@@ -62,6 +68,7 @@ pub type BlockNode<'ast> = Node<'ast, Block<'ast>>;
 
 impl_from! {
     IfStatement => Statement::IfStatement,
+    WhileStatement => Statement::WhileStatement,
     VariableDefinitionStatement => Statement::VariableDefinitionStatement,
     VariableDefinitionStatement => SimpleStatement::VariableDefinitionStatement,
     InferredDefinitionStatement => Statement::InferredDefinitionStatement,
