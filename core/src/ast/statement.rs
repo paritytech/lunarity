@@ -4,11 +4,21 @@ use ast::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Statement<'ast> {
+    /// Only available in modifiers
     Placeholder,
+    IfStatement(IfStatement<'ast>),
+    WhileStatement,
+    ForStatement,
+    BlockStatement(Block<'ast>),
+    InlineAssemblyStatement,
+    DoWhileStatement,
+    ContinueStatement,
+    BreakStatement,
+    ReturnStatement,
+    ThrowStatement,
     VariableDefinitionStatement(VariableDefinitionStatement<'ast>),
     InferredDefinitionStatement(InferredDefinitionStatement<'ast>),
     ExpressionStatement(ExpressionNode<'ast>),
-    BlockStatement(Block<'ast>),
 }
 
 /// Used in the `for` loop initialization.
@@ -17,6 +27,13 @@ pub enum SimpleStatement<'ast> {
     VariableDefinitionStatement(VariableDefinitionStatement<'ast>),
     InferredDefinitionStatement(InferredDefinitionStatement<'ast>),
     ExpressionStatement(ExpressionNode<'ast>),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct IfStatement<'ast> {
+    pub test: ExpressionNode<'ast>,
+    pub consequent: StatementNode<'ast>,
+    pub alternate: Option<StatementNode<'ast>>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -40,9 +57,11 @@ pub struct InferredDefinitionStatement<'ast> {
 
 pub type StatementNode<'ast> = Node<'ast, Statement<'ast>>;
 pub type StatementList<'ast> = NodeList<'ast, Statement<'ast>>;
+pub type SimpleStatementNode<'ast> = Node<'ast, SimpleStatement<'ast>>;
 pub type BlockNode<'ast> = Node<'ast, Block<'ast>>;
 
 impl_from! {
+    IfStatement => Statement::IfStatement,
     VariableDefinitionStatement => Statement::VariableDefinitionStatement,
     VariableDefinitionStatement => SimpleStatement::VariableDefinitionStatement,
     InferredDefinitionStatement => Statement::InferredDefinitionStatement,

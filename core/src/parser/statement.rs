@@ -39,6 +39,19 @@ impl<'ast> Parser<'ast> {
         }
 
         match self.lexer.token {
+            Token::BraceOpen      => Some(self.block::<Context, _>()),
+            Token::KeywordIf      => self.if_statement::<Context>(),
+            Token::DeclarationVar => self.inferred_definition_statement(),
+
+            _ => match self.variable_definition_statement() {
+                None => self.expression_statement(),
+                node => node,
+            }
+        }
+    }
+
+    pub fn simple_statement(&mut self) -> Option<SimpleStatementNode<'ast>> {
+        match self.lexer.token {
             Token::DeclarationVar => self.inferred_definition_statement(),
 
             _ => match self.variable_definition_statement() {
@@ -65,6 +78,40 @@ impl<'ast> Parser<'ast> {
 
         self.node_at(start, end, Block {
             body: body.as_list(),
+        })
+    }
+
+    fn if_statement<Context>(&mut self) -> Option<StatementNode<'ast>>
+    where
+        Context: StatementContext<'ast>,
+    {
+        let start = self.lexer.start_then_consume();
+
+        self.expect(Token::ParenOpen);
+
+        let test = expect!(self, self.expression());
+
+        self.expect(Token::ParenClose);
+
+        let consequent = expect!(self, self.statement::<Context>());
+        let alternate;
+
+        if self.allow(Token::KeywordElse) {
+            alternate = self.statement::<Context>();
+
+            if alternate.is_none() {
+                self.error();
+            }
+        } else {
+            alternate = None;
+        }
+
+        let end = alternate.end().unwrap_or_else(|| consequent.end);
+
+        self.node_at(start, end, IfStatement {
+            test,
+            consequent,
+            alternate,
         })
     }
 
@@ -190,7 +237,7 @@ mod test {
         assert_units(r#"
 
             contract Foo {
-                function wow() {
+                function bar() {
                     _;
                 }
             }
@@ -201,7 +248,7 @@ mod test {
                 inherits: NodeList::empty(),
                 body: m.list([
                     m.node(45, 102, FunctionDefinition {
-                        name: m.node(54, 57, "wow"),
+                        name: m.node(54, 57, "bar"),
                         params: NodeList::empty(),
                         visibility: None,
                         mutability: None,
@@ -209,7 +256,100 @@ mod test {
                         returns: NodeList::empty(),
                         block: m.node(60, 102, Block {
                             body: m.list([
-                                m.node::<_, ExpressionNode, _>(82, 84, m.node(82, 83, "_"))
+                                m.stmt_expr(82, 83, 84,"_")
+                            ]),
+                        })
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
+    #[test]
+    fn if_statement() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                function bar() {
+                    if (true) {
+                        stuff;
+                    }
+
+                    if (true) {
+                        foo;
+                    } else {
+                        bar;
+                    }
+
+                    if (true) {
+                        doge;
+                    } else if (true) {
+                        such;
+                    } else {
+                        moon;
+                    }
+                }
+            }
+
+        "#, [
+            m.node(14, 533, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 519, FunctionDefinition {
+                        name: m.node(54, 57, "bar"),
+                        params: NodeList::empty(),
+                        visibility: None,
+                        mutability: None,
+                        modifiers: NodeList::empty(),
+                        returns: NodeList::empty(),
+                        block: m.node(60, 519, Block {
+                            body: m.list([
+                                m.node(82, 146, IfStatement {
+                                    test: m.node(86, 90, Primitive::Bool(true)),
+                                    consequent: m.node(92, 146, Block {
+                                        body: m.list([
+                                            m.stmt_expr(118, 123, 124, "stuff"),
+                                        ]),
+                                    }),
+                                    alternate: None,
+                                }),
+                                m.node(168, 288, IfStatement {
+                                    test: m.node(172, 176, Primitive::Bool(true)),
+                                    consequent: m.node(178, 230, Block {
+                                        body: m.list([
+                                            m.stmt_expr(204, 207, 208, "foo"),
+                                        ]),
+                                    }),
+                                    alternate: m.node(236, 288, Block {
+                                        body: m.list([
+                                            m.stmt_expr(262, 265, 266, "bar"),
+                                        ]),
+                                    }),
+                                }),
+                                m.node(310, 501, IfStatement {
+                                    test: m.node(314, 318, Primitive::Bool(true)),
+                                    consequent: m.node(320, 373, Block {
+                                        body: m.list([
+                                            m.stmt_expr(346, 350, 351, "doge"),
+                                        ]),
+                                    }),
+                                    alternate: m.node(379, 501, IfStatement {
+                                        test: m.node(383, 387, Primitive::Bool(true)),
+                                        consequent: m.node(389, 442, Block {
+                                            body: m.list([
+                                                m.stmt_expr(415, 419, 420, "such"),
+                                            ]),
+                                        }),
+                                        alternate: m.node(448, 501, Block {
+                                            body: m.list([
+                                                m.stmt_expr(474, 478, 479, "moon"),
+                                            ]),
+                                        }),
+                                    }),
+                                }),
                             ]),
                         })
                     }),
