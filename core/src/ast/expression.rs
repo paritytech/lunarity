@@ -9,6 +9,10 @@ pub enum Expression<'ast> {
     BinaryExpression(BinaryExpression<'ast>),
     AssignmentExpression(AssignmentExpression<'ast>),
     TupleExpression(TupleExpression<'ast>),
+    CallExpression(CallExpression<'ast>),
+    MemberAccessExpression(MemberAccessExpression<'ast>),
+    IndexAccessExpression(IndexAccessExpression<'ast>),
+    ConditionalExpression(ConditionalExpression<'ast>),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -106,6 +110,31 @@ pub struct TupleExpression<'ast> {
     pub expressions: ExpressionList<'ast>,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct CallExpression<'ast> {
+    pub callee: ExpressionNode<'ast>,
+    pub arguments: ExpressionList<'ast>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct MemberAccessExpression<'ast> {
+    pub object: ExpressionNode<'ast>,
+    pub member: IdentifierNode<'ast>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct IndexAccessExpression<'ast> {
+    pub array: ExpressionNode<'ast>,
+    pub index: Option<ExpressionNode<'ast>>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ConditionalExpression<'ast> {
+    pub test: ExpressionNode<'ast>,
+    pub consequent: ExpressionNode<'ast>,
+    pub alternate: ExpressionNode<'ast>,
+}
+
 pub type ExpressionNode<'ast> = Node<'ast, Expression<'ast>>;
 pub type ExpressionList<'ast> = NodeList<'ast, Expression<'ast>>;
 
@@ -117,4 +146,8 @@ impl_from! {
     BinaryExpression => Expression::BinaryExpression,
     AssignmentExpression => Expression::AssignmentExpression,
     TupleExpression => Expression::TupleExpression,
+    CallExpression => Expression::CallExpression,
+    MemberAccessExpression => Expression::MemberAccessExpression,
+    IndexAccessExpression => Expression::IndexAccessExpression,
+    ConditionalExpression => Expression::ConditionalExpression,
 }
