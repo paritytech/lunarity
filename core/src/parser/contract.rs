@@ -1,7 +1,7 @@
 use toolshed::list::{ListBuilder, GrowableList};
 
 use ast::*;
-use parser::{Parser, ModifierContext};
+use parser::{Parser, ModifierContext, TopPrecedence};
 use lexer::Token;
 
 impl<'ast> Parser<'ast> {
@@ -57,7 +57,7 @@ impl<'ast> Parser<'ast> {
         let name       = self.expect_str_node(Token::Identifier);
 
         let init = if self.allow(Token::Assign) {
-            match self.expression() {
+            match self.expression::<TopPrecedence>() {
                 None => {
                     self.error();
 

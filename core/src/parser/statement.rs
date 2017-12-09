@@ -1,7 +1,7 @@
 use toolshed::list::{List, GrowableList, ListBuilder};
 
 use ast::*;
-use parser::Parser;
+use parser::{Parser, TopPrecedence};
 use lexer::Token;
 
 /// A trait that allows for extra statements to be parsed in a specific context.
@@ -94,7 +94,7 @@ impl<'ast> Parser<'ast> {
 
         self.expect(Token::ParenOpen);
 
-        let test = expect!(self, self.expression());
+        let test = expect!(self, self.expression::<TopPrecedence>());
 
         self.expect(Token::ParenClose);
 
@@ -128,7 +128,7 @@ impl<'ast> Parser<'ast> {
 
         self.expect(Token::ParenOpen);
 
-        let test = expect!(self, self.expression());
+        let test = expect!(self, self.expression::<TopPrecedence>());
 
         self.expect(Token::ParenClose);
 
@@ -154,11 +154,11 @@ impl<'ast> Parser<'ast> {
             self.expect(Token::Semicolon);
         }
 
-        let test = self.expression();
+        let test = self.expression::<TopPrecedence>();
 
         self.expect(Token::Semicolon);
 
-        let update = self.expression();
+        let update = self.expression::<TopPrecedence>();
 
         self.expect(Token::ParenClose);
 
@@ -176,7 +176,7 @@ impl<'ast> Parser<'ast> {
     where
         S: From<ExpressionNode<'ast>> + Copy,
     {
-        let expression = self.expression()?;
+        let expression = self.expression::<TopPrecedence>()?;
         let end        = self.expect_end(Token::Semicolon);
 
         self.node_at(expression.start, end, expression)
@@ -192,7 +192,7 @@ impl<'ast> Parser<'ast> {
         let init;
 
         if self.allow(Token::Assign) {
-            init = self.expression();
+            init = self.expression::<TopPrecedence>();
 
             if init.is_none() {
                 self.error();
@@ -224,7 +224,7 @@ impl<'ast> Parser<'ast> {
 
         self.expect(Token::Assign);
 
-        let init = expect!(self, self.expression());
+        let init = expect!(self, self.expression::<TopPrecedence>());
         let end  = self.expect_end(Token::Semicolon);
 
         self.node_at(start, end, InferredDefinitionStatement {
