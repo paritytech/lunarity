@@ -1,3 +1,19 @@
+//!
+//!  Lookup table layout
+//!  ===================
+//!
+//!  EOF    ;      :      ,      .      (      )      {      }      [      ]      =>
+//!  IDENT  BLTIN  CONTR  LIB    IFACE  ENUM   STRUCT MODIF  EVENT  FUNCT  VAR    ANON
+//!  AS     ASM    BREAK  CONST  CONTIN DO     DELETE ELSE   EXTERN FOR    HEX    IF
+//!  INDEX  INTERN IMPORT IS     MAP    MEM    NEW    PAY    PULIC  PRAGMA PRIV   PURE
+//!  RET    RETNS  STORAG SUPER  THIS   THROW  USING  VIEW   WHILE  RESERV T_BOOL T_ADDR
+//!  T_STR  T_BYT  T_INT  T_UINT T_FIX  T_UFIX L_TRUE L_FALS L_HEX  L_INT  L_RAT  L_STR
+//!  U_ETH  U_TIME :=     =:     ++     --     !      ~      *      /      %      **
+//!  +      -      <<     >>     <      <=     >      >=     ==     !=     &      ^
+//!  |      &&     ||     ?      =      +=     -=     *=     /=     %=     <<=    >>=
+//!  &=     ^=     |=     ERRTOK ERREOF
+//!
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Token {
     EndOfProgram,

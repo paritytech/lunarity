@@ -500,7 +500,7 @@ mod test {
                                     test: m.node(101, 109, BinaryExpression {
                                         left: m.node(101, 102, "i"),
                                         operator: m.node(103, 104, BinaryOperator::Lesser),
-                                        right: m.node(104, 109, Primitive::IntegerNumber("9000")),
+                                        right: m.node(105, 109, Primitive::IntegerNumber("9000")),
                                     }),
                                     update: m.node(111, 114, PostfixExpression {
                                         operand: m.node(111, 112, "i"),

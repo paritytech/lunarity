@@ -6,12 +6,14 @@ mod type_name;
 mod contract;
 mod function;
 mod expression;
+mod nested;
 mod statement;
 
 use toolshed::Arena;
 use toolshed::list::GrowableList;
 
 pub use parser::statement::{StatementContext, FunctionContext, ModifierContext};
+pub use parser::nested::*;
 
 use ast::*;
 use lexer::{Lexer, Token};

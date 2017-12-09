@@ -1,11 +1,18 @@
 use toolshed::list::ListBuilder;
 
 use ast::*;
-use parser::Parser;
+use parser::{Parser, B0};
 use lexer::Token;
 
 impl<'ast> Parser<'ast> {
+    #[inline]
     pub fn expression(&mut self) -> Option<ExpressionNode<'ast>> {
+        let expression = self.bound_expression()?;
+
+        self.nested_expression(expression, B0)
+    }
+
+    pub fn bound_expression(&mut self) -> Option<ExpressionNode<'ast>> {
         let primitive = match self.lexer.token {
             Token::Identifier      => return self.identifier_expression(),
             Token::ParenOpen       => return self.tuple_expression(),
