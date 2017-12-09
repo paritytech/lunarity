@@ -51,10 +51,10 @@ precedence!(TopPrecedence, [
     ADD,   SUB,   BSL,   BSR,   LESS,  LSEQ,  GRTR,  GREQ,  EQ,    INEQ,  B_AND, B_XOR,
 //  +      -      <<     >>     <      <=     >      >=     ==     !=     &      ^
 
-    B_OR,  AND,   OR,    _____, _____, _____, _____, _____, _____, _____, _____, _____,
+    B_OR,  AND,   OR,    _____, ASGN,  A_ADD, A_SUB, A_MUL, A_DIV, A_REM, A_BSL, A_BSR,
 //  |      &&     ||     ?      =      +=     -=     *=     /=     %=     <<=    >>=
 
-    _____, _____, _____, _____, _____,
+    A_BAN, A_XOR, A_BOR, _____, _____,
 //  &=     ^=     |=     ERRTOK ERREOF
 ]);
 
@@ -79,6 +79,27 @@ const DEC: NestedHandler = Some(|par, operand| {
 });
 
 
+macro_rules! assign {
+    ($name:ident, $precedence:ident => $op:expr) => {
+        const $name: NestedHandler = {
+            fn handler<'ast>(par: &mut Parser<'ast>, left: ExpressionNode<'ast>) -> Option<ExpressionNode<'ast>> {
+                // TODO: check if left is LValue
+
+                let operator = par.node_at_token($op);
+                let right    = expect!(par, par.expression::<$precedence>());
+
+                par.node_at(left.start, right.end, AssignmentExpression {
+                    operator,
+                    left,
+                    right,
+                })
+            }
+
+            Some(handler)
+        };
+    }
+}
+
 macro_rules! binary {
     ($name:ident, $precedence:ident => $op:expr) => {
         const $name: NestedHandler = {
@@ -97,6 +118,19 @@ macro_rules! binary {
         };
     }
 }
+
+// TODO: Precedence15 on all assigns
+assign!(ASGN ,  TopPrecedence => AssignmentOperator::Plain);
+assign!(A_ADD , TopPrecedence => AssignmentOperator::Addition);
+assign!(A_SUB , TopPrecedence => AssignmentOperator::Subtraction);
+assign!(A_MUL , TopPrecedence => AssignmentOperator::Multiplication);
+assign!(A_DIV , TopPrecedence => AssignmentOperator::Division);
+assign!(A_REM , TopPrecedence => AssignmentOperator::Remainder);
+assign!(A_BSL , TopPrecedence => AssignmentOperator::BitShiftLeft);
+assign!(A_BSR , TopPrecedence => AssignmentOperator::BitShiftRight);
+assign!(A_BAN , TopPrecedence => AssignmentOperator::BitAnd);
+assign!(A_XOR , TopPrecedence => AssignmentOperator::BitXor);
+assign!(A_BOR , TopPrecedence => AssignmentOperator::BitOr);
 
 binary!(OR    , TopPrecedence => BinaryOperator::LogicalOr);      // TODO: Precedence13
 binary!(AND   , TopPrecedence => BinaryOperator::LogicalAnd);     // TODO: Precedence12
