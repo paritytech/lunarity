@@ -388,3 +388,76 @@ impl<'ast> Parser<'ast> {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use parser::mock::{Mock, assert_units};
+
+    #[test]
+    fn operator_precedence() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                function() {
+                    uint a = 2 * 2 + 2;
+                    uint b = 2 + 2 * 2;
+                }
+            }
+
+        "#, [
+            m.node(14, 169, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 155, FunctionDefinition {
+                        name: None,
+                        params: NodeList::empty(),
+                        visibility: None,
+                        mutability: None,
+                        modifiers: NodeList::empty(),
+                        returns: NodeList::empty(),
+                        block: m.node(56, 155, Block {
+                            body: m.list([
+                                m.node(78, 97, VariableDefinitionStatement {
+                                    declaration: m.node(78, 84, VariableDeclaration {
+                                        type_name: m.node(78, 82, ElementaryTypeName::Uint(32)),
+                                        location: None,
+                                        id: m.node(83, 84, "a"),
+                                    }),
+                                    init: m.node(87, 96, BinaryExpression {
+                                        left: m.node(87, 92, BinaryExpression {
+                                            left: m.node(87, 88, Primitive::IntegerNumber("2")),
+                                            operator: m.node(89, 90, BinaryOperator::Multiplication),
+                                            right: m.node(91, 92, Primitive::IntegerNumber("2")),
+                                        }),
+                                        operator: m.node(93, 94, BinaryOperator::Addition),
+                                        right: m.node(95, 96, Primitive::IntegerNumber("2")),
+                                    }),
+                                }),
+                                m.node(118, 137, VariableDefinitionStatement {
+                                    declaration: m.node(118, 124, VariableDeclaration {
+                                        type_name: m.node(118, 122, ElementaryTypeName::Uint(32)),
+                                        location: None,
+                                        id: m.node(123, 124, "b"),
+                                    }),
+                                    init: m.node(127, 136, BinaryExpression {
+                                        left: m.node(127, 128, Primitive::IntegerNumber("2")),
+                                        operator: m.node(129, 130, BinaryOperator::Addition),
+                                        right: m.node(131, 136, BinaryExpression {
+                                            left: m.node(131, 132, Primitive::IntegerNumber("2")),
+                                            operator: m.node(133, 134, BinaryOperator::Multiplication),
+                                            right: m.node(135, 136, Primitive::IntegerNumber("2")),
+                                        }),
+                                    }),
+                                }),
+                            ]),
+                        }),
+                    }),
+                ]),
+            }),
+        ]);
+    }
+}
