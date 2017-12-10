@@ -600,6 +600,106 @@ mod test {
         ]);
     }
 
+
+    #[test]
+    fn assignment_expressions() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                function() {
+                    a = b;
+                    a += b;
+                    a -= b;
+                    a *= b;
+                    a /= b;
+                    a %= b;
+                    a <<= b;
+                    a >>= b;
+                    a &= b;
+                    a ^= b;
+                    a |= b;
+                }
+            }
+
+        "#, [
+            m.node(14, 398, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 384, FunctionDefinition {
+                        name: None,
+                        params: NodeList::empty(),
+                        visibility: None,
+                        mutability: None,
+                        modifiers: NodeList::empty(),
+                        returns: NodeList::empty(),
+                        block: m.node(56, 384, Block {
+                            body: m.list([
+                                m.stmt_expr(78, 83, 84, AssignmentExpression {
+                                    left: m.node(78, 79, "a"),
+                                    operator: m.node(80, 81, AssignmentOperator::Plain),
+                                    right: m.node(82, 83, "b"),
+                                }),
+                                m.stmt_expr(105, 111, 112, AssignmentExpression {
+                                    left: m.node(105, 106, "a"),
+                                    operator: m.node(107, 109, AssignmentOperator::Addition),
+                                    right: m.node(110, 111, "b"),
+                                }),
+                                m.stmt_expr(133, 139, 140, AssignmentExpression {
+                                    left: m.node(133, 134, "a"),
+                                    operator: m.node(135, 137, AssignmentOperator::Subtraction),
+                                    right: m.node(138, 139, "b"),
+                                }),
+                                m.stmt_expr(161, 167, 168, AssignmentExpression {
+                                    left: m.node(161, 162, "a"),
+                                    operator: m.node(163, 165, AssignmentOperator::Multiplication),
+                                    right: m.node(166, 167, "b"),
+                                }),
+                                m.stmt_expr(189, 195, 196, AssignmentExpression {
+                                    left: m.node(189, 190, "a"),
+                                    operator: m.node(191, 193, AssignmentOperator::Division),
+                                    right: m.node(194, 195, "b"),
+                                }),
+                                m.stmt_expr(217, 223, 224, AssignmentExpression {
+                                    left: m.node(217, 218, "a"),
+                                    operator: m.node(219, 221, AssignmentOperator::Remainder),
+                                    right: m.node(222, 223, "b"),
+                                }),
+                                m.stmt_expr(245, 252, 253, AssignmentExpression {
+                                    left: m.node(245, 246, "a"),
+                                    operator: m.node(247, 250, AssignmentOperator::BitShiftLeft),
+                                    right: m.node(251, 252, "b"),
+                                }),
+                                m.stmt_expr(274, 281, 282, AssignmentExpression {
+                                    left: m.node(274, 275, "a"),
+                                    operator: m.node(276, 279, AssignmentOperator::BitShiftRight),
+                                    right: m.node(280, 281, "b"),
+                                }),
+                                m.stmt_expr(303, 309, 310, AssignmentExpression {
+                                    left: m.node(303, 304, "a"),
+                                    operator: m.node(305, 307, AssignmentOperator::BitAnd),
+                                    right: m.node(308, 309, "b"),
+                                }),
+                                m.stmt_expr(331, 337, 338, AssignmentExpression {
+                                    left: m.node(331, 332, "a"),
+                                    operator: m.node(333, 335, AssignmentOperator::BitXor),
+                                    right: m.node(336, 337, "b"),
+                                }),
+                                m.stmt_expr(359, 365, 366, AssignmentExpression {
+                                    left: m.node(359, 360, "a"),
+                                    operator: m.node(361, 363, AssignmentOperator::BitOr),
+                                    right: m.node(364, 365, "b"),
+                                }),
+                            ]),
+                        }),
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
     #[test]
     fn operator_precedence() {
         let m = Mock::new();
