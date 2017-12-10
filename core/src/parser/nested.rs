@@ -232,8 +232,6 @@ const _____: NestedHandler = None;
 const CALL: NestedHandler = Some(|par, callee| {
     par.lexer.consume();
 
-    par.expect(Token::ParenOpen);
-
     let arguments = par.expression_list();
     let end       = par.expect_end(Token::ParenClose);
 
@@ -380,12 +378,11 @@ impl<'ast> Parser<'ast> {
     where
         P: Precedence,
     {
-        loop {
-            match P::get_handler(self.lexer.token).and_then(|handler| handler(self, left)) {
-                Some(node) => left = node,
-                None       => break left,
-            }
+        while let Some(node) = P::get_handler(self.lexer.token).and_then(|handler| handler(self, left)) {
+            left = node;
         }
+
+        left
     }
 }
 
@@ -393,6 +390,215 @@ impl<'ast> Parser<'ast> {
 mod test {
     use super::*;
     use parser::mock::{Mock, assert_units};
+
+
+    #[test]
+    fn nested_expressions() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                function() {
+                    doge.moon;
+                    add(1, 2);
+                    things[1];
+                    solidity++;
+                    solidity--;
+                }
+            }
+
+        "#, [
+            m.node(14, 246, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 232, FunctionDefinition {
+                        name: None,
+                        params: NodeList::empty(),
+                        visibility: None,
+                        mutability: None,
+                        modifiers: NodeList::empty(),
+                        returns: NodeList::empty(),
+                        block: m.node(56, 232, Block {
+                            body: m.list([
+                                m.stmt_expr(78, 87, 88, MemberAccessExpression {
+                                    object: m.node(78, 82, "doge"),
+                                    member: m.node(83, 87, "moon"),
+                                }),
+                                m.stmt_expr(109, 118, 119, CallExpression {
+                                    callee: m.node(109, 112, "add"),
+                                    arguments: m.list([
+                                        m.node(113, 114, Primitive::IntegerNumber("1")),
+                                        m.node(116, 117, Primitive::IntegerNumber("2")),
+                                    ]),
+                                }),
+                                m.stmt_expr(140, 149, 150, IndexAccessExpression {
+                                    array: m.node(140, 146, "things"),
+                                    index: m.node(147, 148, Primitive::IntegerNumber("1")),
+                                }),
+                                m.stmt_expr(171, 181, 182, PostfixExpression {
+                                    operand: m.node(171, 179, "solidity"),
+                                    operator: m.node(179, 181, PostfixOperator::Increment),
+                                }),
+                                m.stmt_expr(203, 213, 214, PostfixExpression {
+                                    operand: m.node(203, 211, "solidity"),
+                                    operator: m.node(211, 213, PostfixOperator::Decrement),
+                                }),
+                            ]),
+                        }),
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
+    #[test]
+    fn binary_expressions() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                function() {
+                    a || b;
+                    a && b;
+                    a == b;
+                    a != b;
+                    a < b;
+                    a <= b;
+                    a > b;
+                    a >= b;
+                    a | b;
+                    a ^ b;
+                    a & b;
+                    a << b;
+                    a >> b;
+                    a + b;
+                    a - b;
+                    a * b;
+                    a / b;
+                    a % b;
+                    a ** b;
+                }
+            }
+
+        "#, [
+            m.node(14, 611, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 597, FunctionDefinition {
+                        name: None,
+                        params: NodeList::empty(),
+                        visibility: None,
+                        mutability: None,
+                        modifiers: NodeList::empty(),
+                        returns: NodeList::empty(),
+                        block: m.node(56, 597, Block {
+                            body: m.list([
+                                m.stmt_expr(78, 84, 85, BinaryExpression {
+                                    left: m.node(78, 79, "a"),
+                                    operator: m.node(80, 82, BinaryOperator::LogicalOr),
+                                    right: m.node(83, 84, "b"),
+                                }),
+                                m.stmt_expr(106, 112, 113, BinaryExpression {
+                                    left: m.node(106, 107, "a"),
+                                    operator: m.node(108, 110, BinaryOperator::LogicalAnd),
+                                    right: m.node(111, 112, "b"),
+                                }),
+                                m.stmt_expr(134, 140, 141, BinaryExpression {
+                                    left: m.node(134, 135, "a"),
+                                    operator: m.node(136, 138, BinaryOperator::Equality),
+                                    right: m.node(139, 140, "b"),
+                                }),
+                                m.stmt_expr(162, 168, 169, BinaryExpression {
+                                    left: m.node(162, 163, "a"),
+                                    operator: m.node(164, 166, BinaryOperator::Inequality),
+                                    right: m.node(167, 168, "b"),
+                                }),
+                                m.stmt_expr(190, 195, 196, BinaryExpression {
+                                    left: m.node(190, 191, "a"),
+                                    operator: m.node(192, 193, BinaryOperator::Lesser),
+                                    right: m.node(194, 195, "b"),
+                                }),
+                                m.stmt_expr(217, 223, 224, BinaryExpression {
+                                    left: m.node(217, 218, "a"),
+                                    operator: m.node(219, 221, BinaryOperator::LesserEquals),
+                                    right: m.node(222, 223, "b"),
+                                }),
+                                m.stmt_expr(245, 250, 251, BinaryExpression {
+                                    left: m.node(245, 246, "a"),
+                                    operator: m.node(247, 248, BinaryOperator::Greater),
+                                    right: m.node(249, 250, "b"),
+                                }),
+                                m.stmt_expr(272, 278, 279, BinaryExpression {
+                                    left: m.node(272, 273, "a"),
+                                    operator: m.node(274, 276, BinaryOperator::GreaterEquals),
+                                    right: m.node(277, 278, "b"),
+                                }),
+                                m.stmt_expr(300, 305, 306, BinaryExpression {
+                                    left: m.node(300, 301, "a"),
+                                    operator: m.node(302, 303, BinaryOperator::BitOr),
+                                    right: m.node(304, 305, "b"),
+                                }),
+                                m.stmt_expr(327, 332, 333, BinaryExpression {
+                                    left: m.node(327, 328, "a"),
+                                    operator: m.node(329, 330, BinaryOperator::BitXor),
+                                    right: m.node(331, 332, "b"),
+                                }),
+                                m.stmt_expr(354, 359, 360, BinaryExpression {
+                                    left: m.node(354, 355, "a"),
+                                    operator: m.node(356, 357, BinaryOperator::BitAnd),
+                                    right: m.node(358, 359, "b"),
+                                }),
+                                m.stmt_expr(381, 387, 388, BinaryExpression {
+                                    left: m.node(381, 382, "a"),
+                                    operator: m.node(383, 385, BinaryOperator::BitShiftLeft),
+                                    right: m.node(386, 387, "b"),
+                                }),
+                                m.stmt_expr(409, 415, 416, BinaryExpression {
+                                    left: m.node(409, 410, "a"),
+                                    operator: m.node(411, 413, BinaryOperator::BitShiftRight),
+                                    right: m.node(414, 415, "b"),
+                                }),
+                                m.stmt_expr(437, 442, 443, BinaryExpression {
+                                    left: m.node(437, 438, "a"),
+                                    operator: m.node(439, 440, BinaryOperator::Addition),
+                                    right: m.node(441, 442, "b"),
+                                }),
+                                m.stmt_expr(464, 469, 470, BinaryExpression {
+                                    left: m.node(464, 465, "a"),
+                                    operator: m.node(466, 467, BinaryOperator::Subtraction),
+                                    right: m.node(468, 469, "b"),
+                                }),
+                                m.stmt_expr(491, 496, 497, BinaryExpression {
+                                    left: m.node(491, 492, "a"),
+                                    operator: m.node(493, 494, BinaryOperator::Multiplication),
+                                    right: m.node(495, 496, "b"),
+                                }),
+                                m.stmt_expr(518, 523, 524, BinaryExpression {
+                                    left: m.node(518, 519, "a"),
+                                    operator: m.node(520, 521, BinaryOperator::Division),
+                                    right: m.node(522, 523, "b"),
+                                }),
+                                m.stmt_expr(545, 550, 551, BinaryExpression {
+                                    left: m.node(545, 546, "a"),
+                                    operator: m.node(547, 548, BinaryOperator::Remainder),
+                                    right: m.node(549, 550, "b"),
+                                }),
+                                m.stmt_expr(572, 578, 579, BinaryExpression {
+                                    left: m.node(572, 573, "a"),
+                                    operator: m.node(574, 576, BinaryOperator::Exponent),
+                                    right: m.node(577, 578, "b"),
+                                }),
+                            ]),
+                        }),
+                    }),
+                ]),
+            }),
+        ]);
+    }
 
     #[test]
     fn operator_precedence() {
