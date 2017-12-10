@@ -32,7 +32,7 @@ impl<'ast> StatementContext<'ast> for ModifierContext {
     #[inline]
     fn pre_parse(par: &mut Parser<'ast>) -> Option<StatementNode<'ast>> {
         match par.lexer.token {
-            Token::Identifier if par.lexer.token_as_str() == "_" => par.token_statement(Statement::Placeholder),
+            Token::Identifier if par.lexer.token_as_str() == "_" => par.token_statement(Placeholder),
             _ => None
         }
     }
@@ -44,8 +44,8 @@ impl<'ast> StatementContext<'ast> for FunctionLoopContext {
     #[inline]
     fn pre_parse(par: &mut Parser<'ast>) -> Option<StatementNode<'ast>> {
         match par.lexer.token {
-            Token::KeywordContinue => par.token_statement(Statement::ContinueStatement),
-            Token::KeywordBreak    => par.token_statement(Statement::BreakStatement),
+            Token::KeywordContinue => par.token_statement(ContinueStatement),
+            Token::KeywordBreak    => par.token_statement(BreakStatement),
             _ => None
         }
     }
@@ -57,9 +57,9 @@ impl<'ast> StatementContext<'ast> for ModifierLoopContext {
     #[inline]
     fn pre_parse(par: &mut Parser<'ast>) -> Option<StatementNode<'ast>> {
         match par.lexer.token {
-            Token::Identifier if par.lexer.token_as_str() == "_" => par.token_statement(Statement::Placeholder),
-            Token::KeywordContinue => par.token_statement(Statement::ContinueStatement),
-            Token::KeywordBreak    => par.token_statement(Statement::BreakStatement),
+            Token::Identifier if par.lexer.token_as_str() == "_" => par.token_statement(Placeholder),
+            Token::KeywordContinue => par.token_statement(ContinueStatement),
+            Token::KeywordBreak    => par.token_statement(BreakStatement),
             _ => None
         }
     }
@@ -80,6 +80,8 @@ impl<'ast> Parser<'ast> {
             Token::KeywordWhile   => self.while_statement::<Context>(),
             Token::KeywordFor     => self.for_statement::<Context>(),
             Token::KeywordDo      => self.do_while_statement::<Context>(),
+            Token::KeywordReturn  => self.return_statement(),
+            Token::KeywordThrow   => self.token_statement(ThrowStatement),
             Token::DeclarationVar => self.inferred_definition_statement(),
 
             _ => match self.variable_definition_statement() {
@@ -236,6 +238,16 @@ impl<'ast> Parser<'ast> {
         self.node_at(start, end, DoWhileStatement {
             body,
             test,
+        })
+    }
+
+    fn return_statement(&mut self) -> Option<StatementNode<'ast>> {
+        let start = self.lexer.start_then_consume();
+        let value = self.expression::<TopPrecedence>();
+        let end   = self.expect_end(Token::Semicolon);
+
+        self.node_at(start, end, ReturnStatement {
+            value,
         })
     }
 
@@ -708,7 +720,7 @@ mod test {
                                     test: m.node(89, 93, Primitive::Bool(true)),
                                     body: m.node(95, 152, Block {
                                         body: m.list([
-                                            m.node(121, 130, Statement::ContinueStatement),
+                                            m.node(121, 130, ContinueStatement),
                                         ]),
                                     }),
                                 }),
@@ -718,7 +730,7 @@ mod test {
                                     update: None,
                                     body: m.node(182, 236, Block {
                                         body: m.list([
-                                            m.node(208, 214, Statement::BreakStatement),
+                                            m.node(208, 214, BreakStatement),
                                         ]),
                                     }),
                                 }),
@@ -753,6 +765,49 @@ mod test {
             }
 
         "#).is_err());
+    }
+
+    #[test]
+    fn return_and_throw_statements() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                function bar() {
+                    throw;
+                    return;
+                    return 100;
+                }
+            }
+
+        "#, [
+            m.node(14, 180, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 166, FunctionDefinition {
+                        name: m.node(54, 57, "bar"),
+                        params: NodeList::empty(),
+                        visibility: None,
+                        mutability: None,
+                        modifiers: NodeList::empty(),
+                        returns: NodeList::empty(),
+                        block: m.node(60, 166, Block {
+                            body: m.list([
+                                m.node(82, 88, ThrowStatement),
+                                m.node(109, 116, ReturnStatement {
+                                    value: None,
+                                }),
+                                m.node(137, 148, ReturnStatement {
+                                    value: m.node(144, 147, Primitive::IntegerNumber("100")),
+                                }),
+                            ]),
+                        }),
+                    }),
+                ]),
+            }),
+        ]);
     }
 
     #[test]

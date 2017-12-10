@@ -14,7 +14,7 @@ pub enum Statement<'ast> {
     DoWhileStatement(DoWhileStatement<'ast>),
     ContinueStatement,
     BreakStatement,
-    ReturnStatement,
+    ReturnStatement(ReturnStatement<'ast>),
     ThrowStatement,
     VariableDefinitionStatement(VariableDefinitionStatement<'ast>),
     InferredDefinitionStatement(InferredDefinitionStatement<'ast>),
@@ -61,6 +61,11 @@ pub struct DoWhileStatement<'ast> {
     pub test: ExpressionNode<'ast>,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ReturnStatement<'ast> {
+    pub value: Option<ExpressionNode<'ast>>,
+}
+
 /// explicitly typed, can have storage flag, init is optional
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct VariableDefinitionStatement<'ast> {
@@ -75,6 +80,8 @@ pub struct InferredDefinitionStatement<'ast> {
     pub init: ExpressionNode<'ast>,
 }
 
+pub use self::Statement::{Placeholder, BreakStatement, ContinueStatement, ThrowStatement};
+
 pub type StatementNode<'ast> = Node<'ast, Statement<'ast>>;
 pub type StatementList<'ast> = NodeList<'ast, Statement<'ast>>;
 pub type SimpleStatementNode<'ast> = Node<'ast, SimpleStatement<'ast>>;
@@ -85,6 +92,7 @@ impl_from! {
     WhileStatement => Statement::WhileStatement,
     ForStatement => Statement::ForStatement,
     DoWhileStatement => Statement::DoWhileStatement,
+    ReturnStatement => Statement::ReturnStatement,
     VariableDefinitionStatement => Statement::VariableDefinitionStatement,
     VariableDefinitionStatement => SimpleStatement::VariableDefinitionStatement,
     InferredDefinitionStatement => Statement::InferredDefinitionStatement,
