@@ -8,6 +8,8 @@ use lexer::Token;
 /// In particular, it's used to differentiate between function and modifier
 /// bodies to allow placeholder statements (`_;`) only in the modifier definition.
 pub trait StatementContext<'ast> {
+    type LoopContext: StatementContext<'ast>;
+
     #[inline]
     fn pre_parse(&mut Parser<'ast>) -> Option<StatementNode<'ast>> {
         None
@@ -17,17 +19,48 @@ pub trait StatementContext<'ast> {
 pub struct FunctionContext;
 pub struct ModifierContext;
 
-impl<'ast> StatementContext<'ast> for FunctionContext {}
+pub struct FunctionLoopContext;
+pub struct ModifierLoopContext;
+
+impl<'ast> StatementContext<'ast> for FunctionContext {
+    type LoopContext = FunctionLoopContext;
+}
+
 impl<'ast> StatementContext<'ast> for ModifierContext {
+    type LoopContext = ModifierLoopContext;
+
     #[inline]
     fn pre_parse(par: &mut Parser<'ast>) -> Option<StatementNode<'ast>> {
-        if par.lexer.token == Token::Identifier && par.lexer.token_as_str() == "_" {
-            let start = par.lexer.start_then_consume();
-            let end   = par.expect_end(Token::Semicolon);
+        match par.lexer.token {
+            Token::Identifier if par.lexer.token_as_str() == "_" => par.token_statement(Statement::Placeholder),
+            _ => None
+        }
+    }
+}
 
-            par.node_at(start, end, Statement::Placeholder)
-        } else {
-            None
+impl<'ast> StatementContext<'ast> for FunctionLoopContext {
+    type LoopContext = Self;
+
+    #[inline]
+    fn pre_parse(par: &mut Parser<'ast>) -> Option<StatementNode<'ast>> {
+        match par.lexer.token {
+            Token::KeywordContinue => par.token_statement(Statement::ContinueStatement),
+            Token::KeywordBreak    => par.token_statement(Statement::BreakStatement),
+            _ => None
+        }
+    }
+}
+
+impl<'ast> StatementContext<'ast> for ModifierLoopContext {
+    type LoopContext = Self;
+
+    #[inline]
+    fn pre_parse(par: &mut Parser<'ast>) -> Option<StatementNode<'ast>> {
+        match par.lexer.token {
+            Token::Identifier if par.lexer.token_as_str() == "_" => par.token_statement(Statement::Placeholder),
+            Token::KeywordContinue => par.token_statement(Statement::ContinueStatement),
+            Token::KeywordBreak    => par.token_statement(Statement::BreakStatement),
+            _ => None
         }
     }
 }
@@ -46,7 +79,7 @@ impl<'ast> Parser<'ast> {
             Token::KeywordIf      => self.if_statement::<Context>(),
             Token::KeywordWhile   => self.while_statement::<Context>(),
             Token::KeywordFor     => self.for_statement::<Context>(),
-            Token::KeywordDo      => self.do_statement::<Context>(),
+            Token::KeywordDo      => self.do_while_statement::<Context>(),
             Token::DeclarationVar => self.inferred_definition_statement(),
 
             _ => match self.variable_definition_statement() {
@@ -85,6 +118,17 @@ impl<'ast> Parser<'ast> {
         self.node_at(start, end, Block {
             body: body.as_list(),
         })
+    }
+
+    #[inline]
+    fn token_statement<S>(&mut self, statement: S) -> Option<StatementNode<'ast>>
+    where
+        S: 'ast + Copy + Into<Statement<'ast>>,
+    {
+        let start = self.lexer.start_then_consume();
+        let end   = self.expect_end(Token::Semicolon);
+
+        self.node_at(start, end, statement)
     }
 
     fn if_statement<Context>(&mut self) -> Option<StatementNode<'ast>>
@@ -133,7 +177,7 @@ impl<'ast> Parser<'ast> {
 
         self.expect(Token::ParenClose);
 
-        let body = expect!(self, self.statement::<Context>());
+        let body = expect!(self, self.statement::<Context::LoopContext>());
 
         self.node_at(start, body.end, WhileStatement {
             test,
@@ -163,7 +207,7 @@ impl<'ast> Parser<'ast> {
 
         self.expect(Token::ParenClose);
 
-        let body = expect!(self, self.statement::<Context>());
+        let body = expect!(self, self.statement::<Context::LoopContext>());
 
         self.node_at(start, body.end, ForStatement {
             init,
@@ -173,12 +217,12 @@ impl<'ast> Parser<'ast> {
         })
     }
 
-    fn do_statement<Context>(&mut self) -> Option<StatementNode<'ast>>
+    fn do_while_statement<Context>(&mut self) -> Option<StatementNode<'ast>>
     where
         Context: StatementContext<'ast>,
     {
         let start = self.lexer.start_then_consume();
-        let body  = expect!(self, self.statement::<Context>());
+        let body  = expect!(self, self.statement::<Context::LoopContext>());
 
         self.expect(Token::KeywordWhile);
         self.expect(Token::ParenOpen);
@@ -626,6 +670,89 @@ mod test {
                 ]),
             }),
         ]);
+    }
+
+    #[test]
+    fn break_and_continue_statements() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                function bar() {
+                    while (true) {
+                        continue;
+                    }
+
+                    for(;;) {
+                        break;
+                    }
+                }
+            }
+
+        "#, [
+            m.node(14, 268, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 254, FunctionDefinition {
+                        name: m.node(54, 57, "bar"),
+                        params: NodeList::empty(),
+                        visibility: None,
+                        mutability: None,
+                        modifiers: NodeList::empty(),
+                        returns: NodeList::empty(),
+                        block: m.node(60, 254, Block {
+                            body: m.list([
+                                m.node(82, 152, WhileStatement {
+                                    test: m.node(89, 93, Primitive::Bool(true)),
+                                    body: m.node(95, 152, Block {
+                                        body: m.list([
+                                            m.node(121, 130, Statement::ContinueStatement),
+                                        ]),
+                                    }),
+                                }),
+                                m.node(174, 236, ForStatement {
+                                    init: None,
+                                    test: None,
+                                    update: None,
+                                    body: m.node(182, 236, Block {
+                                        body: m.list([
+                                            m.node(208, 214, Statement::BreakStatement),
+                                        ]),
+                                    }),
+                                }),
+                            ]),
+                        }),
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
+    #[test]
+    fn cannot_use_break_or_continue_outside_loops() {
+        use parser::parse;
+
+        assert!(parse(r#"
+
+            contract Foo {
+                function bar() {
+                    continue;
+                }
+            }
+
+        "#).is_err());
+
+        assert!(parse(r#"
+
+            contract Foo {
+                function bar() {
+                    break;
+                }
+            }
+
+        "#).is_err());
     }
 
     #[test]
