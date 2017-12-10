@@ -11,7 +11,7 @@ pub enum Statement<'ast> {
     ForStatement(ForStatement<'ast>),
     BlockStatement(Block<'ast>),
     InlineAssemblyStatement,
-    DoWhileStatement,
+    DoWhileStatement(DoWhileStatement<'ast>),
     ContinueStatement,
     BreakStatement,
     ReturnStatement,
@@ -55,6 +55,12 @@ pub struct Block<'ast> {
     pub body: StatementList<'ast>,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct DoWhileStatement<'ast> {
+    pub body: StatementNode<'ast>,
+    pub test: ExpressionNode<'ast>,
+}
+
 /// explicitly typed, can have storage flag, init is optional
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct VariableDefinitionStatement<'ast> {
@@ -78,6 +84,7 @@ impl_from! {
     IfStatement => Statement::IfStatement,
     WhileStatement => Statement::WhileStatement,
     ForStatement => Statement::ForStatement,
+    DoWhileStatement => Statement::DoWhileStatement,
     VariableDefinitionStatement => Statement::VariableDefinitionStatement,
     VariableDefinitionStatement => SimpleStatement::VariableDefinitionStatement,
     InferredDefinitionStatement => Statement::InferredDefinitionStatement,

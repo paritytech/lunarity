@@ -46,6 +46,7 @@ impl<'ast> Parser<'ast> {
             Token::KeywordIf      => self.if_statement::<Context>(),
             Token::KeywordWhile   => self.while_statement::<Context>(),
             Token::KeywordFor     => self.for_statement::<Context>(),
+            Token::KeywordDo      => self.do_statement::<Context>(),
             Token::DeclarationVar => self.inferred_definition_statement(),
 
             _ => match self.variable_definition_statement() {
@@ -162,13 +163,35 @@ impl<'ast> Parser<'ast> {
 
         self.expect(Token::ParenClose);
 
-        let body   = expect!(self, self.statement::<Context>());
+        let body = expect!(self, self.statement::<Context>());
 
         self.node_at(start, body.end, ForStatement {
             init,
             test,
             update,
             body,
+        })
+    }
+
+    fn do_statement<Context>(&mut self) -> Option<StatementNode<'ast>>
+    where
+        Context: StatementContext<'ast>,
+    {
+        let start = self.lexer.start_then_consume();
+        let body  = expect!(self, self.statement::<Context>());
+
+        self.expect(Token::KeywordWhile);
+        self.expect(Token::ParenOpen);
+
+        let test = expect!(self, self.expression::<TopPrecedence>());
+
+        self.expect(Token::ParenClose);
+
+        let end = self.expect_end(Token::Semicolon);
+
+        self.node_at(start, end, DoWhileStatement {
+            body,
+            test,
         })
     }
 
@@ -415,7 +438,6 @@ mod test {
         ]);
     }
 
-
     #[test]
     fn while_statement() {
         let m = Mock::new();
@@ -553,6 +575,50 @@ mod test {
                                     body: m.node(91, 93, Block {
                                         body: NodeList::empty(),
                                     }),
+                                }),
+                            ]),
+                        }),
+                    }),
+                ]),
+            }),
+        ]);
+    }
+
+    #[test]
+    fn do_while_statement() {
+        let m = Mock::new();
+
+        assert_units(r#"
+
+            contract Foo {
+                function bar() {
+                    do {
+                        neverStopStopping;
+                    } while (true);
+                }
+            }
+
+        "#, [
+            m.node(14, 197, ContractDefinition {
+                name: m.node(23, 26, "Foo"),
+                inherits: NodeList::empty(),
+                body: m.list([
+                    m.node(45, 183, FunctionDefinition {
+                        name: m.node(54, 57, "bar"),
+                        params: NodeList::empty(),
+                        visibility: None,
+                        mutability: None,
+                        modifiers: NodeList::empty(),
+                        returns: NodeList::empty(),
+                        block: m.node(60, 183, Block {
+                            body: m.list([
+                                m.node(82, 165, DoWhileStatement {
+                                    body: m.node(85, 151, Block {
+                                        body: m.list([
+                                            m.stmt_expr(111, 128, 129, "neverStopStopping"),
+                                        ]),
+                                    }),
+                                    test: m.node(159, 163, Primitive::Bool(true)),
                                 }),
                             ]),
                         }),
