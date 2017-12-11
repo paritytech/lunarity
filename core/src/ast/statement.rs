@@ -10,7 +10,7 @@ pub enum Statement<'ast> {
     WhileStatement(WhileStatement<'ast>),
     ForStatement(ForStatement<'ast>),
     BlockStatement(Block<'ast>),
-    InlineAssemblyStatement,
+    InlineAssemblyStatement(InlineAssemblyStatement<'ast>),
     DoWhileStatement(DoWhileStatement<'ast>),
     ContinueStatement,
     BreakStatement,
@@ -53,6 +53,12 @@ pub struct ForStatement<'ast> {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Block<'ast> {
     pub body: StatementList<'ast>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct InlineAssemblyStatement<'ast> {
+    pub string: Option<StringLiteralNode<'ast>>,
+    pub block: InlineAssemblyBlockNode<'ast>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -100,4 +106,5 @@ impl_from! {
     ExpressionNode => Statement::ExpressionStatement,
     ExpressionNode => SimpleStatement::ExpressionStatement,
     Block => Statement::BlockStatement,
+    InlineAssemblyStatement => Statement::InlineAssemblyStatement,
 }

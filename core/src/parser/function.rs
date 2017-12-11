@@ -75,19 +75,6 @@ impl<'ast> Parser<'ast> {
         })
     }
 
-    #[inline]
-    fn unique_flag<F>(&mut self, at: &mut Option<Node<'ast, F>>, flag: F)
-    where
-        F: Copy,
-    {
-        if at.is_some() {
-            // TODO: More descriptive errors, something like "Can't redeclare visibility/mutability"
-            return self.error();
-        }
-
-        *at = self.node_at_token(flag);
-    }
-
     fn modifier_invocation(&mut self) -> Option<Node<'ast, ModifierInvocation<'ast>>> {
         let id = self.allow_str_node(Token::Identifier)?;
 

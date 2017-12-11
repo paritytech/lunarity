@@ -75,15 +75,20 @@ impl<'ast> Parser<'ast> {
         }
 
         match self.lexer.token {
-            Token::BraceOpen      => Some(self.block::<Context, _>()),
-            Token::KeywordIf      => self.if_statement::<Context>(),
-            Token::KeywordWhile   => self.while_statement::<Context>(),
-            Token::KeywordFor     => self.for_statement::<Context>(),
-            Token::KeywordDo      => self.do_while_statement::<Context>(),
-            Token::KeywordReturn  => self.return_statement(),
-            Token::KeywordThrow   => self.token_statement(ThrowStatement),
-            Token::DeclarationVar => self.inferred_definition_statement(),
+            Token::BraceOpen       => Some(self.block::<Context, _>()),
+            Token::KeywordIf       => self.if_statement::<Context>(),
+            Token::KeywordWhile    => self.while_statement::<Context>(),
+            Token::KeywordFor      => self.for_statement::<Context>(),
+            Token::KeywordDo       => self.do_while_statement::<Context>(),
+            Token::KeywordReturn   => self.return_statement(),
+            Token::KeywordThrow    => self.token_statement(ThrowStatement),
+            Token::KeywordAssembly => self.inline_assembly_statement(),
+            Token::DeclarationVar  => self.inferred_definition_statement(),
 
+            // _ => match self.expression_statement() {
+            //     None => self.variable_definition_statement(),
+            //     node => node,
+            // }
             _ => match self.variable_definition_statement() {
                 None => self.expression_statement(),
                 node => node,
@@ -248,6 +253,22 @@ impl<'ast> Parser<'ast> {
 
         self.node_at(start, end, ReturnStatement {
             value,
+        })
+    }
+
+    fn inline_assembly_statement(&mut self) -> Option<StatementNode<'ast>> {
+        let start  = self.lexer.start_then_consume();
+        let string = self.allow_str_node(Token::LiteralString);
+
+        if self.lexer.token != Token::BraceOpen {
+            self.error();
+        }
+
+        let block = expect!(self, self.inline_assembly_block());
+
+        self.node_at(start, block.end, InlineAssemblyStatement {
+            string,
+            block,
         })
     }
 
@@ -573,12 +594,12 @@ mod test {
                                             location: None,
                                             id: m.node(94, 95, "i"),
                                         }),
-                                        init: m.node(98, 99, Primitive::IntegerNumber("0")),
+                                        init: m.node(98, 99, Primitive::IntegerNumber("0", NumberUnit::None)),
                                     }),
                                     test: m.node(101, 109, BinaryExpression {
                                         left: m.node(101, 102, "i"),
                                         operator: m.node(103, 104, BinaryOperator::Lesser),
-                                        right: m.node(105, 109, Primitive::IntegerNumber("9000")),
+                                        right: m.node(105, 109, Primitive::IntegerNumber("9000", NumberUnit::None)),
                                     }),
                                     update: m.node(111, 114, PostfixExpression {
                                         operand: m.node(111, 112, "i"),
@@ -800,7 +821,7 @@ mod test {
                                     value: None,
                                 }),
                                 m.node(137, 148, ReturnStatement {
-                                    value: m.node(144, 147, Primitive::IntegerNumber("100")),
+                                    value: m.node(144, 147, Primitive::IntegerNumber("100", NumberUnit::None)),
                                 }),
                             ]),
                         }),
@@ -844,7 +865,7 @@ mod test {
                                         location: None,
                                         id: m.node(87, 90, "foo"),
                                     }),
-                                    init: m.node(93, 95, Primitive::IntegerNumber("10")),
+                                    init: m.node(93, 95, Primitive::IntegerNumber("10", NumberUnit::None)),
                                 }),
                                 m.node(117, 140, VariableDefinitionStatement {
                                     declaration: m.node(117, 132, VariableDeclaration {
@@ -901,7 +922,7 @@ mod test {
                             body: m.list([
                                 m.node(82, 95, InferredDefinitionStatement {
                                     ids: m.list([ m.node(86, 89, "foo") ]),
-                                    init: m.node(92, 94, Primitive::IntegerNumber("10")),
+                                    init: m.node(92, 94, Primitive::IntegerNumber("10", NumberUnit::None)),
                                 }),
                                 m.node(116, 142, InferredDefinitionStatement {
                                     ids: m.list([
@@ -911,9 +932,9 @@ mod test {
                                     ]),
                                     init: m.node(132, 141, TupleExpression {
                                         expressions: m.list([
-                                            m.node(133, 134, Primitive::IntegerNumber("1")),
-                                            m.node(136, 137, Primitive::IntegerNumber("2")),
-                                            m.node(139, 140, Primitive::IntegerNumber("3")),
+                                            m.node(133, 134, Primitive::IntegerNumber("1", NumberUnit::None)),
+                                            m.node(136, 137, Primitive::IntegerNumber("2", NumberUnit::None)),
+                                            m.node(139, 140, Primitive::IntegerNumber("3", NumberUnit::None)),
                                         ])
                                     }),
                                 }),
@@ -931,9 +952,9 @@ mod test {
                                     ]),
                                     init: m.node(211, 220, TupleExpression {
                                         expressions: m.list([
-                                            m.node(212, 213, Primitive::IntegerNumber("4")),
-                                            m.node(215, 216, Primitive::IntegerNumber("5")),
-                                            m.node(218, 219, Primitive::IntegerNumber("6")),
+                                            m.node(212, 213, Primitive::IntegerNumber("4", NumberUnit::None)),
+                                            m.node(215, 216, Primitive::IntegerNumber("5", NumberUnit::None)),
+                                            m.node(218, 219, Primitive::IntegerNumber("6", NumberUnit::None)),
                                         ])
                                     }),
                                 }),

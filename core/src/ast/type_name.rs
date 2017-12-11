@@ -4,7 +4,7 @@ use ast::*;
 pub enum TypeName<'ast> {
     ElementaryTypeName(ElementaryTypeName),
     UserDefinedTypeName(Identifier<'ast>),
-    Mapping,
+    Mapping(Mapping<'ast>),
     ArrayTypeName,
     FunctionTypeName,
 }
@@ -34,7 +34,14 @@ pub enum ElementaryTypeName {
     Ufixed(u8, u8),
 }
 
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct Mapping<'ast> {
+    pub from: ElementaryTypeNameNode<'ast>,
+    pub to: TypeNameNode<'ast>,
+}
+
 pub type TypeNameNode<'ast> = Node<'ast, TypeName<'ast>>;
+pub type ElementaryTypeNameNode<'ast> = Node<'ast, ElementaryTypeName>;
 pub type VariableDeclarationNode<'ast> = Node<'ast, VariableDeclaration<'ast>>;
 pub type VariableDeclarationList<'ast> = NodeList<'ast, VariableDeclaration<'ast>>;
 
@@ -47,4 +54,5 @@ impl<'ast> From<ElementaryTypeName> for TypeName<'ast> {
 
 impl_from! {
     Identifier => TypeName::UserDefinedTypeName,
+    Mapping => TypeName::Mapping,
 }

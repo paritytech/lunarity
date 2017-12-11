@@ -53,8 +53,21 @@ impl<'ast> Parser<'ast> {
 
     fn state_variable_declaration(&mut self) -> Option<ContractPartNode<'ast>> {
         let type_name  = self.type_name()?;
-        let visibility = self.state_variable_visibility();
-        let name       = self.expect_str_node(Token::Identifier);
+
+        let mut visibility = None;
+        let mut constant = None;
+
+        for _ in 0..2 {
+            match self.lexer.token {
+                Token::KeywordPublic   => self.unique_flag(&mut visibility, StateVariableVisibility::Public),
+                Token::KeywordInternal => self.unique_flag(&mut visibility, StateVariableVisibility::Internal),
+                Token::KeywordPrivate  => self.unique_flag(&mut visibility, StateVariableVisibility::Private),
+                Token::KeywordConstant => self.unique_flag(&mut constant, Flag),
+                _                      => break,
+            }
+        }
+
+        let name = self.expect_str_node(Token::Identifier);
 
         let init = if self.allow(Token::Assign) {
             match self.expression::<TopPrecedence>() {
@@ -74,21 +87,10 @@ impl<'ast> Parser<'ast> {
         self.node_at(type_name.start, end, StateVariableDeclaration {
             type_name,
             visibility,
+            constant,
             name,
             init,
         })
-    }
-
-    fn state_variable_visibility(&mut self) -> Option<Node<'ast, StateVariableVisibility>> {
-        let visibility = match self.lexer.token {
-            Token::KeywordPublic   => StateVariableVisibility::Public,
-            Token::KeywordInternal => StateVariableVisibility::Internal,
-            Token::KeywordPrivate  => StateVariableVisibility::Private,
-            Token::KeywordConstant => StateVariableVisibility::Constant,
-            _                      => return None,
-        };
-
-        self.node_at_token(visibility)
     }
 
     fn using_for_declaration(&mut self) -> Option<ContractPartNode<'ast>> {
@@ -308,12 +310,14 @@ mod test {
                     m.node(45, 60, StateVariableDeclaration {
                         type_name: m.node(45, 50, ElementaryTypeName::Int(4)),
                         visibility: None,
+                        constant: None,
                         name: m.node(51, 54, "foo"),
-                        init: m.node(57, 59, Primitive::IntegerNumber("10")),
+                        init: m.node(57, 59, Primitive::IntegerNumber("10", NumberUnit::None)),
                     }),
                     m.node(77, 97, StateVariableDeclaration {
                         type_name: m.node(77, 84, ElementaryTypeName::Byte(10)),
                         visibility: m.node(85, 91, StateVariableVisibility::Public),
+                        constant: None,
                         name: m.node(92, 96, "doge"),
                         init: None,
                     }),

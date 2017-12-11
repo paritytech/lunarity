@@ -8,6 +8,7 @@ mod function;
 mod expression;
 mod nested;
 mod statement;
+mod assembly;
 
 use toolshed::Arena;
 use toolshed::list::GrowableList;
@@ -168,65 +169,18 @@ impl<'ast> Parser<'ast> {
         self.expect(EndOfProgram);
     }
 
-    // #[inline]
-    // fn block<I>(&mut self) -> BlockNode<'ast, I> where
-    //     I: Parse<'ast, Output = Node<'ast, I>> + Copy
-    // {
-    //     let start = self.lexer.start();
+    #[inline]
+    fn unique_flag<F>(&mut self, at: &mut Option<Node<'ast, F>>, flag: F)
+    where
+        F: Copy,
+    {
+        if at.is_some() {
+            // TODO: More descriptive errors, something like "Can't redeclare visibility/mutability"
+            return self.error();
+        }
 
-    //     match self.lexer.token {
-    //         BraceOpen => self.lexer.consume(),
-    //         _         => self.error::<()>(),
-    //     }
-
-    //     let block = self.raw_block();
-    //     let end   = self.lexer.end_then_consume();
-
-    //     self.alloc_at_loc(start, end, block)
-    // }
-
-    // /// Same as above, but assumes that the opening brace has already been checked
-    // #[inline]
-    // fn unchecked_block<I>(&mut self) -> BlockNode<'ast, I> where
-    //     I: Parse<'ast, Output = Node<'ast, I>> + Copy
-    // {
-    //     let start = self.lexer.start_then_consume();
-    //     let block = self.raw_block();
-    //     let end   = self.lexer.end_then_consume();
-
-    //     self.alloc_at_loc(start, end, block)
-    // }
-
-    // #[inline]
-    // fn raw_block<I>(&mut self) -> Block<'ast, I> where
-    //     I: Parse<'ast, Output = Node<'ast, I>> + Copy
-    // {
-    //     if self.lexer.token == BraceClose {
-    //         return Block { body: NodeList::empty() };
-    //     }
-
-    //     let statement = I::parse(self);
-    //     let builder = ListBuilder::new(self.arena, statement);
-
-    //     while self.lexer.token != BraceClose && self.lexer.token != EndOfProgram {
-    //         builder.push(self.arena, I::parse(self));
-    //     }
-
-    //     Block { body: builder.as_list() }
-    // }
-
-    // #[inline]
-    // fn identifier(&mut self) -> IdentifierNode<'ast> {
-    //     match self.lexer.token {
-    //         Identifier => {
-    //             let ident = self.lexer.token_as_str();
-    //             let ident = self.alloc_in_loc(ident);
-    //             self.lexer.consume();
-    //             ident
-    //         },
-    //         _ => self.error()
-    //     }
-    // }
+        *at = self.node_at_token(flag);
+    }
 }
 
 /// Parse the Solidity source from `&str` and produce an Abstract Syntax Tree for it.
@@ -244,5 +198,18 @@ pub fn parse<'src, 'ast>(source: &'src str) -> Result<Program<'ast>, Vec<Error>>
     match errors.len() {
         0 => Ok(Program::new(body, arena)),
         _ => Err(errors)
+    }
+}
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn can_parse_second_price_auction() {
+        let source = include_str!("../../benches/second-price-auction.sol");
+
+        parse(source).unwrap();
     }
 }

@@ -391,7 +391,6 @@ mod test {
     use super::*;
     use parser::mock::{Mock, assert_units};
 
-
     #[test]
     fn nested_expressions() {
         let m = Mock::new();
@@ -429,13 +428,13 @@ mod test {
                                 m.stmt_expr(109, 118, 119, CallExpression {
                                     callee: m.node(109, 112, "add"),
                                     arguments: m.list([
-                                        m.node(113, 114, Primitive::IntegerNumber("1")),
-                                        m.node(116, 117, Primitive::IntegerNumber("2")),
+                                        m.node(113, 114, Primitive::IntegerNumber("1", NumberUnit::None)),
+                                        m.node(116, 117, Primitive::IntegerNumber("2", NumberUnit::None)),
                                     ]),
                                 }),
                                 m.stmt_expr(140, 149, 150, IndexAccessExpression {
                                     array: m.node(140, 146, "things"),
-                                    index: m.node(147, 148, Primitive::IntegerNumber("1")),
+                                    index: m.node(147, 148, Primitive::IntegerNumber("1", NumberUnit::None)),
                                 }),
                                 m.stmt_expr(171, 181, 182, PostfixExpression {
                                     operand: m.node(171, 179, "solidity"),
@@ -735,12 +734,12 @@ mod test {
                                     }),
                                     init: m.node(87, 96, BinaryExpression {
                                         left: m.node(87, 92, BinaryExpression {
-                                            left: m.node(87, 88, Primitive::IntegerNumber("2")),
+                                            left: m.node(87, 88, Primitive::IntegerNumber("2", NumberUnit::None)),
                                             operator: m.node(89, 90, BinaryOperator::Multiplication),
-                                            right: m.node(91, 92, Primitive::IntegerNumber("2")),
+                                            right: m.node(91, 92, Primitive::IntegerNumber("2", NumberUnit::None)),
                                         }),
                                         operator: m.node(93, 94, BinaryOperator::Addition),
-                                        right: m.node(95, 96, Primitive::IntegerNumber("2")),
+                                        right: m.node(95, 96, Primitive::IntegerNumber("2", NumberUnit::None)),
                                     }),
                                 }),
                                 m.node(118, 137, VariableDefinitionStatement {
@@ -750,12 +749,12 @@ mod test {
                                         id: m.node(123, 124, "b"),
                                     }),
                                     init: m.node(127, 136, BinaryExpression {
-                                        left: m.node(127, 128, Primitive::IntegerNumber("2")),
+                                        left: m.node(127, 128, Primitive::IntegerNumber("2", NumberUnit::None)),
                                         operator: m.node(129, 130, BinaryOperator::Addition),
                                         right: m.node(131, 136, BinaryExpression {
-                                            left: m.node(131, 132, Primitive::IntegerNumber("2")),
+                                            left: m.node(131, 132, Primitive::IntegerNumber("2", NumberUnit::None)),
                                             operator: m.node(133, 134, BinaryOperator::Multiplication),
-                                            right: m.node(135, 136, Primitive::IntegerNumber("2")),
+                                            right: m.node(135, 136, Primitive::IntegerNumber("2", NumberUnit::None)),
                                         }),
                                     }),
                                 }),

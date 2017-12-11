@@ -16,7 +16,9 @@ impl<'ast> Parser<'ast> {
 
     pub fn bound_expression(&mut self) -> Option<ExpressionNode<'ast>> {
         let primitive = match self.lexer.token {
+            Token::KeywordThis         => return self.node_at_token(ThisExpression),
             Token::Identifier          => return self.identifier_expression(),
+            Token::IdentifierBuiltin   => return self.identifier_expression(),
             Token::ParenOpen           => return self.tuple_expression(),
             Token::OperatorLogicalNot  => return self.prefix_expression(PrefixOperator::LogicalNot),
             Token::OperatorBitNot      => return self.prefix_expression(PrefixOperator::BitNot),
@@ -28,11 +30,11 @@ impl<'ast> Parser<'ast> {
             Token::LiteralTrue         => Primitive::Bool(true),
             Token::LiteralFalse        => Primitive::Bool(false),
             Token::LiteralHex          => Primitive::HexNumber(self.lexer.token_as_str()),
-            Token::LiteralInteger      => Primitive::IntegerNumber(self.lexer.token_as_str()),
+            Token::LiteralInteger      => return self.integer_number(),
             Token::LiteralRational     => Primitive::RationalNumber(self.lexer.token_as_str()),
             Token::LiteralString       => Primitive::String(self.lexer.token_as_str()),
 
-            _ => return None,
+            _ => return self.elementary_type_name(),
         };
 
         self.node_at_token(primitive)
@@ -79,6 +81,31 @@ impl<'ast> Parser<'ast> {
             operator,
             operand,
         })
+    }
+
+    fn integer_number(&mut self) -> Option<ExpressionNode<'ast>> {
+        let number = self.lexer.token_as_str();
+        let (start, mut end) = self.lexer.loc();
+
+        self.lexer.consume();
+
+        let unit = match self.lexer.token {
+            Token::UnitEther => {
+                end = self.lexer.end();
+                self.lexer.consume();
+
+                NumberUnit::Ether
+            },
+            Token::UnitTime => {
+                end = self.lexer.end();
+                self.lexer.consume();
+
+                NumberUnit::Time
+            },
+            _ => NumberUnit::None,
+        };
+
+        self.node_at(start, end, Primitive::IntegerNumber(number, unit))
     }
 }
 

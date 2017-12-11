@@ -84,9 +84,15 @@ const SEM: ByteHandler = Some(|lex| {
 
 // :
 const COL: ByteHandler = Some(|lex| {
-    lex.bump();
+    lex.token = match lex.next_byte() {
+        b'=' => {
+            lex.bump();
 
-    lex.token = Colon;
+            AssemblyBind
+        },
+
+        _ => Colon
+    };
 });
 
 // ,
@@ -1334,6 +1340,6 @@ mod test {
             lex.consume();
         }
 
-        assert_eq!(tokens, 1300);
+        assert_eq!(tokens, 1299);
     }
 }

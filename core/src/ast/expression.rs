@@ -2,6 +2,7 @@ use ast::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Expression<'ast> {
+    ThisExpression,
     IdentifierExpression(Identifier<'ast>),
     PrimitiveExpression(Primitive<'ast>),
     PrefixExpression(PrefixExpression<'ast>),
@@ -13,15 +14,24 @@ pub enum Expression<'ast> {
     MemberAccessExpression(MemberAccessExpression<'ast>),
     IndexAccessExpression(IndexAccessExpression<'ast>),
     ConditionalExpression(ConditionalExpression<'ast>),
+    ElementaryTypeExpression(ElementaryTypeName),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Primitive<'ast> {
     Bool(bool),
     HexNumber(&'ast str),
-    IntegerNumber(&'ast str),
+    IntegerNumber(&'ast str, NumberUnit),
     RationalNumber(&'ast str),
     String(&'ast str),
+}
+
+// TODO: Exact units
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum NumberUnit {
+    None,
+    Ether,
+    Time,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -135,8 +145,17 @@ pub struct ConditionalExpression<'ast> {
     pub alternate: ExpressionNode<'ast>,
 }
 
+pub use self::Expression::ThisExpression;
+
 pub type ExpressionNode<'ast> = Node<'ast, Expression<'ast>>;
 pub type ExpressionList<'ast> = NodeList<'ast, Expression<'ast>>;
+
+impl<'ast> From<ElementaryTypeName> for Expression<'ast> {
+    #[inline]
+    fn from(val: ElementaryTypeName) -> Expression<'ast> {
+        Expression::ElementaryTypeExpression(val)
+    }
+}
 
 impl_from! {
     Identifier => Expression::IdentifierExpression,

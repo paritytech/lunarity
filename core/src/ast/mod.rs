@@ -7,6 +7,7 @@ mod function;
 mod type_name;
 mod expression;
 mod statement;
+mod assembly;
 
 use toolshed::list::{List, UnsafeList};
 use toolshed::Arena;
@@ -19,6 +20,7 @@ pub use ast::function::*;
 pub use ast::type_name::*;
 pub use ast::expression::*;
 pub use ast::statement::*;
+pub use ast::assembly::*;
 
 /// Useful for boolean flags that need location information via FlagNode,
 /// for example: `indexed` or `anonymous`.
@@ -35,6 +37,7 @@ pub type SourceUnitNode<'ast> = Node<'ast, SourceUnit<'ast>>;
 pub type SourceUnitList<'ast> = NodeList<'ast, SourceUnit<'ast>>;
 pub type IdentifierNode<'ast> = Node<'ast, Identifier<'ast>>;
 pub type IdentifierList<'ast> = NodeList<'ast, Identifier<'ast>>;
+pub type StringLiteralNode<'ast> = Node<'ast, StringLiteral<'ast>>;
 
 
 /// A Solidity source code parsed to an AST

@@ -22,6 +22,7 @@ pub enum ContractPart<'ast> {
 pub struct StateVariableDeclaration<'ast> {
     pub type_name: TypeNameNode<'ast>,
     pub visibility: Option<Node<'ast, StateVariableVisibility>>,
+    pub constant: Option<Node<'ast, Flag>>,
     pub name: IdentifierNode<'ast>,
     pub init: Option<ExpressionNode<'ast>>,
 }
@@ -31,7 +32,6 @@ pub enum StateVariableVisibility {
     Public,
     Internal,
     Private,
-    Constant,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
