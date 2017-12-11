@@ -1,7 +1,7 @@
 use toolshed::list::{ListBuilder, GrowableList};
 
 use ast::*;
-use parser::{Parser, FunctionContext};
+use parser::{Parser, FunctionContext, RegularTypeNameContext};
 use lexer::Token;
 
 impl<'ast> Parser<'ast> {
@@ -114,7 +114,7 @@ impl<'ast> Parser<'ast> {
     }
 
     fn parameter(&mut self) -> Option<Node<'ast, Parameter<'ast>>> {
-        let type_name = self.type_name()?;
+        let type_name = self.type_name::<RegularTypeNameContext>()?;
         let name      = self.allow_str_node(Token::Identifier);
 
         let end = name.end().unwrap_or_else(|| type_name.end);

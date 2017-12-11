@@ -1,7 +1,7 @@
 use toolshed::list::{List, GrowableList, ListBuilder};
 
 use ast::*;
-use parser::{Parser, TopPrecedence};
+use parser::{Parser, TopPrecedence, StatementTypeNameContext};
 use lexer::Token;
 
 /// A trait that allows for extra statements to be parsed in a specific context.
@@ -287,7 +287,7 @@ impl<'ast> Parser<'ast> {
     where
         S: From<VariableDefinitionStatement<'ast>> + Copy,
     {
-        let declaration = self.variable_declaration()?;
+        let declaration = self.variable_declaration::<StatementTypeNameContext>()?;
 
         let init;
 

@@ -2,20 +2,40 @@ use ast::*;
 use parser::Parser;
 use lexer::Token;
 
-impl<'ast> Parser<'ast> {
-    pub fn type_name(&mut self) -> Option<TypeNameNode<'ast>> {
-        match self.lexer.token {
-            Token::KeywordMapping => self.mapping(),
-            Token::Identifier     => self.user_defined_type(),
-            _                     => self.elementary_type_name(),
+pub trait TypeNameContext<'ast> {
+    fn parse(&mut Parser<'ast>) -> Option<TypeNameNode<'ast>>;
+}
+
+pub struct RegularTypeNameContext;
+pub struct StatementTypeNameContext;
+
+impl<'ast> TypeNameContext<'ast> for RegularTypeNameContext {
+    fn parse(par: &mut Parser<'ast>) -> Option<TypeNameNode<'ast>> {
+        match par.lexer.token {
+            Token::KeywordMapping => par.mapping(),
+            Token::Identifier     => par.user_defined_type(),
+            _                     => par.elementary_type_name(),
         }
     }
+}
 
-    pub fn type_name_in_statement(&mut self) -> Option<TypeNameNode<'ast>> {
-        match self.lexer.token {
-            Token::KeywordMapping => self.mapping(),
-            _                     => self.elementary_type_name(),
+
+impl<'ast> TypeNameContext<'ast> for StatementTypeNameContext {
+    fn parse(par: &mut Parser<'ast>) -> Option<TypeNameNode<'ast>> {
+        match par.lexer.token {
+            Token::KeywordMapping => par.mapping(),
+            _                     => par.elementary_type_name(),
         }
+    }
+}
+
+impl<'ast> Parser<'ast> {
+    #[inline]
+    pub fn type_name<Context>(&mut self) -> Option<TypeNameNode<'ast>>
+    where
+        Context: TypeNameContext<'ast>,
+    {
+        Context::parse(self)
     }
 
     pub fn elementary_type_name<E>(&mut self) -> Option<Node<'ast, E>>
@@ -41,9 +61,12 @@ impl<'ast> Parser<'ast> {
         self.node_at_token(elementary)
     }
 
-    pub fn variable_declaration(&mut self) -> Option<VariableDeclarationNode<'ast>> {
+    pub fn variable_declaration<Context>(&mut self) -> Option<VariableDeclarationNode<'ast>>
+    where
+        Context: TypeNameContext<'ast>,
+    {
         // FIXME: context should be passed from the statement parser
-        let type_name = self.type_name_in_statement()?;
+        let type_name = self.type_name::<Context>()?;
 
         let location = match self.lexer.token {
             Token::KeywordStorage => self.node_at_token(StorageLocation::Storage),
@@ -78,7 +101,7 @@ impl<'ast> Parser<'ast> {
 
         self.expect(Token::Arrow);
 
-        let to  = expect!(self, self.type_name());
+        let to  = expect!(self, self.type_name::<RegularTypeNameContext>());
         let end = self.expect_end(Token::ParenClose);
 
         self.node_at(start, end, Mapping {

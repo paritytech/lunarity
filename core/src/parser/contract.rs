@@ -1,7 +1,7 @@
 use toolshed::list::{ListBuilder, GrowableList};
 
 use ast::*;
-use parser::{Parser, ModifierContext, TopPrecedence};
+use parser::{Parser, ModifierContext, TopPrecedence, RegularTypeNameContext};
 use lexer::Token;
 
 impl<'ast> Parser<'ast> {
@@ -52,7 +52,7 @@ impl<'ast> Parser<'ast> {
     }
 
     fn state_variable_declaration(&mut self) -> Option<ContractPartNode<'ast>> {
-        let type_name  = self.type_name()?;
+        let type_name = self.type_name::<RegularTypeNameContext>()?;
 
         let mut visibility = None;
         let mut constant = None;
@@ -99,7 +99,7 @@ impl<'ast> Parser<'ast> {
 
         self.expect(Token::KeywordFor);
 
-        let type_name = match self.type_name() {
+        let type_name = match self.type_name::<RegularTypeNameContext>() {
             None => {
                 self.expect(Token::OperatorMultiplication);
 
@@ -122,13 +122,13 @@ impl<'ast> Parser<'ast> {
 
         self.expect(Token::BraceOpen);
 
-        let body = match self.variable_declaration() {
+        let body = match self.variable_declaration::<RegularTypeNameContext>() {
             Some(declaration) => {
                 let builder = ListBuilder::new(self.arena, declaration);
 
                 self.expect(Token::Semicolon);
 
-                while let Some(declaration) = self.variable_declaration() {
+                while let Some(declaration) = self.variable_declaration::<RegularTypeNameContext>() {
                     builder.push(self.arena, declaration);
 
                     self.expect(Token::Semicolon);
@@ -210,7 +210,7 @@ impl<'ast> Parser<'ast> {
     }
 
     fn indexed_parameter(&mut self) -> Option<Node<'ast, IndexedParameter<'ast>>> {
-        let type_name = self.type_name()?;
+        let type_name = self.type_name::<RegularTypeNameContext>()?;
         let indexed   = self.allow_flag_node(Token::KeywordIndexed);
         let name      = self.allow_str_node(Token::Identifier);
 

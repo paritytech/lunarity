@@ -14,6 +14,7 @@ use toolshed::Arena;
 use toolshed::list::GrowableList;
 
 pub use parser::statement::{StatementContext, FunctionContext, ModifierContext};
+pub use parser::type_name::{TypeNameContext, RegularTypeNameContext, StatementTypeNameContext};
 pub use parser::nested::*;
 
 use ast::*;
