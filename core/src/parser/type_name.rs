@@ -65,7 +65,6 @@ impl<'ast> Parser<'ast> {
     where
         Context: TypeNameContext<'ast>,
     {
-        // FIXME: context should be passed from the statement parser
         let type_name = self.type_name::<Context>()?;
 
         let location = match self.lexer.token {

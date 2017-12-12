@@ -30,8 +30,27 @@ pub enum Primitive<'ast> {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum NumberUnit {
     None,
+    Ether(EtherUnit),
+    Time(TimeUnit),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum TimeUnit {
+    Years,
+    Months,
+    Weeks,
+    Days,
+    Hours,
+    Minutes,
+    Seconds,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum EtherUnit {
     Ether,
-    Time,
+    Finney,
+    Szabo,
+    Wei,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

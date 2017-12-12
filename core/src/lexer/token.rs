@@ -8,10 +8,11 @@
 //!  INDEX  INTERN IMPORT IS     MAP    MEM    NEW    PAY    PULIC  PRAGMA PRIV   PURE
 //!  RET    RETNS  STORAG SUPER  THIS   THROW  USING  VIEW   WHILE  RESERV T_BOOL T_ADDR
 //!  T_STR  T_BYT  T_INT  T_UINT T_FIX  T_UFIX L_TRUE L_FALS L_HEX  L_INT  L_RAT  L_STR
-//!  U_ETH  U_TIME :=     =:     ++     --     !      ~      *      /      %      **
-//!  +      -      <<     >>     <      <=     >      >=     ==     !=     &      ^
-//!  |      &&     ||     ?      =      +=     -=     *=     /=     %=     <<=    >>=
-//!  &=     ^=     |=     ERRTOK ERREOF
+//!  E_ETH  E_FINN E_SZAB E_WEI  T_YEAR T_WEEK T_DAYS T_HOUR T_MIN  T_SEC  :=     =:
+//!  ++     --     !      ~      *      /      %      **     +      -      <<     >>
+//!  <      <=     >      >=     ==     !=     &      ^      |      &&     ||     ?
+//!  =      +=     -=     *=     /=     %=     <<=    >>=    &=     ^=     |=     ERRTOK
+//!  ERREOF
 //!
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -88,8 +89,16 @@ pub enum Token {
     LiteralInteger,
     LiteralRational,
     LiteralString,
-    UnitEther,                // wei | szabo | finney | ether
-    UnitTime,                 // seconds | minutes | hours | days | weeks | years
+    UnitEther,
+    UnitFinney,
+    UnitSzabo,
+    UnitWei,
+    UnitTimeYears,
+    UnitTimeWeeks,
+    UnitTimeDays,
+    UnitTimeHours,
+    UnitTimeMinutes,
+    UnitTimeSeconds,
     AssemblyBind,             // :=
     AssemblyAssign,           // =:
     OperatorIncrement,        //      ++ … | … ++

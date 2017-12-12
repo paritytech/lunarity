@@ -993,16 +993,16 @@ mod test {
                 seconds minutes hours days weeks years
             ",
              &[
-                (UnitEther, "wei"),
-                (UnitEther, "szabo"),
-                (UnitEther, "finney"),
+                (UnitWei, "wei"),
+                (UnitSzabo, "szabo"),
+                (UnitFinney, "finney"),
                 (UnitEther, "ether"),
-                (UnitTime, "seconds"),
-                (UnitTime, "minutes"),
-                (UnitTime, "hours"),
-                (UnitTime, "days"),
-                (UnitTime, "weeks"),
-                (UnitTime, "years"),
+                (UnitTimeSeconds, "seconds"),
+                (UnitTimeMinutes, "minutes"),
+                (UnitTimeHours, "hours"),
+                (UnitTimeDays, "days"),
+                (UnitTimeWeeks, "weeks"),
+                (UnitTimeYears, "years"),
             ][..]
         );
     }

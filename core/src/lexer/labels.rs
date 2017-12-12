@@ -157,7 +157,7 @@ pub const L_C: ByteHandler = Some(|lex| {
 // Identifier or keyword starting with a letter `d`
 pub const L_D: ByteHandler = Some(|lex| {
     match_label!(lex [
-        [ a y s         => UnitTime ]  // days
+        [ a y s         => UnitTimeDays ]
         [ o             => KeywordDo ]
         [ e
             [ l e t e   => KeywordDelete ]
@@ -175,7 +175,7 @@ pub const L_E: ByteHandler = Some(|lex| {
         [ c r e c o v e r => IdentifierBuiltin ] // ecrecover
         [ l s e           => KeywordElse ]
         [ n u m           => DeclarationEnum ]
-        [ t h e r         => UnitEther ]         // ether
+        [ t h e r         => UnitEther ]
         [ v e n t         => DeclarationEvent ]
         [ x t e r n a l   => KeywordExternal ]
     ]);
@@ -190,7 +190,7 @@ pub const L_F: ByteHandler = Some(|lex| {
         [ i
             [ n
                 [ a l   => ReservedWord ] // final
-                [ n e y => UnitEther ]    // finney
+                [ n e y => UnitFinney ]
             ]
             [ x e d
                 [                            => { lex.type_size = (32, 80); TypeFixed } ]
@@ -211,7 +211,7 @@ pub const L_F: ByteHandler = Some(|lex| {
 pub const L_H: ByteHandler = Some(|lex| {
     match_label!(lex [
         [ e x     => KeywordHex ]
-        [ o u r s => UnitTime ]   // hours
+        [ o u r s => UnitTimeHours ]
     ]);
 
     lex.read_label();
@@ -274,7 +274,7 @@ pub const L_M: ByteHandler = Some(|lex| {
             [ p p i n g => KeywordMapping ]
         ]
         [ e m o r y     => KeywordMemory ]
-        [ i n u t e s   => UnitTime ]            // minutes
+        [ i n u t e s   => UnitTimeMinutes ]
         [ o d i f i e r => DeclarationModifier ]
         [ s g           => IdentifierBuiltin ]   // msg
         [ u l m o d     => IdentifierBuiltin ]   // mulmod
@@ -346,7 +346,7 @@ pub const L_R: ByteHandler = Some(|lex| {
 pub const L_S: ByteHandler = Some(|lex| {
     match_label!(lex [
         [ e
-            [ c o n d s           => UnitTime ]          // seconds
+            [ c o n d s           => UnitTimeSeconds ]
             [ l f d e s t r u c t => IdentifierBuiltin ] // selfdestruct
         ]
         [ h a
@@ -366,7 +366,7 @@ pub const L_S: ByteHandler = Some(|lex| {
             [ i c i d e => IdentifierBuiltin ] // suicide
         ]
         [ w i t c h     => ReservedWord ]      // switch
-        [ z a b o       => UnitEther ]         // szabo
+        [ z a b o       => UnitSzabo ]
     ]);
 
     lex.read_label();
@@ -429,8 +429,8 @@ pub const L_W: ByteHandler = Some(|lex| {
     match_label!(lex [
         [ h i l e => KeywordWhile ]
         [ e
-            [ e k s => UnitTime ]  // weeks
-            [ i     => UnitEther ] // wei
+            [ e k s => UnitTimeWeeks ]
+            [ i     => UnitWei ]
         ]
     ]);
 
@@ -440,7 +440,7 @@ pub const L_W: ByteHandler = Some(|lex| {
 
 // Identifier or keyword starting with a letter `y`
 pub const L_Y: ByteHandler = Some(|lex| {
-    match_label!(lex [ e a r s => UnitTime ]); // years
+    match_label!(lex [ e a r s => UnitTimeYears ]);
 
     lex.read_label();
     lex.token = Identifier;

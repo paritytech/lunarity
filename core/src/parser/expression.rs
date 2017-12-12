@@ -85,25 +85,27 @@ impl<'ast> Parser<'ast> {
 
     fn integer_number(&mut self) -> Option<ExpressionNode<'ast>> {
         let number = self.lexer.token_as_str();
-        let (start, mut end) = self.lexer.loc();
+        let (start, end) = self.lexer.loc();
 
         self.lexer.consume();
 
         let unit = match self.lexer.token {
-            Token::UnitEther => {
-                end = self.lexer.end();
-                self.lexer.consume();
+            Token::UnitEther       => NumberUnit::Ether(EtherUnit::Ether),
+            Token::UnitFinney      => NumberUnit::Ether(EtherUnit::Finney),
+            Token::UnitSzabo       => NumberUnit::Ether(EtherUnit::Szabo),
+            Token::UnitWei         => NumberUnit::Ether(EtherUnit::Wei),
+            Token::UnitTimeYears   => NumberUnit::Time(TimeUnit::Years),
+            Token::UnitTimeWeeks   => NumberUnit::Time(TimeUnit::Weeks),
+            Token::UnitTimeDays    => NumberUnit::Time(TimeUnit::Days),
+            Token::UnitTimeHours   => NumberUnit::Time(TimeUnit::Hours),
+            Token::UnitTimeMinutes => NumberUnit::Time(TimeUnit::Minutes),
+            Token::UnitTimeSeconds => NumberUnit::Time(TimeUnit::Seconds),
 
-                NumberUnit::Ether
-            },
-            Token::UnitTime => {
-                end = self.lexer.end();
-                self.lexer.consume();
-
-                NumberUnit::Time
-            },
-            _ => NumberUnit::None,
+            _ => return self.node_at(start, end, Primitive::IntegerNumber(number, NumberUnit::None)),
         };
+
+        let end = self.lexer.end();
+        self.lexer.consume();
 
         self.node_at(start, end, Primitive::IntegerNumber(number, unit))
     }
