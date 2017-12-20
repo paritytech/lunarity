@@ -67,6 +67,11 @@ impl<'ast> Parser<'ast> {
     {
         let type_name = self.type_name::<Context>()?;
 
+        self.variable_declaration_from::<Context>(type_name)
+    }
+
+    #[inline]
+    pub fn variable_declaration_from<Context>(&mut self, type_name: TypeNameNode<'ast>) -> Option<VariableDeclarationNode<'ast>> {
         let location = match self.lexer.token {
             Token::KeywordStorage => self.node_at_token(StorageLocation::Storage),
             Token::KeywordMemory  => self.node_at_token(StorageLocation::Memory),

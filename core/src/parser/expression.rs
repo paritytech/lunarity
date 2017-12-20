@@ -1,8 +1,127 @@
 use toolshed::list::ListBuilder;
 
 use ast::*;
-use parser::{Parser, Precedence, Precedence2, TopPrecedence};
+use parser::{Parser, Precedence, Precedence2, TopPrecedence, StatementContext};
 use lexer::Token;
+
+type ExpressionHandler = for<'ast> fn(&mut Parser<'ast>) -> Option<ExpressionNode<'ast>>;
+
+static LUT: [ExpressionHandler; 121] = [
+    _____, _____, _____, _____, _____, TUPLE, _____, _____, _____, _____, _____, _____,
+//  EOF    ;      :      ,      .      (      )      {      }      [      ]      =>
+
+    IDENT, IDENT, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+//  IDENT  BLTIN  CONTR  LIB    IFACE  ENUM   STRUCT MODIF  EVENT  FUNCT  VAR    ANON
+
+    _____, _____, _____, _____, _____, _____, DELET, _____, _____, _____, _____, _____,
+//  AS     ASM    BREAK  CONST  CONTIN DO     DELETE ELSE   EXTERN FOR    HEX    IF
+
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+//  INDEX  INTERN IMPORT IS     MAP    MEM    NEW    PAY    PULIC  PRAGMA PRIV   PURE
+
+    _____, _____, _____, _____, THIS,  _____, _____, _____, _____, _____, ELTYP, ELTYP,
+//  RET    RETNS  STORAG SUPER  THIS   THROW  USING  VIEW   WHILE  RESERV T_BOOL T_ADDR
+
+    ELTYP, ELTYP, ELTYP, ELTYP, ELTYP, ELTYP, TRUE,  FALSE, L_HEX, L_INT, L_RAT, L_STR,
+//  T_STR  T_BYT  T_INT  T_UINT T_FIX  T_UFIX L_TRUE L_FALS L_HEX  L_INT  L_RAT  L_STR
+
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+//  E_ETH  E_FINN E_SZAB E_WEI  T_YEAR T_WEEK T_DAYS T_HOUR T_MIN  T_SEC  :=     =:
+
+    INC,   DEC,   NOT,   B_NOT, _____, _____, _____, _____, PLUS,  MIN, _____, _____,
+//  ++     --     !      ~      *      /      %      **     +      -      <<     >>
+
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+//  <      <=     >      >=     ==     !=     &      ^      |      &&     ||     ?
+
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+//  =      +=     -=     *=     /=     %=     <<=    >>=    &=     ^=     |=     ERRTOK
+
+    _____,
+//  ERREOF
+];
+
+
+macro_rules! create_handlers {
+    ($( const $name:ident = |$par:tt| $code:expr; )* $( pub const $pname:ident = |$ppar:ident| $pcode:expr; )*) => {
+        $(
+            #[allow(non_snake_case)]
+            fn $name<'ast>($par: &mut Parser<'ast>) -> Option<ExpressionNode<'ast>> {
+                $code
+            }
+        )*
+
+        pub(crate) mod statements {
+            use super::*;
+
+            $(
+                #[allow(non_snake_case)]
+                pub fn $pname<'ast, Context: StatementContext>($ppar: &mut Parser<'ast>, _ctx: Context) -> Option<StatementNode<'ast>> {
+                    let expression: Option<Node<_>> = $pcode;
+                    let expression = $ppar.nested_expression::<TopPrecedence>(expression?);
+                    $ppar.wrap_expression(expression)
+                }
+            )*
+        }
+
+        $(
+            #[allow(non_snake_case)]
+            fn $pname<'ast>($ppar: &mut Parser<'ast>) -> Option<ExpressionNode<'ast>> {
+                $pcode
+            }
+        )*
+    };
+}
+
+create_handlers! {
+    const _____ = |_| None;
+
+    const ELTYP = |par| par.elementary_type_name();
+
+    pub const IDENT = |par| par.identifier_expression();
+
+    pub const THIS = |par| par.node_at_token(ThisExpression);
+
+    pub const TUPLE = |par| par.tuple_expression();
+
+    pub const NOT = |par| par.prefix_expression(PrefixOperator::LogicalNot);
+
+    pub const B_NOT = |par| par.prefix_expression(PrefixOperator::BitNot);
+
+    pub const DELET = |par| par.prefix_expression(PrefixOperator::Delete);
+
+    pub const INC = |par| par.prefix_expression(PrefixOperator::Increment);
+
+    pub const DEC = |par| par.prefix_expression(PrefixOperator::Decrement);
+
+    pub const PLUS = |par| par.prefix_expression(PrefixOperator::Plus);
+
+    pub const MIN = |par| par.prefix_expression(PrefixOperator::Minus);
+
+    pub const TRUE = |par| par.node_at_token(Primitive::Bool(true));
+
+    pub const FALSE = |par| par.node_at_token(Primitive::Bool(false));
+
+    pub const L_HEX = |par| {
+        let number = par.lexer.token_as_str();
+
+        par.node_at_token(Primitive::HexNumber(number))
+    };
+
+    pub const L_INT = |par| par.integer_number();
+
+    pub const L_RAT = |par| {
+        let number = par.lexer.token_as_str();
+
+        par.node_at_token(Primitive::RationalNumber(number))
+    };
+
+    pub const L_STR = |par| {
+        let string = par.lexer.token_as_str();
+
+        par.node_at_token(Primitive::String(string))
+    };
+}
 
 impl<'ast> Parser<'ast> {
     #[inline]
@@ -14,30 +133,8 @@ impl<'ast> Parser<'ast> {
             .map(|expression| self.nested_expression::<P>(expression))
     }
 
-    pub fn bound_expression(&mut self) -> Option<ExpressionNode<'ast>> {
-        let primitive = match self.lexer.token {
-            Token::KeywordThis         => return self.node_at_token(ThisExpression),
-            Token::Identifier          => return self.identifier_expression(),
-            Token::IdentifierBuiltin   => return self.identifier_expression(),
-            Token::ParenOpen           => return self.tuple_expression(),
-            Token::OperatorLogicalNot  => return self.prefix_expression(PrefixOperator::LogicalNot),
-            Token::OperatorBitNot      => return self.prefix_expression(PrefixOperator::BitNot),
-            Token::KeywordDelete       => return self.prefix_expression(PrefixOperator::Delete),
-            Token::OperatorIncrement   => return self.prefix_expression(PrefixOperator::Increment),
-            Token::OperatorDecrement   => return self.prefix_expression(PrefixOperator::Decrement),
-            Token::OperatorAddition    => return self.prefix_expression(PrefixOperator::Plus),
-            Token::OperatorSubtraction => return self.prefix_expression(PrefixOperator::Minus),
-            Token::LiteralTrue         => Primitive::Bool(true),
-            Token::LiteralFalse        => Primitive::Bool(false),
-            Token::LiteralHex          => Primitive::HexNumber(self.lexer.token_as_str()),
-            Token::LiteralInteger      => return self.integer_number(),
-            Token::LiteralRational     => Primitive::RationalNumber(self.lexer.token_as_str()),
-            Token::LiteralString       => Primitive::String(self.lexer.token_as_str()),
-
-            _ => return self.elementary_type_name(),
-        };
-
-        self.node_at_token(primitive)
+    fn bound_expression(&mut self) -> Option<ExpressionNode<'ast>> {
+        LUT[self.lexer.token as usize](self)
     }
 
     pub fn identifier_expression(&mut self) -> Option<ExpressionNode<'ast>> {

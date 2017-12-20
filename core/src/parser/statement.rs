@@ -1,99 +1,203 @@
 use toolshed::list::{List, GrowableList, ListBuilder};
 
 use ast::*;
+use parser::expression::statements::*;
 use parser::{Parser, TopPrecedence, StatementTypeNameContext};
 use lexer::Token;
+
+
+type StatementHandler<C> = for<'ast> fn(&mut Parser<'ast>, C) -> Option<StatementNode<'ast>>;
+
+macro_rules! create_handlers {
+    ($( const $name:ident = <$context:ident>|$par:tt| $code:expr; )*) => {
+        $(
+            #[allow(non_snake_case)]
+            fn $name<'ast, $context: StatementContext>($par: &mut Parser<'ast>, _ctx: $context) -> Option<StatementNode<'ast>> {
+                $code
+            }
+        )*
+    };
+}
+
+create_handlers! {
+    const _____ = <Context>|_| None;
+
+    const BLOCK = <Context>|par| Some(par.block::<Context, _>());
+
+    const IF = <Context>|par| par.if_statement::<Context>();
+
+    const WHILE = <Context>|par| par.while_statement::<Context>();
+
+    const FOR = <Context>|par| par.for_statement::<Context>();
+
+    const DOWHL = <Context>|par| par.do_while_statement::<Context>();
+
+    const RET = <Context>|par| par.return_statement();
+
+    const THROW = <Context>|par| par.token_statement(ThrowStatement);
+
+    const CONT = <Context>|par| par.token_statement(ContinueStatement);
+
+    const BREAK = <Context>|par| par.token_statement(BreakStatement);
+
+    const ASM = <Context>|par| par.inline_assembly_statement();
+
+    const VAR = <Context>|par| par.inferred_definition_statement();
+
+    const TYP = <Context>|par| par.variable_definition_statement();
+
+    const TXPR = <Context>|par| {
+        let (start, end) = par.lexer.loc();
+        let identifier = par.lexer.token_as_str();
+
+        par.lexer.consume();
+
+        match par.lexer.token {
+            Token::Identifier     |
+            Token::KeywordStorage |
+            Token::KeywordMemory  => {
+                let type_name: TypeNameNode<'ast> = par.node_at(start, end, identifier);
+                let declaration = par.variable_declaration_from::<Context>(type_name)?;
+
+                return par.variable_definition_statement_from(declaration);
+            },
+            _ => {}
+        }
+
+        let identifier = par.node_at(start, end, identifier);
+        let expression = par.nested_expression::<TopPrecedence>(identifier);
+
+        par.wrap_expression(expression)
+
+        // match par.variable_definition_statement() {
+        //     None => par.expression_statement(),
+        //     node => node
+        // }
+    };
+
+    const PLHLD = <Context>|par| {
+        if par.lexer.token_as_str() == "_" {
+            return par.token_statement(Placeholder);
+        }
+
+        match par.variable_definition_statement() {
+            None => par.expression_statement(),
+            node => node
+        }
+    };
+}
 
 /// A trait that allows for extra statements to be parsed in a specific context.
 /// In particular, it's used to differentiate between function and modifier
 /// bodies to allow placeholder statements (`_;`) only in the modifier definition.
-pub trait StatementContext<'ast> {
-    type LoopContext: StatementContext<'ast>;
+pub trait StatementContext {
+    type LoopContext: StatementContext;
 
     #[inline]
-    fn pre_parse(&mut Parser<'ast>) -> Option<StatementNode<'ast>> {
-        None
-    }
+    fn parse<'ast>(&mut Parser<'ast>) -> Option<StatementNode<'ast>>;
 }
 
-pub struct FunctionContext;
-pub struct ModifierContext;
+macro_rules! context {
+    ($name:ident, $loop:ident, $table:tt) => {
+        pub struct $name;
 
-pub struct FunctionLoopContext;
-pub struct ModifierLoopContext;
+        impl StatementContext for $name {
+            type LoopContext = $loop;
 
-impl<'ast> StatementContext<'ast> for FunctionContext {
-    type LoopContext = FunctionLoopContext;
-}
+            #[inline]
+            fn parse<'ast>(par: &mut Parser<'ast>) -> Option<StatementNode<'ast>> {
+                // TODO: put as const in lexer
+                const LUT: [StatementHandler<$name>; 121] = $table;
 
-impl<'ast> StatementContext<'ast> for ModifierContext {
-    type LoopContext = ModifierLoopContext;
-
-    #[inline]
-    fn pre_parse(par: &mut Parser<'ast>) -> Option<StatementNode<'ast>> {
-        match par.lexer.token {
-            Token::Identifier if par.lexer.token_as_str() == "_" => par.token_statement(Placeholder),
-            _ => None
+                LUT[par.lexer.token as usize](par, $name)
+            }
         }
     }
 }
 
-impl<'ast> StatementContext<'ast> for FunctionLoopContext {
-    type LoopContext = Self;
+context!(FunctionContext, FunctionLoopContext, [
+    _____, _____, _____, _____, _____, TUPLE, _____, BLOCK, _____, _____, _____, _____,
+//  EOF    ;      :      ,      .      (      )      {      }      [      ]      =>
 
-    #[inline]
-    fn pre_parse(par: &mut Parser<'ast>) -> Option<StatementNode<'ast>> {
-        match par.lexer.token {
-            Token::KeywordContinue => par.token_statement(ContinueStatement),
-            Token::KeywordBreak    => par.token_statement(BreakStatement),
-            _ => None
-        }
-    }
-}
+    TXPR,  IDENT, _____, _____, _____, _____, _____, _____, _____, _____, VAR,   _____,
+//  IDENT  BLTIN  CONTR  LIB    IFACE  ENUM   STRUCT MODIF  EVENT  FUNCT  VAR    ANON
 
-impl<'ast> StatementContext<'ast> for ModifierLoopContext {
-    type LoopContext = Self;
+    _____, ASM,   _____, _____, _____, DOWHL, DELET, _____, _____, FOR,   _____, IF,
+//  AS     ASM    BREAK  CONST  CONTIN DO     DELETE ELSE   EXTERN FOR    HEX    IF
 
-    #[inline]
-    fn pre_parse(par: &mut Parser<'ast>) -> Option<StatementNode<'ast>> {
-        match par.lexer.token {
-            Token::Identifier if par.lexer.token_as_str() == "_" => par.token_statement(Placeholder),
-            Token::KeywordContinue => par.token_statement(ContinueStatement),
-            Token::KeywordBreak    => par.token_statement(BreakStatement),
-            _ => None
-        }
-    }
-}
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+//  INDEX  INTERN IMPORT IS     MAP    MEM    NEW    PAY    PULIC  PRAGMA PRIV   PURE
+
+    RET,   _____, _____, _____, THIS,  THROW, _____, _____, WHILE, _____, TYP,   TYP,
+//  RET    RETNS  STORAG SUPER  THIS   THROW  USING  VIEW   WHILE  RESERV T_BOOL T_ADDR
+
+    TYP,   TYP,   TYP,   TYP,   TYP,   TYP,   TRUE,  FALSE, L_HEX, L_INT, L_RAT, L_STR,
+//  T_STR  T_BYT  T_INT  T_UINT T_FIX  T_UFIX L_TRUE L_FALS L_HEX  L_INT  L_RAT  L_STR
+
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+//  E_ETH  E_FINN E_SZAB E_WEI  T_YEAR T_WEEK T_DAYS T_HOUR T_MIN  T_SEC  :=     =:
+
+    INC,   DEC,   NOT,   B_NOT, _____, _____, _____, _____, PLUS,  MIN, _____, _____,
+//  ++     --     !      ~      *      /      %      **     +      -      <<     >>
+
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+//  <      <=     >      >=     ==     !=     &      ^      |      &&     ||     ?
+
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+//  =      +=     -=     *=     /=     %=     <<=    >>=    &=     ^=     |=     ERRTOK
+
+    _____,
+//  ERREOF
+]);
+
+context!(ModifierContext, ModifierLoopContext, [
+    _____, _____, _____, _____, _____, TUPLE, _____, BLOCK, _____, _____, _____, _____,
+    PLHLD, IDENT, _____, _____, _____, _____, _____, _____, _____, _____, VAR,   _____,
+    _____, ASM,   _____, _____, _____, DOWHL, DELET, _____, _____, FOR,   _____, IF,
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+    RET,   _____, _____, _____, THIS,  THROW, _____, _____, WHILE, _____, TYP,   TYP,
+    TYP,   TYP,   TYP,   TYP,   TYP,   TYP,   TRUE,  FALSE, L_HEX, L_INT, L_RAT, L_STR,
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+    INC,   DEC,   NOT,   B_NOT, _____, _____, _____, _____, PLUS,  MIN, _____, _____,
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+    _____,
+]);
+
+context!(FunctionLoopContext, FunctionLoopContext, [
+    _____, _____, _____, _____, _____, TUPLE, _____, BLOCK, _____, _____, _____, _____,
+    TXPR,  IDENT, _____, _____, _____, _____, _____, _____, _____, _____, VAR,   _____,
+    _____, ASM,   BREAK, _____, CONT,  DOWHL, DELET, _____, _____, FOR,   _____, IF,
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+    RET,   _____, _____, _____, THIS,  THROW, _____, _____, WHILE, _____, TYP,   TYP,
+    TYP,   TYP,   TYP,   TYP,   TYP,   TYP,   TRUE,  FALSE, L_HEX, L_INT, L_RAT, L_STR,
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+    INC,   DEC,   NOT,   B_NOT, _____, _____, _____, _____, PLUS,  MIN, _____, _____,
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+    _____,
+]);
+
+context!(ModifierLoopContext, ModifierLoopContext, [
+    _____, _____, _____, _____, _____, TUPLE, _____, BLOCK, _____, _____, _____, _____,
+    PLHLD, IDENT, _____, _____, _____, _____, _____, _____, _____, _____, VAR,   _____,
+    _____, ASM,   BREAK, _____, CONT,  DOWHL, DELET, _____, _____, FOR,   _____, IF,
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+    RET,   _____, _____, _____, THIS,  THROW, _____, _____, WHILE, _____, TYP,   TYP,
+    TYP,   TYP,   TYP,   TYP,   TYP,   TYP,   TRUE,  FALSE, L_HEX, L_INT, L_RAT, L_STR,
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+    INC,   DEC,   NOT,   B_NOT, _____, _____, _____, _____, PLUS,  MIN, _____, _____,
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
+    _____,
+]);
 
 impl<'ast> Parser<'ast> {
     pub fn statement<Context>(&mut self) -> Option<StatementNode<'ast>>
     where
-        Context: StatementContext<'ast>,
+        Context: StatementContext,
     {
-        if let statement @ Some(_) = Context::pre_parse(self) {
-            return statement;
-        }
-
-        match self.lexer.token {
-            Token::BraceOpen       => Some(self.block::<Context, _>()),
-            Token::KeywordIf       => self.if_statement::<Context>(),
-            Token::KeywordWhile    => self.while_statement::<Context>(),
-            Token::KeywordFor      => self.for_statement::<Context>(),
-            Token::KeywordDo       => self.do_while_statement::<Context>(),
-            Token::KeywordReturn   => self.return_statement(),
-            Token::KeywordThrow    => self.token_statement(ThrowStatement),
-            Token::KeywordAssembly => self.inline_assembly_statement(),
-            Token::DeclarationVar  => self.inferred_definition_statement(),
-
-            // _ => match self.expression_statement() {
-            //     None => self.variable_definition_statement(),
-            //     node => node,
-            // }
-            _ => match self.variable_definition_statement() {
-                None => self.expression_statement(),
-                node => node,
-            }
-        }
+        Context::parse(self)
     }
 
     pub fn simple_statement(&mut self) -> Option<SimpleStatementNode<'ast>> {
@@ -111,7 +215,7 @@ impl<'ast> Parser<'ast> {
     pub fn block<Context, B>(&mut self) -> Node<'ast, B>
     where
         B: From<Block<'ast>> + Copy,
-        Context: StatementContext<'ast>,
+        Context: StatementContext,
     {
         let start = self.lexer.start_then_consume();
         let body  = GrowableList::new();
@@ -140,7 +244,7 @@ impl<'ast> Parser<'ast> {
 
     fn if_statement<Context>(&mut self) -> Option<StatementNode<'ast>>
     where
-        Context: StatementContext<'ast>,
+        Context: StatementContext,
     {
         let start = self.lexer.start_then_consume();
 
@@ -174,7 +278,7 @@ impl<'ast> Parser<'ast> {
 
     fn while_statement<Context>(&mut self) -> Option<StatementNode<'ast>>
     where
-        Context: StatementContext<'ast>,
+        Context: StatementContext,
     {
         let start = self.lexer.start_then_consume();
 
@@ -194,7 +298,7 @@ impl<'ast> Parser<'ast> {
 
     fn for_statement<Context>(&mut self) -> Option<StatementNode<'ast>>
     where
-        Context: StatementContext<'ast>,
+        Context: StatementContext,
     {
         let start = self.lexer.start_then_consume();
 
@@ -226,7 +330,7 @@ impl<'ast> Parser<'ast> {
 
     fn do_while_statement<Context>(&mut self) -> Option<StatementNode<'ast>>
     where
-        Context: StatementContext<'ast>,
+        Context: StatementContext,
     {
         let start = self.lexer.start_then_consume();
         let body  = expect!(self, self.statement::<Context::LoopContext>());
@@ -282,6 +386,16 @@ impl<'ast> Parser<'ast> {
         self.node_at(expression.start, end, expression)
     }
 
+    pub fn wrap_expression<S>(&mut self, expression: ExpressionNode<'ast>) -> Option<Node<'ast, S>>
+    where
+        S: From<ExpressionNode<'ast>> + Copy,
+    {
+        let expression = expression;
+        let end        = self.expect_end(Token::Semicolon);
+
+        self.node_at(expression.start, end, expression)
+    }
+
     /// `S` should be either `Statement` or `SimpleStatement`
     fn variable_definition_statement<S>(&mut self) -> Option<Node<'ast, S>>
     where
@@ -289,6 +403,14 @@ impl<'ast> Parser<'ast> {
     {
         let declaration = self.variable_declaration::<StatementTypeNameContext>()?;
 
+        self.variable_definition_statement_from(declaration)
+    }
+
+    #[inline]
+    fn variable_definition_statement_from<S>(&mut self, declaration: VariableDeclarationNode<'ast>) -> Option<Node<'ast, S>>
+    where
+        S: From<VariableDefinitionStatement<'ast>> + Copy,
+    {
         let init;
 
         if self.allow(Token::Assign) {
