@@ -19,10 +19,10 @@ static LUT: [ExpressionHandler; 121] = [
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
 //  INDEX  INTERN IMPORT IS     MAP    MEM    NEW    PAY    PULIC  PRAGMA PRIV   PURE
 
-    _____, _____, _____, _____, THIS,  _____, _____, _____, _____, _____, ELTYP, ELTYP,
+    _____, _____, _____, _____, THIS,  _____, _____, _____, _____, _____, BOOL,  ADDR,
 //  RET    RETNS  STORAG SUPER  THIS   THROW  USING  VIEW   WHILE  RESERV T_BOOL T_ADDR
 
-    ELTYP, ELTYP, ELTYP, ELTYP, ELTYP, ELTYP, TRUE,  FALSE, L_HEX, L_INT, L_RAT, L_STR,
+    STR,   BYTE,  INT,   UINT,  FIXED, UFIXD, TRUE,  FALSE, L_HEX, L_INT, L_RAT, L_STR,
 //  T_STR  T_BYT  T_INT  T_UINT T_FIX  T_UFIX L_TRUE L_FALS L_HEX  L_INT  L_RAT  L_STR
 
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
@@ -76,7 +76,21 @@ macro_rules! create_handlers {
 create_handlers! {
     const _____ = |_| None;
 
-    const ELTYP = |par| par.elementary_type_name();
+    const BOOL = |par| par.bool_type_name();
+
+    const ADDR = |par| par.address_type_name();
+
+    const STR = |par| par.string_type_name();
+
+    const BYTE = |par| par.byte_type_name();
+
+    const INT = |par| par.int_type_name();
+
+    const UINT = |par| par.uint_type_name();
+
+    const FIXED = |par| par.fixed_type_name();
+
+    const UFIXD = |par| par.ufixed_type_name();
 
     pub const IDENT = |par| par.identifier_expression();
 

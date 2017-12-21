@@ -113,6 +113,7 @@ impl<'ast> Parser<'ast> {
         }
     }
 
+    #[inline]
     fn parameter(&mut self) -> Option<Node<'ast, Parameter<'ast>>> {
         let type_name = self.type_name::<RegularTypeNameContext>()?;
         let name      = self.allow_str_node(Token::Identifier);

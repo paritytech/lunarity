@@ -8,85 +8,6 @@ use lexer::Token;
 
 type StatementHandler<C> = for<'ast> fn(&mut Parser<'ast>, C) -> Option<StatementNode<'ast>>;
 
-macro_rules! create_handlers {
-    ($( const $name:ident = <$context:ident>|$par:tt| $code:expr; )*) => {
-        $(
-            #[allow(non_snake_case)]
-            fn $name<'ast, $context: StatementContext>($par: &mut Parser<'ast>, _ctx: $context) -> Option<StatementNode<'ast>> {
-                $code
-            }
-        )*
-    };
-}
-
-create_handlers! {
-    const _____ = <Context>|_| None;
-
-    const BLOCK = <Context>|par| Some(par.block::<Context, _>());
-
-    const IF = <Context>|par| par.if_statement::<Context>();
-
-    const WHILE = <Context>|par| par.while_statement::<Context>();
-
-    const FOR = <Context>|par| par.for_statement::<Context>();
-
-    const DOWHL = <Context>|par| par.do_while_statement::<Context>();
-
-    const RET = <Context>|par| par.return_statement();
-
-    const THROW = <Context>|par| par.token_statement(ThrowStatement);
-
-    const CONT = <Context>|par| par.token_statement(ContinueStatement);
-
-    const BREAK = <Context>|par| par.token_statement(BreakStatement);
-
-    const ASM = <Context>|par| par.inline_assembly_statement();
-
-    const VAR = <Context>|par| par.inferred_definition_statement();
-
-    const TYP = <Context>|par| par.variable_definition_statement();
-
-    const TXPR = <Context>|par| {
-        let (start, end) = par.lexer.loc();
-        let identifier = par.lexer.token_as_str();
-
-        par.lexer.consume();
-
-        match par.lexer.token {
-            Token::Identifier     |
-            Token::KeywordStorage |
-            Token::KeywordMemory  => {
-                let type_name: TypeNameNode<'ast> = par.node_at(start, end, identifier);
-                let declaration = par.variable_declaration_from::<Context>(type_name)?;
-
-                return par.variable_definition_statement_from(declaration);
-            },
-            _ => {}
-        }
-
-        let identifier = par.node_at(start, end, identifier);
-        let expression = par.nested_expression::<TopPrecedence>(identifier);
-
-        par.wrap_expression(expression)
-
-        // match par.variable_definition_statement() {
-        //     None => par.expression_statement(),
-        //     node => node
-        // }
-    };
-
-    const PLHLD = <Context>|par| {
-        if par.lexer.token_as_str() == "_" {
-            return par.token_statement(Placeholder);
-        }
-
-        match par.variable_definition_statement() {
-            None => par.expression_statement(),
-            node => node
-        }
-    };
-}
-
 /// A trait that allows for extra statements to be parsed in a specific context.
 /// In particular, it's used to differentiate between function and modifier
 /// bodies to allow placeholder statements (`_;`) only in the modifier definition.
@@ -128,16 +49,16 @@ context!(FunctionContext, FunctionLoopContext, [
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
 //  INDEX  INTERN IMPORT IS     MAP    MEM    NEW    PAY    PULIC  PRAGMA PRIV   PURE
 
-    RET,   _____, _____, _____, THIS,  THROW, _____, _____, WHILE, _____, TYP,   TYP,
+    RET,   _____, _____, _____, THIS,  THROW, _____, _____, WHILE, _____, BOOL,  ADDR,
 //  RET    RETNS  STORAG SUPER  THIS   THROW  USING  VIEW   WHILE  RESERV T_BOOL T_ADDR
 
-    TYP,   TYP,   TYP,   TYP,   TYP,   TYP,   TRUE,  FALSE, L_HEX, L_INT, L_RAT, L_STR,
+    STR,   BYTE,  INT,   UINT,  FIXED, UFIXD, TRUE,  FALSE, L_HEX, L_INT, L_RAT, L_STR,
 //  T_STR  T_BYT  T_INT  T_UINT T_FIX  T_UFIX L_TRUE L_FALS L_HEX  L_INT  L_RAT  L_STR
 
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
 //  E_ETH  E_FINN E_SZAB E_WEI  T_YEAR T_WEEK T_DAYS T_HOUR T_MIN  T_SEC  :=     =:
 
-    INC,   DEC,   NOT,   B_NOT, _____, _____, _____, _____, PLUS,  MIN, _____, _____,
+    INC,   DEC,   NOT,   B_NOT, _____, _____, _____, _____, PLUS,  MIN,   _____, _____,
 //  ++     --     !      ~      *      /      %      **     +      -      <<     >>
 
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
@@ -155,10 +76,10 @@ context!(ModifierContext, ModifierLoopContext, [
     PLHLD, IDENT, _____, _____, _____, _____, _____, _____, _____, _____, VAR,   _____,
     _____, ASM,   _____, _____, _____, DOWHL, DELET, _____, _____, FOR,   _____, IF,
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    RET,   _____, _____, _____, THIS,  THROW, _____, _____, WHILE, _____, TYP,   TYP,
-    TYP,   TYP,   TYP,   TYP,   TYP,   TYP,   TRUE,  FALSE, L_HEX, L_INT, L_RAT, L_STR,
+    RET,   _____, _____, _____, THIS,  THROW, _____, _____, WHILE, _____, BOOL,  ADDR,
+    STR,   BYTE,  INT,   UINT,  FIXED, UFIXD, TRUE,  FALSE, L_HEX, L_INT, L_RAT, L_STR,
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    INC,   DEC,   NOT,   B_NOT, _____, _____, _____, _____, PLUS,  MIN, _____, _____,
+    INC,   DEC,   NOT,   B_NOT, _____, _____, _____, _____, PLUS,  MIN,   _____, _____,
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
     _____,
@@ -169,10 +90,10 @@ context!(FunctionLoopContext, FunctionLoopContext, [
     TXPR,  IDENT, _____, _____, _____, _____, _____, _____, _____, _____, VAR,   _____,
     _____, ASM,   BREAK, _____, CONT,  DOWHL, DELET, _____, _____, FOR,   _____, IF,
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    RET,   _____, _____, _____, THIS,  THROW, _____, _____, WHILE, _____, TYP,   TYP,
-    TYP,   TYP,   TYP,   TYP,   TYP,   TYP,   TRUE,  FALSE, L_HEX, L_INT, L_RAT, L_STR,
+    RET,   _____, _____, _____, THIS,  THROW, _____, _____, WHILE, _____, BOOL,  ADDR,
+    STR,   BYTE,  INT,   UINT,  FIXED, UFIXD, TRUE,  FALSE, L_HEX, L_INT, L_RAT, L_STR,
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    INC,   DEC,   NOT,   B_NOT, _____, _____, _____, _____, PLUS,  MIN, _____, _____,
+    INC,   DEC,   NOT,   B_NOT, _____, _____, _____, _____, PLUS,  MIN,   _____, _____,
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
     _____,
@@ -183,14 +104,142 @@ context!(ModifierLoopContext, ModifierLoopContext, [
     PLHLD, IDENT, _____, _____, _____, _____, _____, _____, _____, _____, VAR,   _____,
     _____, ASM,   BREAK, _____, CONT,  DOWHL, DELET, _____, _____, FOR,   _____, IF,
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    RET,   _____, _____, _____, THIS,  THROW, _____, _____, WHILE, _____, TYP,   TYP,
-    TYP,   TYP,   TYP,   TYP,   TYP,   TYP,   TRUE,  FALSE, L_HEX, L_INT, L_RAT, L_STR,
+    RET,   _____, _____, _____, THIS,  THROW, _____, _____, WHILE, _____, BOOL,  ADDR,
+    STR,   BYTE,  INT,   UINT,  FIXED, UFIXD, TRUE,  FALSE, L_HEX, L_INT, L_RAT, L_STR,
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    INC,   DEC,   NOT,   B_NOT, _____, _____, _____, _____, PLUS,  MIN, _____, _____,
+    INC,   DEC,   NOT,   B_NOT, _____, _____, _____, _____, PLUS,  MIN,   _____, _____,
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
     _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
     _____,
 ]);
+
+macro_rules! create_handlers {
+    ($( const $name:ident = <$context:ident>|$par:tt| $code:expr; )*) => {
+        $(
+            #[allow(non_snake_case)]
+            fn $name<'ast, $context: StatementContext>($par: &mut Parser<'ast>, _ctx: $context) -> Option<StatementNode<'ast>> {
+                $code
+            }
+        )*
+    };
+}
+
+create_handlers! {
+    const _____ = <Context>|_| None;
+
+    const BLOCK = <Context>|par| Some(par.block::<Context, _>());
+
+    const IF = <Context>|par| par.if_statement::<Context>();
+
+    const WHILE = <Context>|par| par.while_statement::<Context>();
+
+    const FOR = <Context>|par| par.for_statement::<Context>();
+
+    const DOWHL = <Context>|par| par.do_while_statement::<Context>();
+
+    const RET = <Context>|par| par.return_statement();
+
+    const THROW = <Context>|par| par.token_statement(ThrowStatement);
+
+    const CONT = <Context>|par| par.token_statement(ContinueStatement);
+
+    const BREAK = <Context>|par| par.token_statement(BreakStatement);
+
+    const ASM = <Context>|par| par.inline_assembly_statement();
+
+    const VAR = <Context>|par| par.inferred_definition_statement();
+
+    const BOOL = <Context>|par| {
+        let type_name = par.bool_type_name();
+        let declaration = par.variable_declaration_from::<Context>(type_name);
+
+        par.variable_definition_statement_from(declaration)
+    };
+
+    const ADDR = <Context>|par| {
+        let type_name = par.address_type_name();
+        let declaration = par.variable_declaration_from::<Context>(type_name);
+
+        par.variable_definition_statement_from(declaration)
+    };
+
+    const STR = <Context>|par| {
+        let type_name = par.string_type_name();
+        let declaration = par.variable_declaration_from::<Context>(type_name);
+
+        par.variable_definition_statement_from(declaration)
+    };
+
+    const BYTE = <Context>|par| {
+        let type_name = par.byte_type_name();
+        let declaration = par.variable_declaration_from::<Context>(type_name);
+
+        par.variable_definition_statement_from(declaration)
+    };
+
+    const INT = <Context>|par| {
+        let type_name = par.int_type_name();
+        let declaration = par.variable_declaration_from::<Context>(type_name);
+
+        par.variable_definition_statement_from(declaration)
+    };
+
+    const UINT = <Context>|par| {
+        let type_name = par.uint_type_name();
+        let declaration = par.variable_declaration_from::<Context>(type_name);
+
+        par.variable_definition_statement_from(declaration)
+    };
+
+    const FIXED = <Context>|par| {
+        let type_name = par.fixed_type_name();
+        let declaration = par.variable_declaration_from::<Context>(type_name);
+
+        par.variable_definition_statement_from(declaration)
+    };
+
+    const UFIXD = <Context>|par| {
+        let type_name = par.ufixed_type_name();
+        let declaration = par.variable_declaration_from::<Context>(type_name);
+
+        par.variable_definition_statement_from(declaration)
+    };
+
+    const TXPR = <Context>|par| {
+        let (start, end) = par.lexer.loc();
+        let identifier = par.lexer.token_as_str();
+
+        par.lexer.consume();
+
+        match par.lexer.token {
+            Token::Identifier     |
+            Token::KeywordStorage |
+            Token::KeywordMemory  => {
+                let type_name: TypeNameNode<'ast> = par.node_at(start, end, identifier);
+                let declaration = par.variable_declaration_from::<Context>(type_name);
+
+                return par.variable_definition_statement_from(declaration);
+            },
+            _ => {}
+        }
+
+        let identifier = par.node_at(start, end, identifier);
+        let expression = par.nested_expression::<TopPrecedence>(identifier);
+
+        par.wrap_expression(expression)
+    };
+
+    const PLHLD = <Context>|par| {
+        if par.lexer.token_as_str() == "_" {
+            return par.token_statement(Placeholder);
+        }
+
+        match par.variable_definition_statement() {
+            None => par.expression_statement(),
+            node => node
+        }
+    };
+}
 
 impl<'ast> Parser<'ast> {
     pub fn statement<Context>(&mut self) -> Option<StatementNode<'ast>>
@@ -242,6 +291,7 @@ impl<'ast> Parser<'ast> {
         self.node_at(start, end, statement)
     }
 
+    #[inline]
     fn if_statement<Context>(&mut self) -> Option<StatementNode<'ast>>
     where
         Context: StatementContext,
