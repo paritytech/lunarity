@@ -26,7 +26,6 @@ Feel free to rerun the benchmarks (requires nightly Rust, with rustup: `rustup r
 
 ## License
 
-This crate is distributed under the terms of both the MIT license
-and the Apache License (Version 2.0). Choose whichever one works best for you.
+This crate is distributed under the terms of GNU GENERAL PUBLIC LICENSE version 3.0.
 
-See [LICENSE-APACHE](LICENSE-APACHE) and [LICENSE-MIT](LICENSE-MIT) for details.
+See [LICENSE](LICENSE) for details.
