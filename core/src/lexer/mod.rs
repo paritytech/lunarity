@@ -1132,7 +1132,7 @@ mod test {
                 (TypeUint, "uint"),
                 (TypeString, "string"),
                 (TypeByte, "byte"),
-                (TypeByte, "bytes"),
+                (TypeBytes, "bytes"),
                 (TypeAddress, "address"),
                 (TypeFixed, "fixed"),
                 (TypeUfixed, "ufixed"),

@@ -50,6 +50,7 @@ impl<'ast> Parser<'ast> {
                 Token::TypeAddress    => ElementaryTypeName::Address,
                 Token::TypeString     => ElementaryTypeName::String,
                 Token::TypeByte       => ElementaryTypeName::Byte(size.0),
+                Token::TypeBytes      => ElementaryTypeName::Bytes,
                 Token::TypeInt        => ElementaryTypeName::Int(size.0),
                 Token::TypeUint       => ElementaryTypeName::Uint(size.0),
                 Token::TypeFixed      => ElementaryTypeName::Fixed(size.0, size.1),
