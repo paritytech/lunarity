@@ -1,4 +1,4 @@
-use ast::*;
+use {*};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Expression<'ast> {

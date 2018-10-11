@@ -1,3 +1,9 @@
+extern crate toolshed;
+
+#[cfg(test)]
+#[macro_use]
+extern crate pretty_assertions;
+
 #[macro_use]
 mod impl_from;
 mod node;
@@ -13,14 +19,14 @@ use toolshed::list::{List, UnsafeList};
 use toolshed::Arena;
 use std::marker::PhantomData;
 
-pub use ast::node::{Node, NodeInner, OptionalLocation};
-pub use ast::source::*;
-pub use ast::contract::*;
-pub use ast::function::*;
-pub use ast::type_name::*;
-pub use ast::expression::*;
-pub use ast::statement::*;
-pub use ast::assembly::*;
+pub use self::node::{Node, NodeInner, OptionalLocation};
+pub use self::source::*;
+pub use self::contract::*;
+pub use self::function::*;
+pub use self::type_name::*;
+pub use self::expression::*;
+pub use self::statement::*;
+pub use self::assembly::*;
 
 /// Useful for boolean flags that need location information via FlagNode,
 /// for example: `indexed` or `anonymous`.
@@ -55,7 +61,7 @@ pub struct Program<'ast> {
 
 impl<'ast> Program<'ast> {
     #[inline]
-    pub(crate) fn new(body: UnsafeList, arena: Arena) -> Self {
+    pub fn new(body: UnsafeList, arena: Arena) -> Self {
         Program {
             body,
             arena,

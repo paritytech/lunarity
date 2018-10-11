@@ -1,7 +1,7 @@
 use toolshed::list::GrowableList;
 
 use ast::*;
-use parser::Parser;
+use Parser;
 use lexer::Token;
 
 impl<'ast> Parser<'ast> {

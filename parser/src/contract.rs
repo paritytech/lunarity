@@ -1,7 +1,7 @@
 use toolshed::list::{ListBuilder, GrowableList};
 
 use ast::*;
-use parser::{Parser, ModifierContext, TopPrecedence, RegularTypeNameContext};
+use {Parser, ModifierContext, TopPrecedence, RegularTypeNameContext};
 use lexer::Token;
 
 impl<'ast> Parser<'ast> {
@@ -255,7 +255,7 @@ impl<'ast> Parser<'ast> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use parser::mock::{Mock, assert_units};
+    use mock::{Mock, assert_units};
 
     #[test]
     fn empty_contract() {

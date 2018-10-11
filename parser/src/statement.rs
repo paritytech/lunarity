@@ -1,7 +1,7 @@
 use toolshed::list::{List, GrowableList, ListBuilder};
 
 use ast::*;
-use parser::{Parser, TopPrecedence, StatementTypeNameContext};
+use {Parser, TopPrecedence, StatementTypeNameContext};
 use lexer::Token;
 
 /// A trait that allows for extra statements to be parsed in a specific context.
@@ -354,7 +354,7 @@ impl<'ast> Parser<'ast> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use parser::mock::{Mock, assert_units};
+    use mock::{Mock, assert_units};
 
     #[test]
     fn empty_block() {
@@ -765,7 +765,7 @@ mod test {
 
     #[test]
     fn cannot_use_break_or_continue_outside_loops() {
-        use parser::parse;
+        use parse;
 
         assert!(parse(r#"
 

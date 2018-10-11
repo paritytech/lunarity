@@ -1,6 +1,6 @@
 use toolshed::list::List;
 
-use ast::*;
+use {*};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Statement<'ast> {

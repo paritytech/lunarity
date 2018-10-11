@@ -1,6 +1,9 @@
 [workspace]
 members = [
-    "core",
+    "lunarity",
+    "ast",
+    "parser",
+    "lexer",
 ]
 
 [profile]
