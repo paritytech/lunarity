@@ -47,7 +47,7 @@ pub fn assert_units<'mock, E>(source: &str, expected: E)
 where
     E: AsRef<[SourceUnitNode<'mock>]>
 {
-    use parser::parse;
+    use parse;
 
     let program = parse(source).unwrap();
 

@@ -1,5 +1,14 @@
+extern crate toolshed;
+extern crate lunarity_lexer as lexer;
+extern crate lunarity_ast as ast;
+
 #[cfg(test)] mod mock;
 #[macro_use] mod expect_macro;
+
+#[cfg(test)]
+#[macro_use]
+extern crate pretty_assertions;
+
 
 mod source;
 mod type_name;
@@ -13,14 +22,14 @@ mod assembly;
 use toolshed::Arena;
 use toolshed::list::GrowableList;
 
-pub use parser::statement::{StatementContext, FunctionContext, ModifierContext};
-pub use parser::type_name::{TypeNameContext, RegularTypeNameContext, StatementTypeNameContext};
-pub use parser::nested::*;
+pub use self::statement::{StatementContext, FunctionContext, ModifierContext};
+pub use self::type_name::{TypeNameContext, RegularTypeNameContext, StatementTypeNameContext};
+pub use self::nested::*;
 
 use ast::*;
 use lexer::{Lexer, Token};
 use lexer::Token::*;
-use error::Error;
+use lexer::error::Error;
 
 
 pub struct Parser<'ast> {
@@ -209,7 +218,7 @@ mod test {
 
     #[test]
     fn can_parse_second_price_auction() {
-        let source = include_str!("../../benches/second-price-auction.sol");
+        let source = include_str!("../../lunarity/benches/second-price-auction.sol");
 
         parse(source).unwrap();
     }

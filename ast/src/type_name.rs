@@ -1,4 +1,4 @@
-use ast::*;
+use {*};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum TypeName<'ast> {

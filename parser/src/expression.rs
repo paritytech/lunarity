@@ -1,7 +1,7 @@
 use toolshed::list::ListBuilder;
 
 use ast::*;
-use parser::{Parser, Precedence, Precedence2, TopPrecedence};
+use {Parser, Precedence, Precedence2, TopPrecedence};
 use lexer::Token;
 
 impl<'ast> Parser<'ast> {
@@ -115,7 +115,7 @@ impl<'ast> Parser<'ast> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use parser::mock::{Mock, assert_units};
+    use mock::{Mock, assert_units};
 
     #[test]
     fn nested_expressions() {

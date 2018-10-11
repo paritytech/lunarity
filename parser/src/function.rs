@@ -1,7 +1,7 @@
 use toolshed::list::{ListBuilder, GrowableList};
 
 use ast::*;
-use parser::{Parser, FunctionContext, RegularTypeNameContext};
+use {Parser, FunctionContext, RegularTypeNameContext};
 use lexer::Token;
 
 impl<'ast> Parser<'ast> {
@@ -129,7 +129,7 @@ impl<'ast> Parser<'ast> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use parser::mock::{Mock, assert_units};
+    use mock::{Mock, assert_units};
 
     #[test]
     fn empty_function() {
@@ -428,7 +428,7 @@ mod test {
 
     #[test]
     fn function_flags_are_unique_per_kind() {
-        use parser::parse;
+        use parse;
 
         // TODO: Better errors
         assert!(parse("contract Foo { function() public public; }").is_err());

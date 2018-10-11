@@ -1,4 +1,4 @@
-use ast::*;
+use {*};
 
 /// A `SourceUnit` is the top level construct of the grammar.
 #[derive(Clone, Copy, Debug, PartialEq)]

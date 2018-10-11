@@ -1,5 +1,5 @@
 use std::fmt::{self, Debug};
-use lexer::Token;
+use Token;
 
 /// Error type used by the tokenizer and the parser internally.
 #[derive(PartialEq, Clone)]

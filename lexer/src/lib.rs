@@ -1,16 +1,19 @@
+extern crate toolshed;
+
 mod token;
 mod labels;
 mod util;
+pub mod error;
 
-pub use lexer::token::Token;
+pub use self::token::Token;
 
-use lexer::util::legal_in_label;
-use lexer::labels::*;
-use lexer::token::Token::*;
+use self::util::legal_in_label;
+use self::labels::*;
+use self::token::Token::*;
 
 use std::str;
 use std::marker::PhantomData;
-use error::Error;
+use self::error::Error;
 use toolshed::Arena;
 
 macro_rules! expect_byte {
@@ -1324,7 +1327,7 @@ mod test {
 
     #[test]
     fn second_price_auction() {
-        let source = include_str!("../../benches/second-price-auction.sol");
+        let source = include_str!("../../lunarity/benches/second-price-auction.sol");
 
         let arena = Arena::new();
         let mut lex = Lexer::new(&arena, source);

@@ -1,5 +1,5 @@
 use ast::*;
-use parser::Parser;
+use Parser;
 use lexer::Token;
 
 pub trait TypeNameContext<'ast> {

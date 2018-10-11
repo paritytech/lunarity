@@ -1,7 +1,7 @@
-use lexer::{ByteHandler, Lexer};
-use lexer::util::legal_in_label;
-use lexer::token::Token;
-use lexer::token::Token::*;
+use {ByteHandler, Lexer};
+use util::legal_in_label;
+use token::Token;
+use token::Token::*;
 
 macro_rules! byte {
     // Mapping alphabet to ASCII bytes
