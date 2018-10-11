@@ -124,7 +124,7 @@ pub const L_B: ByteHandler = Some(|lex| {
         [ y t e
             [     => { lex.type_size.0 = 1; TypeByte } ]
             [ s
-                [                         => { lex.type_size.0 = 32; TypeBytes } ]
+                [                         => { TypeBytes } ]
                 [ (b'1'...b'9') @ bytes32 => TypeByte ]
             ]
         ]
