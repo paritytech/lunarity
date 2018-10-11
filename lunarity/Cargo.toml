@@ -9,6 +9,6 @@ repository = "https://github.com/maciejhirsz/lunarity"
 lunarity-ast = { path = "../ast" }
 lunarity-lexer = { path = "../lexer" }
 lunarity-parser = { path = "../parser" }
-toolshed = "0.4"
 
-[dev.dependencies]
+[dev-dependencies]
+toolshed = "0.4"
