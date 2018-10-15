@@ -8,8 +8,8 @@ description = "A high performance Solidity language Parser"
 
 [dependencies]
 toolshed = "0.4"
-lunarity-lexer = { path ="../lexer" }
-lunarity-ast = { path = "../ast" }
+lunarity-lexer = "0.1"
+lunarity-ast = "0.1"
 
 [dev-dependencies]
 pretty_assertions = "0.4"
