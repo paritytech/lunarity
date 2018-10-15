@@ -1,7 +1,9 @@
 [package]
 name = "lunarity-lexer"
 version = "0.1.0"
-authors = ["Maciej Hirsz <maciej.hirsz@gmail.com>"]
+authors = ["Parity Technologies <admin@parity.io>"]
+license = "GPL-3.0"
+repository = "https://github.com/paritytech/lunarity"
 
 [dependencies]
 toolshed = "0.4"

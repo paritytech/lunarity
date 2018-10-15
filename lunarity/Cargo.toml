@@ -1,9 +1,9 @@
 [package]
 name = "lunarity"
 version = "0.1.0"
-authors = ["Maciej Hirsz <maciej.hirsz@gmail.com>"]
+authors = ["Parity Technologies <admin@parity.io>"]
 license = "GPL-3.0"
-repository = "https://github.com/maciejhirsz/lunarity"
+repository = "https://github.com/paritytech/lunarity"
 
 [dependencies]
 lunarity-ast = { path = "../ast" }
