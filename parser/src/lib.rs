@@ -18,6 +18,7 @@ mod expression;
 mod nested;
 mod statement;
 mod assembly;
+mod error;
 
 use toolshed::Arena;
 use toolshed::list::GrowableList;
@@ -27,16 +28,16 @@ pub use self::type_name::{TypeNameContext, RegularTypeNameContext, StatementType
 pub use self::nested::*;
 
 use ast::*;
+use error::Error;
 use lexer::{Lexer, Token};
 use lexer::Token::*;
-use lexer::error::Error;
 
 
 pub struct Parser<'ast> {
     arena: &'ast Arena,
 
     /// Lexer will produce tokens from the source
-    lexer: Lexer<'ast>,
+    lexer: Lexer<&'ast str>,
 
     /// Errors occurred during parsing
     errors: Vec<Error>,
@@ -47,9 +48,11 @@ pub struct Parser<'ast> {
 
 impl<'ast> Parser<'ast> {
     pub fn new(source: &str, arena: &'ast Arena) -> Self {
+        let source = arena.alloc_str(source);
+
         Parser {
             arena,
-            lexer: Lexer::new(arena, source),
+            lexer: Lexer::new(source),
             errors: Vec::new(),
             body: NodeList::empty(),
         }
@@ -58,7 +61,7 @@ impl<'ast> Parser<'ast> {
     #[inline]
     fn allow(&mut self, token: Token) -> bool {
         if self.lexer.token == token {
-            self.lexer.consume();
+            self.lexer.advance();
             true
         } else {
             false
@@ -68,7 +71,7 @@ impl<'ast> Parser<'ast> {
     #[inline]
     fn expect(&mut self, token: Token) {
         if self.lexer.token == token {
-            self.lexer.consume();
+            self.lexer.advance();
         } else {
             self.error();
         }
@@ -76,8 +79,8 @@ impl<'ast> Parser<'ast> {
 
     #[inline]
     fn expect_exact(&mut self, token: Token, expected: &str) {
-        if self.lexer.token == token && self.lexer.token_as_str() == expected {
-            self.lexer.consume();
+        if self.lexer.token == token && self.lexer.slice() == expected {
+            self.lexer.advance();
         } else {
             self.error();
         }
@@ -85,7 +88,7 @@ impl<'ast> Parser<'ast> {
 
     #[inline]
     fn expect_end(&mut self, token: Token) -> u32 {
-        let end = self.lexer.end();
+        let end = self.lexer.range().end as u32;
 
         self.expect(token);
 
@@ -97,15 +100,15 @@ impl<'ast> Parser<'ast> {
     where
         R: From<Node<'ast, &'ast str>>,
     {
-        let node = self.lexer.token_as_str();
+        let node = self.lexer.slice();
 
         self.node_at_token(node)
     }
 
     #[inline]
     fn expect_str_node(&mut self, token: Token) -> Node<'ast, &'ast str> {
-        let val          = self.lexer.token_as_str();
-        let (start, end) = self.lexer.loc();
+        let val          = self.lexer.slice();
+        let (start, end) = self.loc();
 
         self.expect(token);
 
@@ -130,8 +133,41 @@ impl<'ast> Parser<'ast> {
         }
     }
 
+    #[inline]
+    fn loc(&mut self) -> (u32, u32) {
+        let range = self.lexer.range();
+
+        (range.start as u32, range.end as u32)
+    }
+
+    #[inline]
+    fn start_then_advance(&mut self) -> u32 {
+        let start = self.lexer.range().start as u32;
+
+        self.lexer.advance();
+
+        start
+    }
+
+    #[inline]
+    fn end_then_advance(&mut self) -> u32 {
+        let end = self.lexer.range().end as u32;
+
+        self.lexer.advance();
+
+        end
+    }
+
     fn error(&mut self) {
-        self.errors.push(self.lexer.invalid_token());
+        let token = self.lexer.token;
+        let raw   = self.lexer.slice().into();
+        let span  = self.lexer.range();
+
+        self.errors.push(Error {
+            token,
+            raw,
+            span,
+        });
     }
 
     #[inline]
@@ -159,9 +195,9 @@ impl<'ast> Parser<'ast> {
         I: Into<T>,
         R: From<Node<'ast, T>>,
     {
-        let (start, end) = self.lexer.loc();
+        let (start, end) = self.loc();
 
-        self.lexer.consume();
+        self.lexer.advance();
 
         self.node_at(start, end, item)
     }

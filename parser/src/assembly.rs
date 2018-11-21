@@ -9,7 +9,7 @@ impl<'ast> Parser<'ast> {
     where
         B: From<InlineAssemblyBlock<'ast>> + Copy,
     {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
         let items = GrowableList::new();
 
         while let Some(item) = self.assembly_item() {
@@ -32,10 +32,10 @@ impl<'ast> Parser<'ast> {
     }
 
     fn assembly_identifier(&mut self) -> Option<AssemblyItemNode<'ast>> {
-        let (start, end) = self.lexer.loc();
-        let identifier = self.lexer.token_as_str();
+        let (start, end) = self.loc();
+        let identifier = self.lexer.slice();
 
-        self.lexer.consume();
+        self.lexer.advance();
 
         if self.allow(Token::AssemblyBind) {
             let id   = self.node_at(start, end, identifier);

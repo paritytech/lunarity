@@ -32,7 +32,7 @@ impl<'ast> StatementContext<'ast> for ModifierContext {
     #[inline]
     fn pre_parse(par: &mut Parser<'ast>) -> Option<StatementNode<'ast>> {
         match par.lexer.token {
-            Token::Identifier if par.lexer.token_as_str() == "_" => par.token_statement(Placeholder),
+            Token::Identifier if par.lexer.slice() == "_" => par.token_statement(Placeholder),
             _ => None
         }
     }
@@ -57,7 +57,7 @@ impl<'ast> StatementContext<'ast> for ModifierLoopContext {
     #[inline]
     fn pre_parse(par: &mut Parser<'ast>) -> Option<StatementNode<'ast>> {
         match par.lexer.token {
-            Token::Identifier if par.lexer.token_as_str() == "_" => par.token_statement(Placeholder),
+            Token::Identifier if par.lexer.slice() == "_" => par.token_statement(Placeholder),
             Token::KeywordContinue => par.token_statement(ContinueStatement),
             Token::KeywordBreak    => par.token_statement(BreakStatement),
             _ => None
@@ -113,7 +113,7 @@ impl<'ast> Parser<'ast> {
         B: From<Block<'ast>> + Copy,
         Context: StatementContext<'ast>,
     {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
         let body  = GrowableList::new();
 
         while let Some(statement) = self.statement::<Context>() {
@@ -132,7 +132,7 @@ impl<'ast> Parser<'ast> {
     where
         S: 'ast + Copy + Into<Statement<'ast>>,
     {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
         let end   = self.expect_end(Token::Semicolon);
 
         self.node_at(start, end, statement)
@@ -142,7 +142,7 @@ impl<'ast> Parser<'ast> {
     where
         Context: StatementContext<'ast>,
     {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
 
         self.expect(Token::ParenOpen);
 
@@ -176,7 +176,7 @@ impl<'ast> Parser<'ast> {
     where
         Context: StatementContext<'ast>,
     {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
 
         self.expect(Token::ParenOpen);
 
@@ -196,7 +196,7 @@ impl<'ast> Parser<'ast> {
     where
         Context: StatementContext<'ast>,
     {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
 
         self.expect(Token::ParenOpen);
 
@@ -228,7 +228,7 @@ impl<'ast> Parser<'ast> {
     where
         Context: StatementContext<'ast>,
     {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
         let body  = expect!(self, self.statement::<Context::LoopContext>());
 
         self.expect(Token::KeywordWhile);
@@ -247,7 +247,7 @@ impl<'ast> Parser<'ast> {
     }
 
     fn return_statement(&mut self) -> Option<StatementNode<'ast>> {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
         let value = self.expression::<TopPrecedence>();
         let end   = self.expect_end(Token::Semicolon);
 
@@ -257,7 +257,7 @@ impl<'ast> Parser<'ast> {
     }
 
     fn inline_assembly_statement(&mut self) -> Option<StatementNode<'ast>> {
-        let start  = self.lexer.start_then_consume();
+        let start  = self.start_then_advance();
         let string = self.allow_str_node(Token::LiteralString);
 
         if self.lexer.token != Token::BraceOpen {
@@ -314,7 +314,7 @@ impl<'ast> Parser<'ast> {
     where
         S: From<InferredDefinitionStatement<'ast>> + Copy,
     {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
 
         let ids = if self.allow(Token::ParenOpen) {
             self.tuple_destructing()

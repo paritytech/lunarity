@@ -29,7 +29,7 @@ use logos::{Logos, Lexer, Extras, Source};
 /// - For `bytes20` this will be set to `(20, _)`
 /// - For 'ufixed128x40` this will be set to `(16, 40)`
 #[derive(Default)]
-pub struct TypeSize(u8, u8);
+pub struct TypeSize(pub u8, pub u8);
 
 impl Extras for TypeSize {}
 
@@ -263,8 +263,9 @@ pub enum Token {
     #[callback = "rational_to_integer"]
     LiteralRational,
 
-    #[regex = r#"'([^']|\\')*'"#]
-    #[regex = r#""([^"]|\\")*"|'([^']|\\')*'"#]
+    #[token = "\""]
+    #[token = "'"]
+    #[callback = "read_strings"]
     LiteralString,
 
     #[token = "ether"]
@@ -416,6 +417,31 @@ pub enum Token {
     UnexpectedEndOfProgram,
 }
 
+fn read_strings<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
+    use logos::internal::LexerInternal;
+
+    let mark = lex.slice().as_bytes()[0];
+
+    loop {
+        match lex.read() {
+            0 => return lex.token = Token::UnexpectedEndOfProgram,
+            b'\\' => {
+                match lex.next() {
+                    0 => return lex.token = Token::UnexpectedEndOfProgram,
+                    _ => lex.bump(),
+                }
+            },
+            byte => {
+                lex.bump();
+
+                if byte == mark {
+                    break;
+                }
+            }
+        }
+    }
+}
+
 fn ignore_comments<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
     use logos::internal::LexerInternal;
 
@@ -458,6 +484,10 @@ fn validate_bytes<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
 fn validate_int<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
     let slice = lex.slice();
     let cutoff = if slice.starts_with("u") { 4 } else { 3 };
+
+    if slice.len() == cutoff {
+        return lex.extras.0 = 32;
+    }
 
     let mut n = 0u16;
 
