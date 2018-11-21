@@ -17,9 +17,28 @@
 //!  ```
 //!
 
-use logos::Logos;
+use logos::{Logos, Lexer, Extras, Source};
+
+/// If the current token is an elementary type,
+/// this will hold it's size, if applicable.
+///
+/// The first number is size in bytes, the second is
+/// decimal offset for fixed point numbers.
+///
+/// - For `int64` this will be set to `(8, _)`
+/// - For `bytes20` this will be set to `(20, _)`
+/// - For 'ufixed128x40` this will be set to `(16, 40)`
+#[derive(Default)]
+pub struct TypeSize(u8, u8);
+
+impl Extras for TypeSize {}
+
+fn validate_bytes<S: Source>(_lex: &mut Lexer<Token, S>) {
+
+}
 
 #[derive(Debug, PartialEq, Clone, Copy, Logos)]
+#[extras = "TypeSize"]
 pub enum Token {
     #[end]
     EndOfProgram,
@@ -211,6 +230,7 @@ pub enum Token {
 
     // FIXME: needs a validator
     #[regex = "byte|bytes[1-9][0-9]?"]
+    #[callback = "validate_bytes"]
     TypeByte,
 
     #[token = "bytes"]
