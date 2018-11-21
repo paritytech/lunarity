@@ -841,15 +841,20 @@ mod test {
         assert_lex("   ", []);
     }
 
-    // #[test]
-    // fn line_comment() {
-    //     assert_lex(" // foo", []);
-    // }
+    #[test]
+    fn line_comment() {
+        assert_lex(" // foo\nbar", [(Identifier, "bar")]);
+    }
 
-    // #[test]
-    // fn block_comment() {
-    //     assert_lex(" /* foo */ bar", [(Identifier, "bar")]);
-    // }
+    #[test]
+    fn block_comment() {
+        assert_lex(" /* foo */ bar", [(Identifier, "bar")]);
+        assert_lex(" /* foo **/ bar", [(Identifier, "bar")]);
+        assert_lex(" /* foo ***/ bar", [(Identifier, "bar")]);
+        assert_lex(" /* foo ****/ bar", [(Identifier, "bar")]);
+        assert_lex(" /* foo *****/ bar", [(Identifier, "bar")]);
+        assert_lex(" /* foo ", [(UnexpectedEndOfProgram, "/* foo ")]);
+    }
 
     #[test]
     fn identifiers() {
@@ -910,13 +915,13 @@ mod test {
                 (LiteralHex, "0xDEAD"),
                 (LiteralHex, "0Xdead"),
                 (LiteralRational, "3.14"),
-                (LiteralRational, "3.14E+2"),
+                (LiteralInteger, "3.14E+2"),
                 (LiteralRational, ".12345"),
-                (LiteralRational, "5.1e2"),
+                (LiteralInteger, "5.1e2"),
                 (LiteralRational, "42e-3"),
-                (LiteralRational, "500E-1"),
+                (LiteralInteger, "500E-1"),
                 (LiteralRational, "500.1"),
-                (LiteralRational, "10.000"),
+                (LiteralInteger, "10.000"),
                 (LiteralString, "'foo bar'"),
                 (LiteralString, "\"doge to the moon\""),
             ][..]
@@ -1307,27 +1312,27 @@ mod test {
         );
     }
 
-    // #[test]
-    // fn not_real_types() {
-    //     assert_lex(
-    //         "
-    //             bytes33 int127 fixed127 fixed128x fixed258x80 fixed256x81
-    //             bytes0  uint0  uint53   ufixed1x1
-    //         ",
-    //          &[
-    //             (Identifier, "bytes33"),
-    //             (Identifier, "int127"),
-    //             (Identifier, "fixed127"),
-    //             (Identifier, "fixed128x"),
-    //             (Identifier, "fixed258x80"),
-    //             (Identifier, "fixed256x81"),
-    //             (Identifier, "bytes0"),
-    //             (Identifier, "uint0"),
-    //             (Identifier, "uint53"),
-    //             (Identifier, "ufixed1x1"),
-    //         ][..]
-    //     );
-    // }
+    #[test]
+    fn not_real_types() {
+        assert_lex(
+            "
+                bytes33 int127 fixed127 fixed128x fixed258x80 fixed256x81
+                bytes0  uint0  uint53   ufixed1x1
+            ",
+             &[
+                (Identifier, "bytes33"),
+                (Identifier, "int127"),
+                (Identifier, "fixed127"),
+                (Identifier, "fixed128x"),
+                (Identifier, "fixed258x80"),
+                (Identifier, "fixed256x81"),
+                (Identifier, "bytes0"),
+                (Identifier, "uint0"),
+                (Identifier, "uint53"),
+                (Identifier, "ufixed1x1"),
+            ][..]
+        );
+    }
 
     #[test]
     fn second_price_auction() {
