@@ -426,15 +426,14 @@ mod test {
         ]);
     }
 
-    // FIXME: This one runs into infinite loop
-    // #[test]
-    // fn function_flags_are_unique_per_kind() {
-    //     use parse;
+    #[test]
+    fn function_flags_are_unique_per_kind() {
+        use parse;
 
-    //     // TODO: Better errors
-    //     assert!(parse("contract Foo { function() public public; }").is_err());
-    //     assert!(parse("contract Foo { function() pure pure; }").is_err());
-    //     assert!(parse("contract Foo { function() internal external; }").is_err());
-    //     assert!(parse("contract Foo { function() payable constant; }").is_err());
-    // }
+        // TODO: Better errors
+        assert!(parse("contract Foo { function() public public; }").is_err());
+        assert!(parse("contract Foo { function() pure pure; }").is_err());
+        assert!(parse("contract Foo { function() internal external; }").is_err());
+        assert!(parse("contract Foo { function() payable constant; }").is_err());
+    }
 }

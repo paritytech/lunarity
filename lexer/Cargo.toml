@@ -7,4 +7,4 @@ repository = "https://github.com/paritytech/lunarity"
 description = "A high performance Solidity language Lexer"
 
 [dependencies]
-logos = "0.6.1"
+logos = { version = "0.6.1", features = ["nul_term_source"] }

@@ -221,6 +221,8 @@ impl<'ast> Parser<'ast> {
         F: Copy,
     {
         if at.is_some() {
+            self.lexer.advance();
+
             // TODO: More descriptive errors, something like "Can't redeclare visibility/mutability"
             return self.error();
         }

@@ -14,14 +14,14 @@ static SOURCE: &'static str = include_str!("./second-price-auction.sol");
 #[bench]
 fn tokenize(b: &mut Bencher) {
     let arena = toolshed::Arena::new();
-    let ptr = arena.alloc_str_with_nul(SOURCE);
+    let nts = arena.alloc_nul_term_str(SOURCE);
     b.bytes = SOURCE.len() as u64;
 
     b.iter(|| {
-        let mut lexer = unsafe { Lexer::from_ptr(ptr) };
+        let mut lexer = Lexer::new(nts);
 
         while lexer.token != Token::EndOfProgram {
-            lexer.consume()
+            lexer.advance()
         }
     });
 }
