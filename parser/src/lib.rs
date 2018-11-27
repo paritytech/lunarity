@@ -20,7 +20,7 @@ mod statement;
 mod assembly;
 mod error;
 
-use toolshed::Arena;
+use toolshed::{Arena, NulTermStr};
 use toolshed::list::GrowableList;
 
 pub use self::statement::{StatementContext, FunctionContext, ModifierContext};
@@ -37,7 +37,7 @@ pub struct Parser<'ast> {
     arena: &'ast Arena,
 
     /// Lexer will produce tokens from the source
-    lexer: Lexer<&'ast str>,
+    lexer: Lexer<NulTermStr<'ast>>,
 
     /// Errors occurred during parsing
     errors: Vec<Error>,
@@ -48,7 +48,7 @@ pub struct Parser<'ast> {
 
 impl<'ast> Parser<'ast> {
     pub fn new(source: &str, arena: &'ast Arena) -> Self {
-        let source = arena.alloc_str(source);
+        let source = arena.alloc_nul_term_str(source);
 
         Parser {
             arena,
