@@ -1,13 +1,13 @@
 [package]
 name = "lunarity-ast"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 license = "GPL-3.0"
 repository = "https://github.com/paritytech/lunarity"
 description = "Abstract Syntax Tree for the Solidity language"
 
 [dependencies]
-toolshed = "0.4"
+toolshed = "0.6"
 
 [dev-dependencies]
-pretty_assertions = "0.4"
+pretty_assertions = "0.5"

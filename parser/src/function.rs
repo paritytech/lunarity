@@ -6,7 +6,7 @@ use lexer::Token;
 
 impl<'ast> Parser<'ast> {
     pub fn function_definition(&mut self) -> Option<ContractPartNode<'ast>> {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
 
         let name = match self.lexer.token {
             Token::Identifier => self.str_node(),

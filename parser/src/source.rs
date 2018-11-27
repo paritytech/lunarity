@@ -15,13 +15,13 @@ impl<'ast> Parser<'ast> {
     }
 
     fn pragma_directive(&mut self) -> Option<SourceUnitNode<'ast>> {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
 
-        if self.lexer.token != Token::Identifier || self.lexer.token_as_str() != "solidity" {
+        if self.lexer.token != Token::Identifier || self.lexer.slice() != "solidity" {
             self.error();
         }
 
-        let version = self.lexer.read_pragma();
+        let version = ::lexer::read_pragma(&mut self.lexer);
         let end     = self.expect_end(Token::Semicolon);
 
         self.node_at(start, end, PragmaDirective {
@@ -30,11 +30,11 @@ impl<'ast> Parser<'ast> {
     }
 
     fn import_directive(&mut self) -> Option<SourceUnitNode<'ast>> {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
 
         let symbol = match self.lexer.token {
             Token::OperatorMultiplication => {
-                self.lexer.consume();
+                self.lexer.advance();
 
                 None
             },
@@ -70,7 +70,7 @@ impl<'ast> Parser<'ast> {
     }
 
     fn import_directive_from_many(&mut self, start: u32) -> Option<SourceUnitNode<'ast>> {
-        self.lexer.consume();
+        self.lexer.advance();
 
         let imports = ListBuilder::new(self.arena, self.import_node());
 
@@ -125,7 +125,7 @@ mod test {
 
         assert_units("pragma solidity ^0.4.17;", [
             m.node(0, 24, PragmaDirective {
-                version: "^0.4.17"
+                version: "solidity ^0.4.17"
             })
         ]);
     }

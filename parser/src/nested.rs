@@ -246,7 +246,7 @@ precedence!(Precedence2, [
 const _____: NestedHandler = None;
 
 const CALL: NestedHandler = Some(|par, callee| {
-    par.lexer.consume();
+    par.lexer.advance();
 
     let arguments = par.expression_list();
     let end       = par.expect_end(Token::ParenClose);
@@ -258,7 +258,7 @@ const CALL: NestedHandler = Some(|par, callee| {
 });
 
 const MEMBR: NestedHandler = Some(|par, object| {
-    par.lexer.consume();
+    par.lexer.advance();
 
     let member = par.expect_str_node(Token::Identifier);
 
@@ -269,7 +269,7 @@ const MEMBR: NestedHandler = Some(|par, object| {
 });
 
 const INDEX: NestedHandler = Some(|par, array| {
-    par.lexer.consume();
+    par.lexer.advance();
 
     let index = par.expression::<TopPrecedence>();
     let end   = par.expect_end(Token::BracketClose);
@@ -299,7 +299,7 @@ const DEC: NestedHandler = Some(|par, operand| {
 });
 
 const COND: NestedHandler = Some(|par, test| {
-    par.lexer.consume();
+    par.lexer.advance();
 
     let consequent = expect!(par, par.expression::<Precedence14>());
 

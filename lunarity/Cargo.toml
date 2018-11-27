@@ -1,14 +1,17 @@
 [package]
 name = "lunarity"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 license = "GPL-3.0"
 repository = "https://github.com/paritytech/lunarity"
 
 [dependencies]
-lunarity-ast = "0.1.0"
-lunarity-lexer = "0.1.0"
-lunarity-parser = "0.1.0"
+# lunarity-ast = "0.1.0"
+# lunarity-lexer = "0.1.0"
+# lunarity-parser = "0.1.0"
+lunarity-ast = { path = "../ast" }
+lunarity-lexer = { path = "../lexer" }
+lunarity-parser = { path = "../parser" }
 
 [dev-dependencies]
-toolshed = "0.4"
+toolshed = "0.6"

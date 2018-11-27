@@ -29,10 +29,10 @@ impl<'ast> Parser<'ast> {
             Token::OperatorSubtraction => return self.prefix_expression(PrefixOperator::Minus),
             Token::LiteralTrue         => Primitive::Bool(true),
             Token::LiteralFalse        => Primitive::Bool(false),
-            Token::LiteralHex          => Primitive::HexNumber(self.lexer.token_as_str()),
+            Token::LiteralHex          => Primitive::HexNumber(self.lexer.slice()),
             Token::LiteralInteger      => return self.integer_number(),
-            Token::LiteralRational     => Primitive::RationalNumber(self.lexer.token_as_str()),
-            Token::LiteralString       => Primitive::String(self.lexer.token_as_str()),
+            Token::LiteralRational     => Primitive::RationalNumber(self.lexer.slice()),
+            Token::LiteralString       => Primitive::String(self.lexer.slice()),
 
             _ => return self.elementary_type_name(),
         };
@@ -41,7 +41,7 @@ impl<'ast> Parser<'ast> {
     }
 
     pub fn identifier_expression(&mut self) -> Option<ExpressionNode<'ast>> {
-        let ident = self.lexer.token_as_str();
+        let ident = self.lexer.slice();
 
         self.node_at_token(ident)
     }
@@ -64,7 +64,7 @@ impl<'ast> Parser<'ast> {
     }
 
     fn tuple_expression(&mut self) -> Option<ExpressionNode<'ast>> {
-        let start       = self.lexer.start_then_consume();
+        let start       = self.start_then_advance();
         let expressions = self.expression_list();
         let end         = self.expect_end(Token::ParenClose);
 
@@ -84,10 +84,10 @@ impl<'ast> Parser<'ast> {
     }
 
     fn integer_number(&mut self) -> Option<ExpressionNode<'ast>> {
-        let number = self.lexer.token_as_str();
-        let (start, end) = self.lexer.loc();
+        let number = self.lexer.slice();
+        let (start, end) = self.loc();
 
-        self.lexer.consume();
+        self.lexer.advance();
 
         let unit = match self.lexer.token {
             Token::UnitEther       => NumberUnit::Ether(EtherUnit::Ether),
@@ -104,8 +104,7 @@ impl<'ast> Parser<'ast> {
             _ => return self.node_at(start, end, Primitive::IntegerNumber(number, NumberUnit::None)),
         };
 
-        let end = self.lexer.end();
-        self.lexer.consume();
+        let end = self.end_then_advance();
 
         self.node_at(start, end, Primitive::IntegerNumber(number, unit))
     }

@@ -43,7 +43,7 @@ impl<'ast> Parser<'ast> {
         E: From<ElementaryTypeName> + Copy,
     {
         let elementary = {
-            let ref size = self.lexer.type_size;
+            let ref size = self.lexer.extras;
 
             match self.lexer.token {
                 Token::TypeBool       => ElementaryTypeName::Bool,
@@ -84,16 +84,16 @@ impl<'ast> Parser<'ast> {
     }
 
     fn user_defined_type(&mut self) -> Option<TypeNameNode<'ast>> {
-        let (start, end) = self.lexer.loc();
-        let identifier = self.lexer.token_as_str();
+        let (start, end) = self.loc();
+        let identifier = self.lexer.slice();
 
-        self.lexer.consume();
+        self.lexer.advance();
 
         self.node_at(start, end, identifier)
     }
 
     fn mapping(&mut self) -> Option<TypeNameNode<'ast>> {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
 
         self.expect(Token::ParenOpen);
 

@@ -1,10 +1,10 @@
 [package]
 name = "lunarity-lexer"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 license = "GPL-3.0"
 repository = "https://github.com/paritytech/lunarity"
 description = "A high performance Solidity language Lexer"
 
 [dependencies]
-toolshed = "0.4"
+logos = { version = "0.6.1", features = ["nul_term_source"] }

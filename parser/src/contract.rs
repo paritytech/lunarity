@@ -6,7 +6,7 @@ use lexer::Token;
 
 impl<'ast> Parser<'ast> {
     pub fn contract_definition(&mut self) -> Option<SourceUnitNode<'ast>> {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
         let name = self.expect_str_node(Token::Identifier);
 
         let inherits = if self.allow(Token::KeywordIs) {
@@ -94,7 +94,7 @@ impl<'ast> Parser<'ast> {
     }
 
     fn using_for_declaration(&mut self) -> Option<ContractPartNode<'ast>> {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
         let id    = self.expect_str_node(Token::Identifier);
 
         self.expect(Token::KeywordFor);
@@ -117,7 +117,7 @@ impl<'ast> Parser<'ast> {
     }
 
     fn struct_defintion(&mut self) -> Option<ContractPartNode<'ast>> {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
         let name  = self.expect_str_node(Token::Identifier);
 
         self.expect(Token::BraceOpen);
@@ -153,7 +153,7 @@ impl<'ast> Parser<'ast> {
     }
 
     fn modifier_definition(&mut self) -> Option<ContractPartNode<'ast>> {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
         let name  = self.expect_str_node(Token::Identifier);
 
         let params;
@@ -176,7 +176,7 @@ impl<'ast> Parser<'ast> {
     }
 
     fn event_definition(&mut self) -> Option<ContractPartNode<'ast>> {
-        let start  = self.lexer.start_then_consume();
+        let start  = self.start_then_advance();
         let name   = self.expect_str_node(Token::Identifier);
 
         self.expect(Token::ParenOpen);
@@ -226,7 +226,7 @@ impl<'ast> Parser<'ast> {
     }
 
     fn enum_definition(&mut self) -> Option<ContractPartNode<'ast>> {
-        let start = self.lexer.start_then_consume();
+        let start = self.start_then_advance();
         let name  = self.expect_str_node(Token::Identifier);
 
         self.expect(Token::BraceOpen);
