@@ -263,9 +263,8 @@ pub enum Token {
     #[callback = "rational_to_integer"]
     LiteralRational,
 
-    #[token = "\""]
-    #[token = "'"]
-    #[callback = "read_strings"]
+    #[regex = "\"([^\"\\\\]|\\\\.)*\""]
+    #[regex = "'([^'\\\\]|\\\\.)*'"]
     LiteralString,
 
     #[token = "ether"]
@@ -415,31 +414,6 @@ pub enum Token {
     #[error]
     UnexpectedToken,
     UnexpectedEndOfProgram,
-}
-
-fn read_strings<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
-    use logos::internal::LexerInternal;
-
-    let mark = lex.slice().as_bytes()[0];
-
-    loop {
-        match lex.read() {
-            0 => return lex.token = Token::UnexpectedEndOfProgram,
-            b'\\' => {
-                match lex.next() {
-                    0 => return lex.token = Token::UnexpectedEndOfProgram,
-                    _ => lex.bump(),
-                }
-            },
-            byte => {
-                lex.bump();
-
-                if byte == mark {
-                    break;
-                }
-            }
-        }
-    }
 }
 
 fn ignore_comments<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
