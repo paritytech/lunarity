@@ -224,7 +224,7 @@ pub enum Token {
     #[token = "string"]
     TypeString,
 
-    #[regex = "byte|bytes[1-9][0-9]?"]
+    #[regex = "byte|bytes[1-2][0-9]?|bytes3[0-2]?|bytes[4-9]"]
     #[callback = "validate_bytes"]
     TypeByte,
 
@@ -239,11 +239,13 @@ pub enum Token {
     #[callback = "default_size"]
     TypeUint,
 
-    #[regex = "int[1-9][0-9]?[0-9]?"]
+    #[regex = "int(8|16|24|32|40|48|56|64|72|80|88|96|104|112|120|128|136|144)"]
+    #[regex = "int(152|160|168|176|184|192|200|208|216|224|232|240|248|256)"]
     #[callback = "validate_int"]
     TypeIntN,
 
-    #[regex = "uint[1-9][0-9]?[0-9]?"]
+    #[regex = "uint(8|16|24|32|40|48|56|64|72|80|88|96|104|112|120|128|136|144)"]
+    #[regex = "uint(152|160|168|176|184|192|200|208|216|224|232|240|248|256)"]
     #[callback = "validate_uint"]
     TypeUintN,
 
@@ -445,26 +447,22 @@ fn ignore_comments<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
     lex.advance();
 }
 
-fn default_size<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
-    lex.extras.0 = 32;
-}
-
 fn validate_bytes<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
     let slice = lex.slice().as_bytes();
 
-    if slice.starts_with(b"bytes") {
+    if slice.len() > 5 {
         lex.extras.0 = slice[5] - b'0';
 
         if let Some(byte) = slice.get(6) {
             lex.extras.0 = lex.extras.0 * 10 + (byte - b'0');
         }
-
-        if lex.extras.0 > 32 {
-            lex.token = Token::Identifier;
-        }
     } else {
         lex.extras.0 = 1;
     }
+}
+
+fn default_size<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
+    lex.extras.0 = 32;
 }
 
 fn validate_int<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
@@ -476,12 +474,8 @@ fn validate_int<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
         n = n * 10 + (*byte - b'0') as u16;
     }
 
-    if n % 8 != 0 || n > 256 {
-        lex.token = Token::Identifier;
-    } else {
-        lex.token = Token::TypeInt;
-        lex.extras.0 = (n / 8) as u8;
-    }
+    lex.extras.0 = (n / 8) as u8;
+    lex.token = Token::TypeInt;
 }
 
 fn validate_uint<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
@@ -493,12 +487,8 @@ fn validate_uint<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
         n = n * 10 + (*byte - b'0') as u16;
     }
 
-    if n % 8 != 0 || n > 256 {
-        lex.token = Token::Identifier;
-    } else {
-        lex.token = Token::TypeUint;
-        lex.extras.0 = (n / 8) as u8;
-    }
+    lex.extras.0 = (n / 8) as u8;
+    lex.token = Token::TypeUint;
 }
 
 fn validate_fixed<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
