@@ -85,10 +85,6 @@ impl<'ast> Parser<'ast> {
             Token::KeywordAssembly => self.inline_assembly_statement(),
             Token::DeclarationVar  => self.inferred_definition_statement(),
 
-            // _ => match self.expression_statement() {
-            //     None => self.variable_definition_statement(),
-            //     node => node,
-            // }
             _ => match self.variable_definition_statement() {
                 None => self.expression_statement(),
                 node => node,

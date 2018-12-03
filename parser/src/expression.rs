@@ -2,45 +2,67 @@ use toolshed::list::ListBuilder;
 
 use ast::*;
 use {Parser, Precedence, P2, TOP};
-use lexer::Token;
+use lexer::{Token, Logos, lookup};
+
+type HandlerFn = for<'ast> fn(&mut Parser<'ast>) -> Option<ExpressionNode<'ast>>;
+
+static EXPRESSION_LUT: [HandlerFn; Token::SIZE] = lookup! {
+    Token::KeywordThis         => |par| par.node_at_token(ThisExpression),
+    Token::Identifier          => |par| par.node_from_slice(|ident| ident),
+    Token::IdentifierBuiltin   => |par| par.node_from_slice(|ident| ident),
+    Token::ParenOpen           => |par| par.tuple_expression(),
+    Token::OperatorLogicalNot  => |par| par.prefix_expression(PrefixOperator::LogicalNot),
+    Token::OperatorBitNot      => |par| par.prefix_expression(PrefixOperator::BitNot),
+    Token::KeywordDelete       => |par| par.prefix_expression(PrefixOperator::Delete),
+    Token::OperatorIncrement   => |par| par.prefix_expression(PrefixOperator::Increment),
+    Token::OperatorDecrement   => |par| par.prefix_expression(PrefixOperator::Decrement),
+    Token::OperatorAddition    => |par| par.prefix_expression(PrefixOperator::Plus),
+    Token::OperatorSubtraction => |par| par.prefix_expression(PrefixOperator::Minus),
+    Token::LiteralTrue         => |par| par.node_at_token(Primitive::Bool(true)),
+    Token::LiteralFalse        => |par| par.node_at_token(Primitive::Bool(false)),
+    Token::LiteralHex          => |par| par.node_from_slice(|slice| Primitive::HexNumber(slice)),
+    Token::LiteralInteger      => |par| par.integer_number(),
+    Token::LiteralRational     => |par| par.node_from_slice(|slice| Primitive::RationalNumber(slice)),
+    Token::LiteralString       => |par| par.node_from_slice(|slice| Primitive::String(slice)),
+    Token::TypeBool            => |par| par.node_at_token(ElementaryTypeName::Bool),
+    Token::TypeAddress         => |par| par.node_at_token(ElementaryTypeName::Address),
+    Token::TypeString          => |par| par.node_at_token(ElementaryTypeName::String),
+    Token::TypeByte            => |par| {
+        let size = par.lexer.extras.0;
+
+        par.node_at_token(ElementaryTypeName::Byte(size))
+    },
+    Token::TypeBytes => |par| {
+        par.node_at_token(ElementaryTypeName::Bytes)
+    },
+    Token::TypeInt => |par| {
+        let size = par.lexer.extras.0;
+
+        par.node_at_token(ElementaryTypeName::Int(size))
+    },
+    Token::TypeUint => |par| {
+        let size = par.lexer.extras.0;
+
+        par.node_at_token(ElementaryTypeName::Uint(size))
+    },
+    Token::TypeFixed => |par| {
+        let size = par.lexer.extras;
+
+        par.node_at_token(ElementaryTypeName::Fixed(size.0, size.1))
+    },
+    Token::TypeUfixed => |par| {
+        let size = par.lexer.extras;
+
+        par.node_at_token(ElementaryTypeName::Ufixed(size.0, size.1))
+    },
+    _ => |_| None,
+};
 
 impl<'ast> Parser<'ast> {
     #[inline]
     pub fn expression(&mut self, precedence: Precedence) -> Option<ExpressionNode<'ast>> {
-        self.bound_expression()
+        EXPRESSION_LUT[self.lexer.token as usize](self)
             .map(|expression| self.nested_expression(expression, precedence))
-    }
-
-    pub fn bound_expression(&mut self) -> Option<ExpressionNode<'ast>> {
-        let primitive = match self.lexer.token {
-            Token::KeywordThis         => return self.node_at_token(ThisExpression),
-            Token::Identifier          => return self.identifier_expression(),
-            Token::IdentifierBuiltin   => return self.identifier_expression(),
-            Token::ParenOpen           => return self.tuple_expression(),
-            Token::OperatorLogicalNot  => return self.prefix_expression(PrefixOperator::LogicalNot),
-            Token::OperatorBitNot      => return self.prefix_expression(PrefixOperator::BitNot),
-            Token::KeywordDelete       => return self.prefix_expression(PrefixOperator::Delete),
-            Token::OperatorIncrement   => return self.prefix_expression(PrefixOperator::Increment),
-            Token::OperatorDecrement   => return self.prefix_expression(PrefixOperator::Decrement),
-            Token::OperatorAddition    => return self.prefix_expression(PrefixOperator::Plus),
-            Token::OperatorSubtraction => return self.prefix_expression(PrefixOperator::Minus),
-            Token::LiteralTrue         => Primitive::Bool(true),
-            Token::LiteralFalse        => Primitive::Bool(false),
-            Token::LiteralHex          => Primitive::HexNumber(self.lexer.slice()),
-            Token::LiteralInteger      => return self.integer_number(),
-            Token::LiteralRational     => Primitive::RationalNumber(self.lexer.slice()),
-            Token::LiteralString       => Primitive::String(self.lexer.slice()),
-
-            _ => return self.elementary_type_name(),
-        };
-
-        self.node_at_token(primitive)
-    }
-
-    pub fn identifier_expression(&mut self) -> Option<ExpressionNode<'ast>> {
-        let ident = self.lexer.slice();
-
-        self.node_at_token(ident)
     }
 
     #[inline]

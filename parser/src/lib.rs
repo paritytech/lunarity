@@ -203,6 +203,22 @@ impl<'ast> Parser<'ast> {
     }
 
     #[inline]
+    fn node_from_slice<T, F, I, R>(&mut self, func: F) -> R
+    where
+        T: 'ast + Copy,
+        F: FnOnce(&'ast str) -> I,
+        I: Into<T>,
+        R: From<Node<'ast, T>>,
+    {
+        let slice = self.lexer.slice();
+        let (start, end) = self.loc();
+
+        self.lexer.advance();
+
+        self.node_at(start, end, func(slice))
+    }
+
+    #[inline]
     fn parse(&mut self) {
         let builder = GrowableList::new();
 

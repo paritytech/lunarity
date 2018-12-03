@@ -28,7 +28,7 @@ use logos::{Logos, Lexer, Extras, Source, Slice};
 /// - For `int64` this will be set to `(8, _)`
 /// - For `bytes20` this will be set to `(20, _)`
 /// - For 'ufixed128x40` this will be set to `(16, 40)`
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub struct TypeSize(pub u8, pub u8);
 
 impl Extras for TypeSize {}
@@ -231,13 +231,21 @@ pub enum Token {
     #[token = "bytes"]
     TypeBytes,
 
-    #[regex = "int([1-9][0-9]?[0-9]?)?"]
-    #[callback = "validate_int"]
+    #[token = "int"]
+    #[callback = "default_size"]
     TypeInt,
 
-    #[regex = "uint([1-9][0-9]?[0-9]?)?"]
-    #[callback = "validate_uint"]
+    #[token = "uint"]
+    #[callback = "default_size"]
     TypeUint,
+
+    #[regex = "int[1-9][0-9]?[0-9]?"]
+    #[callback = "validate_int"]
+    TypeIntN,
+
+    #[regex = "uint[1-9][0-9]?[0-9]?"]
+    #[callback = "validate_uint"]
+    TypeUintN,
 
     #[regex = "fixed([1-9][0-9]?[0-9]?x[0-9][0-9]?)?"]
     #[callback = "validate_fixed"]
@@ -437,6 +445,10 @@ fn ignore_comments<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
     lex.advance();
 }
 
+fn default_size<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
+    lex.extras.0 = 32;
+}
+
 fn validate_bytes<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
     let slice = lex.slice().as_bytes();
 
@@ -456,44 +468,36 @@ fn validate_bytes<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
 }
 
 fn validate_int<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
-    let mut iter = lex.slice().as_bytes()[3..].iter();
+    let slice = lex.slice().as_bytes();
 
-    match iter.next() {
-        None => lex.extras.0 = 32,
-        Some(byte) => {
-            let mut n = (*byte - b'0') as u16;
+    let mut n = (slice[3] - b'0') as u16;
 
-            for byte in iter {
-                n = n * 10 + (*byte - b'0') as u16;
-            }
+    for byte in &slice[4..] {
+        n = n * 10 + (*byte - b'0') as u16;
+    }
 
-            if n % 8 != 0 || n > 256 {
-                lex.token = Token::Identifier;
-            } else {
-                lex.extras.0 = (n / 8) as u8;
-            }
-        }
+    if n % 8 != 0 || n > 256 {
+        lex.token = Token::Identifier;
+    } else {
+        lex.token = Token::TypeInt;
+        lex.extras.0 = (n / 8) as u8;
     }
 }
 
 fn validate_uint<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
-    let mut iter = lex.slice().as_bytes()[4..].iter();
+    let slice = lex.slice().as_bytes();
 
-    match iter.next() {
-        None => lex.extras.0 = 32,
-        Some(byte) => {
-            let mut n = (*byte - b'0') as u16;
+    let mut n = (slice[4] - b'0') as u16;
 
-            for byte in iter {
-                n = n * 10 + (*byte - b'0') as u16;
-            }
+    for byte in &slice[5..] {
+        n = n * 10 + (*byte - b'0') as u16;
+    }
 
-            if n % 8 != 0 || n > 256 {
-                lex.token = Token::Identifier;
-            } else {
-                lex.extras.0 = (n / 8) as u8;
-            }
-        }
+    if n % 8 != 0 || n > 256 {
+        lex.token = Token::Identifier;
+    } else {
+        lex.token = Token::TypeUint;
+        lex.extras.0 = (n / 8) as u8;
     }
 }
 
