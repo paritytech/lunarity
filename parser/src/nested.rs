@@ -1,249 +1,350 @@
 use Parser;
-use lexer::Token;
+use lexer::{Token, Logos, lookup};
 use ast::*;
-
-const TOTAL_TOKENS: usize = 122;
 
 type NestedHandler = Option<for<'ast> fn(&mut Parser<'ast>, ExpressionNode<'ast>) -> Option<ExpressionNode<'ast>>>;
 
 pub trait Precedence {
-    const LUT: [NestedHandler; TOTAL_TOKENS];
-
-    #[inline]
-    fn get_handler(token: Token) -> NestedHandler {
-        Self::LUT[token as usize]
-    }
+    const LUT: [NestedHandler; Token::SIZE];
 }
 
-macro_rules! precedence {
-    ($name:ident, $table:tt) => {
-        pub struct $name;
+pub struct TopPrecedence;
+pub struct Precedence14;
+pub struct Precedence13;
+pub struct Precedence12;
+pub struct Precedence11;
+pub struct Precedence10;
+pub struct Precedence9;
+pub struct Precedence8;
+pub struct Precedence7;
+pub struct Precedence6;
+pub struct Precedence5;
+pub struct Precedence4;
+pub struct Precedence3;
+pub struct Precedence2;
 
-        impl Precedence for $name {
-            const LUT: [NestedHandler; TOTAL_TOKENS] = $table;
-        }
-    }
+impl Precedence for TopPrecedence {
+    const LUT: [NestedHandler; Token::SIZE] = lookup! {
+        Token::Accessor => MEMBR,
+        Token::ParenOpen => CALL,
+        Token::BracketOpen => INDEX,
+        Token::OperatorIncrement => INC,
+        Token::OperatorDecrement => DEC,
+        Token::OperatorMultiplication => MUL,
+        Token::OperatorDivision => DIV,
+        Token::OperatorRemainder => REM,
+        Token::OperatorExponent => EXPN,
+        Token::OperatorAddition => ADD,
+        Token::OperatorSubtraction => SUB,
+        Token::OperatorBitShiftLeft => BSL,
+        Token::OperatorBitShiftRight => BSR,
+        Token::OperatorLesser => LESS,
+        Token::OperatorLesserEquals => LSEQ,
+        Token::OperatorGreater => GRTR,
+        Token::OperatorGreaterEquals => GREQ,
+        Token::OperatorEquality => EQ,
+        Token::OperatorInequality => INEQ,
+        Token::OperatorBitAnd => B_AND,
+        Token::OperatorBitXor => B_XOR,
+        Token::OperatorBitOr => B_OR,
+        Token::OperatorLogicalAnd => AND,
+        Token::OperatorLogicalOr => OR,
+        Token::OperatorConditional => COND,
+        Token::Assign => ASGN,
+        Token::AssignAddition => A_ADD,
+        Token::AssignSubtraction => A_SUB,
+        Token::AssignMultiplication => A_MUL,
+        Token::AssignDivision => A_DIV,
+        Token::AssignRemainder => A_REM,
+        Token::AssignBitShiftLeft => A_BSL,
+        Token::AssignBitShiftRight => A_BSR,
+        Token::AssignBitAnd => A_BAN,
+        Token::AssignBitXor => A_XOR,
+        Token::AssignBitOr => A_BOR,
+        _ => None,
+    };
 }
 
-precedence!(TopPrecedence, [
-    _____, _____, _____, _____, MEMBR, CALL,  _____, _____, _____, INDEX, _____, _____,
-//  EOF    ;      :      ,      .      (      )      {      }      [      ]      =>
+impl Precedence for Precedence14 {
+    const LUT: [NestedHandler; Token::SIZE] = lookup! {
+        Token::Accessor => MEMBR,
+        Token::ParenOpen => CALL,
+        Token::BracketOpen => INDEX,
+        Token::OperatorIncrement => INC,
+        Token::OperatorDecrement => DEC,
+        Token::OperatorMultiplication => MUL,
+        Token::OperatorDivision => DIV,
+        Token::OperatorRemainder => REM,
+        Token::OperatorExponent => EXPN,
+        Token::OperatorAddition => ADD,
+        Token::OperatorSubtraction => SUB,
+        Token::OperatorBitShiftLeft => BSL,
+        Token::OperatorBitShiftRight => BSR,
+        Token::OperatorLesser => LESS,
+        Token::OperatorLesserEquals => LSEQ,
+        Token::OperatorGreater => GRTR,
+        Token::OperatorGreaterEquals => GREQ,
+        Token::OperatorEquality => EQ,
+        Token::OperatorInequality => INEQ,
+        Token::OperatorBitAnd => B_AND,
+        Token::OperatorBitXor => B_XOR,
+        Token::OperatorBitOr => B_OR,
+        Token::OperatorLogicalAnd => AND,
+        Token::OperatorLogicalOr => OR,
+        Token::OperatorConditional => COND,
+        _ => None,
+    };
+}
 
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-//  IDENT  BLTIN  CONTR  LIB    IFACE  ENUM   STRUCT MODIF  EVENT  FUNCT  VAR    ANON
+impl Precedence for Precedence13 {
+    const LUT: [NestedHandler; Token::SIZE] = lookup! {
+        Token::Accessor => MEMBR,
+        Token::ParenOpen => CALL,
+        Token::BracketOpen => INDEX,
+        Token::OperatorIncrement => INC,
+        Token::OperatorDecrement => DEC,
+        Token::OperatorMultiplication => MUL,
+        Token::OperatorDivision => DIV,
+        Token::OperatorRemainder => REM,
+        Token::OperatorExponent => EXPN,
+        Token::OperatorAddition => ADD,
+        Token::OperatorSubtraction => SUB,
+        Token::OperatorBitShiftLeft => BSL,
+        Token::OperatorBitShiftRight => BSR,
+        Token::OperatorLesser => LESS,
+        Token::OperatorLesserEquals => LSEQ,
+        Token::OperatorGreater => GRTR,
+        Token::OperatorGreaterEquals => GREQ,
+        Token::OperatorEquality => EQ,
+        Token::OperatorInequality => INEQ,
+        Token::OperatorBitAnd => B_AND,
+        Token::OperatorBitXor => B_XOR,
+        Token::OperatorBitOr => B_OR,
+        Token::OperatorLogicalAnd => AND,
+        Token::OperatorLogicalOr => OR,
+        _ => None,
+    };
+}
 
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-//  AS     ASM    BREAK  CONST  CONTIN DO     DELETE ELSE   EXTERN FOR    HEX    IF
+impl Precedence for Precedence12 {
+    const LUT: [NestedHandler; Token::SIZE] = lookup! {
+        Token::Accessor => MEMBR,
+        Token::ParenOpen => CALL,
+        Token::BracketOpen => INDEX,
+        Token::OperatorIncrement => INC,
+        Token::OperatorDecrement => DEC,
+        Token::OperatorMultiplication => MUL,
+        Token::OperatorDivision => DIV,
+        Token::OperatorRemainder => REM,
+        Token::OperatorExponent => EXPN,
+        Token::OperatorAddition => ADD,
+        Token::OperatorSubtraction => SUB,
+        Token::OperatorBitShiftLeft => BSL,
+        Token::OperatorBitShiftRight => BSR,
+        Token::OperatorLesser => LESS,
+        Token::OperatorLesserEquals => LSEQ,
+        Token::OperatorGreater => GRTR,
+        Token::OperatorGreaterEquals => GREQ,
+        Token::OperatorEquality => EQ,
+        Token::OperatorInequality => INEQ,
+        Token::OperatorBitAnd => B_AND,
+        Token::OperatorBitXor => B_XOR,
+        Token::OperatorBitOr => B_OR,
+        Token::OperatorLogicalAnd => AND,
+        _ => None,
+    };
+}
 
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-//  INDEX  INTERN IMPORT IS     MAP    MEM    NEW    PAY    PULIC  PRAGMA PRIV   PURE
+impl Precedence for Precedence11 {
+    const LUT: [NestedHandler; Token::SIZE] = lookup! {
+        Token::Accessor => MEMBR,
+        Token::ParenOpen => CALL,
+        Token::BracketOpen => INDEX,
+        Token::OperatorIncrement => INC,
+        Token::OperatorDecrement => DEC,
+        Token::OperatorMultiplication => MUL,
+        Token::OperatorDivision => DIV,
+        Token::OperatorRemainder => REM,
+        Token::OperatorExponent => EXPN,
+        Token::OperatorAddition => ADD,
+        Token::OperatorSubtraction => SUB,
+        Token::OperatorBitShiftLeft => BSL,
+        Token::OperatorBitShiftRight => BSR,
+        Token::OperatorLesser => LESS,
+        Token::OperatorLesserEquals => LSEQ,
+        Token::OperatorGreater => GRTR,
+        Token::OperatorGreaterEquals => GREQ,
+        Token::OperatorEquality => EQ,
+        Token::OperatorInequality => INEQ,
+        Token::OperatorBitAnd => B_AND,
+        Token::OperatorBitXor => B_XOR,
+        Token::OperatorBitOr => B_OR,
+        _ => None,
+    };
+}
 
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-//  RET    RETNS  STORAG SUPER  THIS   THROW  USING  VIEW   WHILE  RESERV T_BOOL T_ADDR
+impl Precedence for Precedence10 {
+    const LUT: [NestedHandler; Token::SIZE] = lookup! {
+        Token::Accessor => MEMBR,
+        Token::ParenOpen => CALL,
+        Token::BracketOpen => INDEX,
+        Token::OperatorIncrement => INC,
+        Token::OperatorDecrement => DEC,
+        Token::OperatorMultiplication => MUL,
+        Token::OperatorDivision => DIV,
+        Token::OperatorRemainder => REM,
+        Token::OperatorExponent => EXPN,
+        Token::OperatorAddition => ADD,
+        Token::OperatorSubtraction => SUB,
+        Token::OperatorBitShiftLeft => BSL,
+        Token::OperatorBitShiftRight => BSR,
+        Token::OperatorLesser => LESS,
+        Token::OperatorLesserEquals => LSEQ,
+        Token::OperatorGreater => GRTR,
+        Token::OperatorGreaterEquals => GREQ,
+        Token::OperatorBitAnd => B_AND,
+        Token::OperatorBitXor => B_XOR,
+        Token::OperatorBitOr => B_OR,
+        _ => None,
+    };
+}
 
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-//  T_STR  T_BYT  T_BYTS T_INT  T_UINT T_FIX  T_UFIX L_TRUE L_FALS L_HEX  L_INT  L_RAT
+impl Precedence for Precedence9 {
+    const LUT: [NestedHandler; Token::SIZE] = lookup! {
+        Token::Accessor => MEMBR,
+        Token::ParenOpen => CALL,
+        Token::BracketOpen => INDEX,
+        Token::OperatorIncrement => INC,
+        Token::OperatorDecrement => DEC,
+        Token::OperatorMultiplication => MUL,
+        Token::OperatorDivision => DIV,
+        Token::OperatorRemainder => REM,
+        Token::OperatorExponent => EXPN,
+        Token::OperatorAddition => ADD,
+        Token::OperatorSubtraction => SUB,
+        Token::OperatorBitShiftLeft => BSL,
+        Token::OperatorBitShiftRight => BSR,
+        Token::OperatorBitAnd => B_AND,
+        Token::OperatorBitXor => B_XOR,
+        Token::OperatorBitOr => B_OR,
+        _ => None,
+    };
+}
 
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-//  L_STR  E_ETH  E_FINN E_SZAB E_WEI  T_YEAR T_WEEK T_DAYS T_HOUR T_MIN  T_SEC  :=
+impl Precedence for Precedence8 {
+    const LUT: [NestedHandler; Token::SIZE] = lookup! {
+        Token::Accessor => MEMBR,
+        Token::ParenOpen => CALL,
+        Token::BracketOpen => INDEX,
+        Token::OperatorIncrement => INC,
+        Token::OperatorDecrement => DEC,
+        Token::OperatorMultiplication => MUL,
+        Token::OperatorDivision => DIV,
+        Token::OperatorRemainder => REM,
+        Token::OperatorExponent => EXPN,
+        Token::OperatorAddition => ADD,
+        Token::OperatorSubtraction => SUB,
+        Token::OperatorBitShiftLeft => BSL,
+        Token::OperatorBitShiftRight => BSR,
+        Token::OperatorBitAnd => B_AND,
+        Token::OperatorBitXor => B_XOR,
+        _ => None,
+    };
+}
 
-    _____, INC,   DEC,   _____, _____, MUL,   DIV,   REM,   EXPN,  ADD,   SUB,   BSL,
-//  =:     ++     --     !      ~      *      /      %      **     +      -      <<
+impl Precedence for Precedence7 {
+    const LUT: [NestedHandler; Token::SIZE] = lookup! {
+        Token::Accessor => MEMBR,
+        Token::ParenOpen => CALL,
+        Token::BracketOpen => INDEX,
+        Token::OperatorIncrement => INC,
+        Token::OperatorDecrement => DEC,
+        Token::OperatorMultiplication => MUL,
+        Token::OperatorDivision => DIV,
+        Token::OperatorRemainder => REM,
+        Token::OperatorExponent => EXPN,
+        Token::OperatorAddition => ADD,
+        Token::OperatorSubtraction => SUB,
+        Token::OperatorBitShiftLeft => BSL,
+        Token::OperatorBitShiftRight => BSR,
+        Token::OperatorBitAnd => B_AND,
+        _ => None,
+    };
+}
 
-    BSR,   LESS,  LSEQ,  GRTR,  GREQ,  EQ,    INEQ,  B_AND, B_XOR, B_OR,  AND,   OR,
-//  >>     <      <=     >      >=     ==     !=     &      ^      |      &&     ||
+impl Precedence for Precedence6 {
+    const LUT: [NestedHandler; Token::SIZE] = lookup! {
+        Token::Accessor => MEMBR,
+        Token::ParenOpen => CALL,
+        Token::BracketOpen => INDEX,
+        Token::OperatorIncrement => INC,
+        Token::OperatorDecrement => DEC,
+        Token::OperatorMultiplication => MUL,
+        Token::OperatorDivision => DIV,
+        Token::OperatorRemainder => REM,
+        Token::OperatorExponent => EXPN,
+        Token::OperatorAddition => ADD,
+        Token::OperatorSubtraction => SUB,
+        Token::OperatorBitShiftLeft => BSL,
+        Token::OperatorBitShiftRight => BSR,
+        _ => None,
+    };
+}
 
-    COND,  ASGN,  A_ADD, A_SUB, A_MUL, A_DIV, A_REM, A_BSL, A_BSR, A_BAN, A_XOR, A_BOR,
-//  ?      =      +=     -=     *=     /=     %=     <<=    >>=    &=     ^=     |=
+impl Precedence for Precedence5 {
+    const LUT: [NestedHandler; Token::SIZE] = lookup! {
+        Token::Accessor => MEMBR,
+        Token::ParenOpen => CALL,
+        Token::BracketOpen => INDEX,
+        Token::OperatorIncrement => INC,
+        Token::OperatorDecrement => DEC,
+        Token::OperatorMultiplication => MUL,
+        Token::OperatorDivision => DIV,
+        Token::OperatorRemainder => REM,
+        Token::OperatorExponent => EXPN,
+        Token::OperatorAddition => ADD,
+        Token::OperatorSubtraction => SUB,
+        _ => None,
+    };
+}
 
-    _____, _____,
-//  ERRTOK ERREOF
-]);
+impl Precedence for Precedence4 {
+    const LUT: [NestedHandler; Token::SIZE] = lookup! {
+        Token::Accessor => MEMBR,
+        Token::ParenOpen => CALL,
+        Token::BracketOpen => INDEX,
+        Token::OperatorIncrement => INC,
+        Token::OperatorDecrement => DEC,
+        Token::OperatorMultiplication => MUL,
+        Token::OperatorDivision => DIV,
+        Token::OperatorRemainder => REM,
+        Token::OperatorExponent => EXPN,
+        _ => None,
+    };
+}
 
-precedence!(Precedence14, [
-    _____, _____, _____, _____, MEMBR, CALL,  _____, _____, _____, INDEX, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, INC,   DEC,   _____, _____, MUL,   DIV,   REM,   EXPN,  ADD,   SUB,   BSL,
-    BSR,   LESS,  LSEQ,  GRTR,  GREQ,  EQ,    INEQ,  B_AND, B_XOR, B_OR,  AND,   OR,
-    COND,  _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____,
-]);
+impl Precedence for Precedence3 {
+    const LUT: [NestedHandler; Token::SIZE] = lookup! {
+        Token::Accessor => MEMBR,
+        Token::ParenOpen => CALL,
+        Token::BracketOpen => INDEX,
+        Token::OperatorIncrement => INC,
+        Token::OperatorDecrement => DEC,
+        Token::OperatorExponent => EXPN,
+        _ => None,
+    };
+}
 
-precedence!(Precedence13, [
-    _____, _____, _____, _____, MEMBR, CALL,  _____, _____, _____, INDEX, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, INC,   DEC,   _____, _____, MUL,   DIV,   REM,   EXPN,  ADD,   SUB,   BSL,
-    BSR,   LESS,  LSEQ,  GRTR,  GREQ,  EQ,    INEQ,  B_AND, B_XOR, B_OR,  AND,   OR,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____,
-]);
-
-precedence!(Precedence12, [
-    _____, _____, _____, _____, MEMBR, CALL,  _____, _____, _____, INDEX, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, INC,   DEC,   _____, _____, MUL,   DIV,   REM,   EXPN,  ADD,   SUB,   BSL,
-    BSR,   LESS,  LSEQ,  GRTR,  GREQ,  EQ,    INEQ,  B_AND, B_XOR, B_OR,  AND,   _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____,
-]);
-
-precedence!(Precedence11, [
-    _____, _____, _____, _____, MEMBR, CALL,  _____, _____, _____, INDEX, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, INC,   DEC,   _____, _____, MUL,   DIV,   REM,   EXPN,  ADD,   SUB,   BSL,
-    BSR,   LESS,  LSEQ,  GRTR,  GREQ,  EQ,    INEQ,  B_AND, B_XOR, B_OR,  _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____,
-]);
-
-precedence!(Precedence10, [
-    _____, _____, _____, _____, MEMBR, CALL,  _____, _____, _____, INDEX, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, INC,   DEC,   _____, _____, MUL,   DIV,   REM,   EXPN,  ADD,   SUB,   BSL,
-    BSR,   LESS,  LSEQ,  GRTR,  GREQ,  _____, _____, B_AND, B_XOR, B_OR,  _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____,
-]);
-
-precedence!(Precedence9, [
-    _____, _____, _____, _____, MEMBR, CALL,  _____, _____, _____, INDEX, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, INC,   DEC,   _____, _____, MUL,   DIV,   REM,   EXPN,  ADD,   SUB,   BSL,
-    BSR,   _____, _____, _____, _____, _____, _____, B_AND, B_XOR, B_OR,  _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____,
-]);
-
-precedence!(Precedence8, [
-    _____, _____, _____, _____, MEMBR, CALL,  _____, _____, _____, INDEX, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, INC,   DEC,   _____, _____, MUL,   DIV,   REM,   EXPN,  ADD,   SUB,   BSL,
-    BSR,   _____, _____, _____, _____, _____, _____, B_AND, B_XOR, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____,
-]);
-
-precedence!(Precedence7, [
-    _____, _____, _____, _____, MEMBR, CALL,  _____, _____, _____, INDEX, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, INC,   DEC,   _____, _____, MUL,   DIV,   REM,   EXPN,  ADD,   SUB,   BSL,
-    BSR,   _____, _____, _____, _____, _____, _____, B_AND, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____,
-]);
-
-precedence!(Precedence6, [
-    _____, _____, _____, _____, MEMBR, CALL,  _____, _____, _____, INDEX, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, INC,   DEC,   _____, _____, MUL,   DIV,   REM,   EXPN,  ADD,   SUB,   BSL,
-    BSR,   _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____,
-]);
-
-precedence!(Precedence5, [
-    _____, _____, _____, _____, MEMBR, CALL,  _____, _____, _____, INDEX, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, INC,   DEC,   _____, _____, MUL,   DIV,   REM,   EXPN,  ADD,   SUB,   _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____,
-]);
-
-precedence!(Precedence4, [
-    _____, _____, _____, _____, MEMBR, CALL,  _____, _____, _____, INDEX, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, INC,   DEC,   _____, _____, MUL,   DIV,   REM,   EXPN,  _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____,
-]);
-
-precedence!(Precedence3, [
-    _____, _____, _____, _____, MEMBR, CALL,  _____, _____, _____, INDEX, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, INC,   DEC,   _____, _____, _____, _____, _____, EXPN,  _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____,
-]);
-
-// TODO: Use in prefix expressions
-precedence!(Precedence2, [
-    _____, _____, _____, _____, MEMBR, CALL,  _____, _____, _____, INDEX, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, INC,   DEC,   _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____, _____,
-    _____, _____,
-]);
-
-const _____: NestedHandler = None;
+impl Precedence for Precedence2 {
+    const LUT: [NestedHandler; Token::SIZE] = lookup! {
+        Token::Accessor => MEMBR,
+        Token::ParenOpen => CALL,
+        Token::BracketOpen => INDEX,
+        Token::OperatorIncrement => INC,
+        Token::OperatorDecrement => DEC,
+        _ => None,
+    };
+}
 
 const CALL: NestedHandler = Some(|par, callee| {
     par.lexer.advance();
@@ -394,7 +495,9 @@ impl<'ast> Parser<'ast> {
     where
         P: Precedence,
     {
-        while let Some(node) = P::get_handler(self.lexer.token).and_then(|handler| handler(self, left)) {
+        // static LUT: [NestedHandler; Token::SIZE] = P::LUT;
+
+        while let Some(node) = P::LUT[self.lexer.token as usize].and_then(|handler| handler(self, left)) {
             left = node;
         }
 

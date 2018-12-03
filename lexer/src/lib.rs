@@ -3,11 +3,12 @@ extern crate logos;
 mod token;
 
 pub use self::token::Token;
+pub use logos::{Logos, lookup};
 pub type Lexer<S> = logos::Lexer<Token, S>;
 
 // FIXME: This should probably be handled with a callback
 #[inline]
-pub fn read_pragma<'source, S: logos::Source<'source>>(lex: &mut Lexer<S>) -> &'source str {
+pub fn read_pragma<'source, S: logos::Source<'source>>(lex: &mut Lexer<S>) -> S::Slice {
     use logos::internal::LexerInternal;
 
     loop {

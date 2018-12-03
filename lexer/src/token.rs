@@ -17,7 +17,7 @@
 //!  ```
 //!
 
-use logos::{Logos, Lexer, Extras, Source};
+use logos::{Logos, Lexer, Extras, Source, Slice};
 
 /// If the current token is an elementary type,
 /// this will hold it's size, if applicable.
@@ -236,7 +236,7 @@ pub enum Token {
     TypeInt,
 
     #[regex = "uint([1-9][0-9]?[0-9]?)?"]
-    #[callback = "validate_int"]
+    #[callback = "validate_uint"]
     TypeUint,
 
     #[regex = "fixed([1-9][0-9]?[0-9]?x[0-9][0-9]?)?"]
@@ -419,7 +419,7 @@ pub enum Token {
 fn ignore_comments<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
     use logos::internal::LexerInternal;
 
-    if lex.slice() == "/*" {
+    if lex.slice().as_bytes() == b"/*" {
         loop {
             match lex.read() {
                 0    => return lex.token = Token::UnexpectedEndOfProgram,
@@ -456,36 +456,57 @@ fn validate_bytes<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
 }
 
 fn validate_int<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
-    let slice = lex.slice();
-    let cutoff = if slice.starts_with("u") { 4 } else { 3 };
+    let mut iter = lex.slice().as_bytes()[3..].iter();
 
-    if slice.len() == cutoff {
-        return lex.extras.0 = 32;
+    match iter.next() {
+        None => lex.extras.0 = 32,
+        Some(byte) => {
+            let mut n = (*byte - b'0') as u16;
+
+            for byte in iter {
+                n = n * 10 + (*byte - b'0') as u16;
+            }
+
+            if n % 8 != 0 || n > 256 {
+                lex.token = Token::Identifier;
+            } else {
+                lex.extras.0 = (n / 8) as u8;
+            }
+        }
     }
+}
 
-    let mut n = 0u16;
+fn validate_uint<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
+    let mut iter = lex.slice().as_bytes()[4..].iter();
 
-    for byte in lex.slice()[cutoff..].bytes() {
-        n = n * 10 + (byte - b'0') as u16;
-    }
+    match iter.next() {
+        None => lex.extras.0 = 32,
+        Some(byte) => {
+            let mut n = (*byte - b'0') as u16;
 
-    if n % 8 != 0 || n > 256 {
-        lex.token = Token::Identifier;
-    } else {
-        lex.extras.0 = (n / 8) as u8;
+            for byte in iter {
+                n = n * 10 + (*byte - b'0') as u16;
+            }
+
+            if n % 8 != 0 || n > 256 {
+                lex.token = Token::Identifier;
+            } else {
+                lex.extras.0 = (n / 8) as u8;
+            }
+        }
     }
 }
 
 fn validate_fixed<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
-    let slice = lex.slice();
-    let cutoff = if slice.starts_with("u") { 6 } else { 5 };
+    let slice = lex.slice().as_bytes();
+    let cutoff = if slice.starts_with(b"u") { 6 } else { 5 };
 
     let mut n = 0u16;
     let mut m = 0u8;
 
-    let mut iter = lex.slice()[cutoff..].bytes();
+    let mut iter = slice[cutoff..].iter();
 
-    while let Some(byte) = iter.next() {
+    while let Some(&byte) = iter.next() {
         if byte == b'x' {
             break;
         }
@@ -494,7 +515,7 @@ fn validate_fixed<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
     }
 
     for byte in iter {
-        m = m * 10 + (byte - b'0');
+        m = m * 10 + (*byte - b'0');
     }
 
     if n % 8 != 0 || n > 256 || m > 80 {
@@ -507,9 +528,9 @@ fn validate_fixed<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
 
 fn rational_to_integer<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src>) {
     let mut floating = 0i32;
-    let mut iter = lex.slice().bytes();
+    let mut iter = lex.slice().as_bytes().iter();
 
-    'outer: while let Some(byte) = iter.next() {
+    'outer: while let Some(&byte) = iter.next() {
         match byte {
             b'e' | b'E' => break 'outer,
             b'0' => floating += 1,
@@ -517,7 +538,7 @@ fn rational_to_integer<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src
                 floating = 0;
                 let mut zeroes = 0;
 
-                while let Some(byte) = iter.next() {
+                while let Some(&byte) = iter.next() {
                     match byte {
                         b'e' | b'E' => break 'outer,
                         b'0' => zeroes += 1,
@@ -535,7 +556,7 @@ fn rational_to_integer<'source, Src: Source<'source>>(lex: &mut Lexer<Token, Src
     let mut neg = 1i32;
     let mut e = 0i32;
 
-    for byte in iter {
+    for &byte in iter {
         match byte {
             b'-' => neg = -1,
             b'+' => {},
