@@ -179,37 +179,37 @@ macro_rules! binary {
     }
 }
 
-assign!(ASSIGN  => Plain);
-assign!(ASSIGN_ADD => Addition);
-assign!(ASSIGN_SUB => Subtraction);
-assign!(ASSIGN_MUL => Multiplication);
-assign!(ASSIGN_DIV => Division);
-assign!(ASSIGN_REM => Remainder);
-assign!(ASSIGN_BIT_SHIFT_LEFT => BitShiftLeft);
+assign!(ASSIGN                 => Plain);
+assign!(ASSIGN_ADD             => Addition);
+assign!(ASSIGN_SUB             => Subtraction);
+assign!(ASSIGN_MUL             => Multiplication);
+assign!(ASSIGN_DIV             => Division);
+assign!(ASSIGN_REM             => Remainder);
+assign!(ASSIGN_BIT_SHIFT_LEFT  => BitShiftLeft);
 assign!(ASSIGN_BIT_SHIFT_RIGHT => BitShiftRight);
-assign!(ASSIGN_BIT_AND => BitAnd);
-assign!(ASSIGN_BIT_XOR => BitXor);
-assign!(ASSIGN_BIT_OR => BitOr);
+assign!(ASSIGN_BIT_AND         => BitAnd);
+assign!(ASSIGN_BIT_XOR         => BitXor);
+assign!(ASSIGN_BIT_OR          => BitOr);
 
-binary!(LOGICAL_OR    , P13 => LogicalOr);
-binary!(LOGICAL_AND   , P12 => LogicalAnd);
-binary!(EQUALITY    , P11 => Equality);
-binary!(INEQUALITY  , P11 => Inequality);
-binary!(LESSER  , P10 => Lesser);
+binary!(LOGICAL_OR       , P13 => LogicalOr);
+binary!(LOGICAL_AND      , P12 => LogicalAnd);
+binary!(EQUALITY         , P11 => Equality);
+binary!(INEQUALITY       , P11 => Inequality);
+binary!(LESSER           , P10 => Lesser);
 binary!(LESSER_EQUALITY  , P10 => LesserEquals);
-binary!(GREATER  , P10 => Greater);
-binary!(GREATER_EQUALITY  , P10 => GreaterEquals);
-binary!(BIT_OR  , P9  => BitOr);
-binary!(BIT_XOR , P8  => BitXor);
-binary!(BIT_AND , P7  => BitAnd);
+binary!(GREATER          , P10 => Greater);
+binary!(GREATER_EQUALITY , P10 => GreaterEquals);
+binary!(BIT_OR           , P9  => BitOr);
+binary!(BIT_XOR          , P8  => BitXor);
+binary!(BIT_AND          , P7  => BitAnd);
 binary!(BIT_SHIFT_LEFT   , P6  => BitShiftLeft);
-binary!(BIT_SHIFT_RIGHT   , P6  => BitShiftRight);
-binary!(ADD   , P5  => Addition);
-binary!(SUB   , P5  => Subtraction);
-binary!(MUL   , P4  => Multiplication);
-binary!(DIV   , P4  => Division);
-binary!(REMAINDER   , P4  => Remainder);
-binary!(EXPONENT  , P3  => Exponent);
+binary!(BIT_SHIFT_RIGHT  , P6  => BitShiftRight);
+binary!(ADD              , P5  => Addition);
+binary!(SUB              , P5  => Subtraction);
+binary!(MUL              , P4  => Multiplication);
+binary!(DIV              , P4  => Division);
+binary!(REMAINDER        , P4  => Remainder);
+binary!(EXPONENT         , P3  => Exponent);
 
 
 impl<'ast> Parser<'ast> {
