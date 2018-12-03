@@ -2,351 +2,83 @@ use Parser;
 use lexer::{Token, Logos, lookup};
 use ast::*;
 
-type NestedHandler = Option<for<'ast> fn(&mut Parser<'ast>, ExpressionNode<'ast>) -> Option<ExpressionNode<'ast>>>;
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
+pub struct Precedence(u8);
 
-pub trait Precedence {
-    const LUT: [NestedHandler; Token::SIZE];
+type HandlerFn = for<'ast> fn(&mut Parser<'ast>, ExpressionNode<'ast>) -> Option<ExpressionNode<'ast>>;
+
+#[derive(Clone, Copy)]
+struct NestedHandler(Precedence, HandlerFn);
+
+pub const TOP: Precedence = Precedence(15);
+pub const P14: Precedence = Precedence(14);
+pub const P13: Precedence = Precedence(13);
+pub const P12: Precedence = Precedence(12);
+pub const P11: Precedence = Precedence(11);
+pub const P10: Precedence = Precedence(10);
+pub const P9: Precedence = Precedence(9);
+pub const P8: Precedence = Precedence(8);
+pub const P7: Precedence = Precedence(7);
+pub const P6: Precedence = Precedence(6);
+pub const P5: Precedence = Precedence(5);
+pub const P4: Precedence = Precedence(4);
+pub const P3: Precedence = Precedence(3);
+pub const P2: Precedence = Precedence(2);
+
+const INVALID: Precedence = Precedence(100);
+
+static NESTED_LUT: [NestedHandler; Token::SIZE] = lookup! {
+    Token::Accessor               => NestedHandler(P2, MEMBER),
+    Token::ParenOpen              => NestedHandler(P2, CALL),
+    Token::BracketOpen            => NestedHandler(P2, INDEX),
+    Token::OperatorIncrement      => NestedHandler(P2, INC),
+    Token::OperatorDecrement      => NestedHandler(P2, DEC),
+    Token::OperatorExponent       => NestedHandler(P3, EXPONENT),
+    Token::OperatorMultiplication => NestedHandler(P4, MUL),
+    Token::OperatorDivision       => NestedHandler(P4, DIV),
+    Token::OperatorRemainder      => NestedHandler(P4, REMAINDER),
+    Token::OperatorAddition       => NestedHandler(P5, ADD),
+    Token::OperatorSubtraction    => NestedHandler(P5, SUB),
+    Token::OperatorBitShiftLeft   => NestedHandler(P6, BIT_SHIFT_LEFT),
+    Token::OperatorBitShiftRight  => NestedHandler(P6, BIT_SHIFT_RIGHT),
+    Token::OperatorBitAnd         => NestedHandler(P7, BIT_AND),
+    Token::OperatorBitXor         => NestedHandler(P8, BIT_XOR),
+    Token::OperatorBitOr          => NestedHandler(P9, BIT_OR),
+    Token::OperatorLesser         => NestedHandler(P10, LESSER),
+    Token::OperatorLesserEquals   => NestedHandler(P10, LESSER_EQUALITY),
+    Token::OperatorGreater        => NestedHandler(P10, GREATER),
+    Token::OperatorGreaterEquals  => NestedHandler(P10, GREATER_EQUALITY),
+    Token::OperatorEquality       => NestedHandler(P11, EQUALITY),
+    Token::OperatorInequality     => NestedHandler(P11, INEQUALITY),
+    Token::OperatorLogicalAnd     => NestedHandler(P12, LOGICAL_AND),
+    Token::OperatorLogicalOr      => NestedHandler(P13, LOGICAL_OR),
+    Token::OperatorConditional    => NestedHandler(P14, CONDITIONAL),
+    Token::Assign                 => NestedHandler(TOP, ASSIGN),
+    Token::AssignAddition         => NestedHandler(TOP, ASSIGN_ADD),
+    Token::AssignSubtraction      => NestedHandler(TOP, ASSIGN_SUB),
+    Token::AssignMultiplication   => NestedHandler(TOP, ASSIGN_MUL),
+    Token::AssignDivision         => NestedHandler(TOP, ASSIGN_DIV),
+    Token::AssignRemainder        => NestedHandler(TOP, ASSIGN_REM),
+    Token::AssignBitShiftLeft     => NestedHandler(TOP, ASSIGN_BIT_SHIFT_LEFT),
+    Token::AssignBitShiftRight    => NestedHandler(TOP, ASSIGN_BIT_SHIFT_RIGHT),
+    Token::AssignBitAnd           => NestedHandler(TOP, ASSIGN_BIT_AND),
+    Token::AssignBitXor           => NestedHandler(TOP, ASSIGN_BIT_XOR),
+    Token::AssignBitOr            => NestedHandler(TOP, ASSIGN_BIT_OR),
+    _                             => NestedHandler(INVALID, |_, _| None),
+};
+
+impl NestedHandler {
+    #[inline]
+    fn get(self, precedence: Precedence) -> Option<HandlerFn> {
+        if self.0 <= precedence {
+            Some(self.1)
+        } else {
+            None
+        }
+    }
 }
 
-pub struct TopPrecedence;
-pub struct Precedence14;
-pub struct Precedence13;
-pub struct Precedence12;
-pub struct Precedence11;
-pub struct Precedence10;
-pub struct Precedence9;
-pub struct Precedence8;
-pub struct Precedence7;
-pub struct Precedence6;
-pub struct Precedence5;
-pub struct Precedence4;
-pub struct Precedence3;
-pub struct Precedence2;
-
-impl Precedence for TopPrecedence {
-    const LUT: [NestedHandler; Token::SIZE] = lookup! {
-        Token::Accessor => MEMBR,
-        Token::ParenOpen => CALL,
-        Token::BracketOpen => INDEX,
-        Token::OperatorIncrement => INC,
-        Token::OperatorDecrement => DEC,
-        Token::OperatorMultiplication => MUL,
-        Token::OperatorDivision => DIV,
-        Token::OperatorRemainder => REM,
-        Token::OperatorExponent => EXPN,
-        Token::OperatorAddition => ADD,
-        Token::OperatorSubtraction => SUB,
-        Token::OperatorBitShiftLeft => BSL,
-        Token::OperatorBitShiftRight => BSR,
-        Token::OperatorLesser => LESS,
-        Token::OperatorLesserEquals => LSEQ,
-        Token::OperatorGreater => GRTR,
-        Token::OperatorGreaterEquals => GREQ,
-        Token::OperatorEquality => EQ,
-        Token::OperatorInequality => INEQ,
-        Token::OperatorBitAnd => B_AND,
-        Token::OperatorBitXor => B_XOR,
-        Token::OperatorBitOr => B_OR,
-        Token::OperatorLogicalAnd => AND,
-        Token::OperatorLogicalOr => OR,
-        Token::OperatorConditional => COND,
-        Token::Assign => ASGN,
-        Token::AssignAddition => A_ADD,
-        Token::AssignSubtraction => A_SUB,
-        Token::AssignMultiplication => A_MUL,
-        Token::AssignDivision => A_DIV,
-        Token::AssignRemainder => A_REM,
-        Token::AssignBitShiftLeft => A_BSL,
-        Token::AssignBitShiftRight => A_BSR,
-        Token::AssignBitAnd => A_BAN,
-        Token::AssignBitXor => A_XOR,
-        Token::AssignBitOr => A_BOR,
-        _ => None,
-    };
-}
-
-impl Precedence for Precedence14 {
-    const LUT: [NestedHandler; Token::SIZE] = lookup! {
-        Token::Accessor => MEMBR,
-        Token::ParenOpen => CALL,
-        Token::BracketOpen => INDEX,
-        Token::OperatorIncrement => INC,
-        Token::OperatorDecrement => DEC,
-        Token::OperatorMultiplication => MUL,
-        Token::OperatorDivision => DIV,
-        Token::OperatorRemainder => REM,
-        Token::OperatorExponent => EXPN,
-        Token::OperatorAddition => ADD,
-        Token::OperatorSubtraction => SUB,
-        Token::OperatorBitShiftLeft => BSL,
-        Token::OperatorBitShiftRight => BSR,
-        Token::OperatorLesser => LESS,
-        Token::OperatorLesserEquals => LSEQ,
-        Token::OperatorGreater => GRTR,
-        Token::OperatorGreaterEquals => GREQ,
-        Token::OperatorEquality => EQ,
-        Token::OperatorInequality => INEQ,
-        Token::OperatorBitAnd => B_AND,
-        Token::OperatorBitXor => B_XOR,
-        Token::OperatorBitOr => B_OR,
-        Token::OperatorLogicalAnd => AND,
-        Token::OperatorLogicalOr => OR,
-        Token::OperatorConditional => COND,
-        _ => None,
-    };
-}
-
-impl Precedence for Precedence13 {
-    const LUT: [NestedHandler; Token::SIZE] = lookup! {
-        Token::Accessor => MEMBR,
-        Token::ParenOpen => CALL,
-        Token::BracketOpen => INDEX,
-        Token::OperatorIncrement => INC,
-        Token::OperatorDecrement => DEC,
-        Token::OperatorMultiplication => MUL,
-        Token::OperatorDivision => DIV,
-        Token::OperatorRemainder => REM,
-        Token::OperatorExponent => EXPN,
-        Token::OperatorAddition => ADD,
-        Token::OperatorSubtraction => SUB,
-        Token::OperatorBitShiftLeft => BSL,
-        Token::OperatorBitShiftRight => BSR,
-        Token::OperatorLesser => LESS,
-        Token::OperatorLesserEquals => LSEQ,
-        Token::OperatorGreater => GRTR,
-        Token::OperatorGreaterEquals => GREQ,
-        Token::OperatorEquality => EQ,
-        Token::OperatorInequality => INEQ,
-        Token::OperatorBitAnd => B_AND,
-        Token::OperatorBitXor => B_XOR,
-        Token::OperatorBitOr => B_OR,
-        Token::OperatorLogicalAnd => AND,
-        Token::OperatorLogicalOr => OR,
-        _ => None,
-    };
-}
-
-impl Precedence for Precedence12 {
-    const LUT: [NestedHandler; Token::SIZE] = lookup! {
-        Token::Accessor => MEMBR,
-        Token::ParenOpen => CALL,
-        Token::BracketOpen => INDEX,
-        Token::OperatorIncrement => INC,
-        Token::OperatorDecrement => DEC,
-        Token::OperatorMultiplication => MUL,
-        Token::OperatorDivision => DIV,
-        Token::OperatorRemainder => REM,
-        Token::OperatorExponent => EXPN,
-        Token::OperatorAddition => ADD,
-        Token::OperatorSubtraction => SUB,
-        Token::OperatorBitShiftLeft => BSL,
-        Token::OperatorBitShiftRight => BSR,
-        Token::OperatorLesser => LESS,
-        Token::OperatorLesserEquals => LSEQ,
-        Token::OperatorGreater => GRTR,
-        Token::OperatorGreaterEquals => GREQ,
-        Token::OperatorEquality => EQ,
-        Token::OperatorInequality => INEQ,
-        Token::OperatorBitAnd => B_AND,
-        Token::OperatorBitXor => B_XOR,
-        Token::OperatorBitOr => B_OR,
-        Token::OperatorLogicalAnd => AND,
-        _ => None,
-    };
-}
-
-impl Precedence for Precedence11 {
-    const LUT: [NestedHandler; Token::SIZE] = lookup! {
-        Token::Accessor => MEMBR,
-        Token::ParenOpen => CALL,
-        Token::BracketOpen => INDEX,
-        Token::OperatorIncrement => INC,
-        Token::OperatorDecrement => DEC,
-        Token::OperatorMultiplication => MUL,
-        Token::OperatorDivision => DIV,
-        Token::OperatorRemainder => REM,
-        Token::OperatorExponent => EXPN,
-        Token::OperatorAddition => ADD,
-        Token::OperatorSubtraction => SUB,
-        Token::OperatorBitShiftLeft => BSL,
-        Token::OperatorBitShiftRight => BSR,
-        Token::OperatorLesser => LESS,
-        Token::OperatorLesserEquals => LSEQ,
-        Token::OperatorGreater => GRTR,
-        Token::OperatorGreaterEquals => GREQ,
-        Token::OperatorEquality => EQ,
-        Token::OperatorInequality => INEQ,
-        Token::OperatorBitAnd => B_AND,
-        Token::OperatorBitXor => B_XOR,
-        Token::OperatorBitOr => B_OR,
-        _ => None,
-    };
-}
-
-impl Precedence for Precedence10 {
-    const LUT: [NestedHandler; Token::SIZE] = lookup! {
-        Token::Accessor => MEMBR,
-        Token::ParenOpen => CALL,
-        Token::BracketOpen => INDEX,
-        Token::OperatorIncrement => INC,
-        Token::OperatorDecrement => DEC,
-        Token::OperatorMultiplication => MUL,
-        Token::OperatorDivision => DIV,
-        Token::OperatorRemainder => REM,
-        Token::OperatorExponent => EXPN,
-        Token::OperatorAddition => ADD,
-        Token::OperatorSubtraction => SUB,
-        Token::OperatorBitShiftLeft => BSL,
-        Token::OperatorBitShiftRight => BSR,
-        Token::OperatorLesser => LESS,
-        Token::OperatorLesserEquals => LSEQ,
-        Token::OperatorGreater => GRTR,
-        Token::OperatorGreaterEquals => GREQ,
-        Token::OperatorBitAnd => B_AND,
-        Token::OperatorBitXor => B_XOR,
-        Token::OperatorBitOr => B_OR,
-        _ => None,
-    };
-}
-
-impl Precedence for Precedence9 {
-    const LUT: [NestedHandler; Token::SIZE] = lookup! {
-        Token::Accessor => MEMBR,
-        Token::ParenOpen => CALL,
-        Token::BracketOpen => INDEX,
-        Token::OperatorIncrement => INC,
-        Token::OperatorDecrement => DEC,
-        Token::OperatorMultiplication => MUL,
-        Token::OperatorDivision => DIV,
-        Token::OperatorRemainder => REM,
-        Token::OperatorExponent => EXPN,
-        Token::OperatorAddition => ADD,
-        Token::OperatorSubtraction => SUB,
-        Token::OperatorBitShiftLeft => BSL,
-        Token::OperatorBitShiftRight => BSR,
-        Token::OperatorBitAnd => B_AND,
-        Token::OperatorBitXor => B_XOR,
-        Token::OperatorBitOr => B_OR,
-        _ => None,
-    };
-}
-
-impl Precedence for Precedence8 {
-    const LUT: [NestedHandler; Token::SIZE] = lookup! {
-        Token::Accessor => MEMBR,
-        Token::ParenOpen => CALL,
-        Token::BracketOpen => INDEX,
-        Token::OperatorIncrement => INC,
-        Token::OperatorDecrement => DEC,
-        Token::OperatorMultiplication => MUL,
-        Token::OperatorDivision => DIV,
-        Token::OperatorRemainder => REM,
-        Token::OperatorExponent => EXPN,
-        Token::OperatorAddition => ADD,
-        Token::OperatorSubtraction => SUB,
-        Token::OperatorBitShiftLeft => BSL,
-        Token::OperatorBitShiftRight => BSR,
-        Token::OperatorBitAnd => B_AND,
-        Token::OperatorBitXor => B_XOR,
-        _ => None,
-    };
-}
-
-impl Precedence for Precedence7 {
-    const LUT: [NestedHandler; Token::SIZE] = lookup! {
-        Token::Accessor => MEMBR,
-        Token::ParenOpen => CALL,
-        Token::BracketOpen => INDEX,
-        Token::OperatorIncrement => INC,
-        Token::OperatorDecrement => DEC,
-        Token::OperatorMultiplication => MUL,
-        Token::OperatorDivision => DIV,
-        Token::OperatorRemainder => REM,
-        Token::OperatorExponent => EXPN,
-        Token::OperatorAddition => ADD,
-        Token::OperatorSubtraction => SUB,
-        Token::OperatorBitShiftLeft => BSL,
-        Token::OperatorBitShiftRight => BSR,
-        Token::OperatorBitAnd => B_AND,
-        _ => None,
-    };
-}
-
-impl Precedence for Precedence6 {
-    const LUT: [NestedHandler; Token::SIZE] = lookup! {
-        Token::Accessor => MEMBR,
-        Token::ParenOpen => CALL,
-        Token::BracketOpen => INDEX,
-        Token::OperatorIncrement => INC,
-        Token::OperatorDecrement => DEC,
-        Token::OperatorMultiplication => MUL,
-        Token::OperatorDivision => DIV,
-        Token::OperatorRemainder => REM,
-        Token::OperatorExponent => EXPN,
-        Token::OperatorAddition => ADD,
-        Token::OperatorSubtraction => SUB,
-        Token::OperatorBitShiftLeft => BSL,
-        Token::OperatorBitShiftRight => BSR,
-        _ => None,
-    };
-}
-
-impl Precedence for Precedence5 {
-    const LUT: [NestedHandler; Token::SIZE] = lookup! {
-        Token::Accessor => MEMBR,
-        Token::ParenOpen => CALL,
-        Token::BracketOpen => INDEX,
-        Token::OperatorIncrement => INC,
-        Token::OperatorDecrement => DEC,
-        Token::OperatorMultiplication => MUL,
-        Token::OperatorDivision => DIV,
-        Token::OperatorRemainder => REM,
-        Token::OperatorExponent => EXPN,
-        Token::OperatorAddition => ADD,
-        Token::OperatorSubtraction => SUB,
-        _ => None,
-    };
-}
-
-impl Precedence for Precedence4 {
-    const LUT: [NestedHandler; Token::SIZE] = lookup! {
-        Token::Accessor => MEMBR,
-        Token::ParenOpen => CALL,
-        Token::BracketOpen => INDEX,
-        Token::OperatorIncrement => INC,
-        Token::OperatorDecrement => DEC,
-        Token::OperatorMultiplication => MUL,
-        Token::OperatorDivision => DIV,
-        Token::OperatorRemainder => REM,
-        Token::OperatorExponent => EXPN,
-        _ => None,
-    };
-}
-
-impl Precedence for Precedence3 {
-    const LUT: [NestedHandler; Token::SIZE] = lookup! {
-        Token::Accessor => MEMBR,
-        Token::ParenOpen => CALL,
-        Token::BracketOpen => INDEX,
-        Token::OperatorIncrement => INC,
-        Token::OperatorDecrement => DEC,
-        Token::OperatorExponent => EXPN,
-        _ => None,
-    };
-}
-
-impl Precedence for Precedence2 {
-    const LUT: [NestedHandler; Token::SIZE] = lookup! {
-        Token::Accessor => MEMBR,
-        Token::ParenOpen => CALL,
-        Token::BracketOpen => INDEX,
-        Token::OperatorIncrement => INC,
-        Token::OperatorDecrement => DEC,
-        _ => None,
-    };
-}
-
-const CALL: NestedHandler = Some(|par, callee| {
+const CALL: HandlerFn = |par, callee| {
     par.lexer.advance();
 
     let arguments = par.expression_list();
@@ -356,9 +88,9 @@ const CALL: NestedHandler = Some(|par, callee| {
         callee,
         arguments,
     })
-});
+};
 
-const MEMBR: NestedHandler = Some(|par, object| {
+const MEMBER: HandlerFn = |par, object| {
     par.lexer.advance();
 
     let member = par.expect_str_node(Token::Identifier);
@@ -367,137 +99,123 @@ const MEMBR: NestedHandler = Some(|par, object| {
         object,
         member,
     })
-});
+};
 
-const INDEX: NestedHandler = Some(|par, array| {
+const INDEX: HandlerFn = |par, array| {
     par.lexer.advance();
 
-    let index = par.expression::<TopPrecedence>();
+    let index = par.expression(TOP);
     let end   = par.expect_end(Token::BracketClose);
 
     par.node_at(array.start, end, IndexAccessExpression {
         array,
         index,
     })
-});
+};
 
-const INC: NestedHandler = Some(|par, operand| {
+const INC: HandlerFn = |par, operand| {
     let operator: Node<_> = par.node_at_token(PostfixOperator::Increment);
 
     par.node_at(operand.start, operator.end, PostfixExpression {
         operator,
         operand,
     })
-});
+};
 
-const DEC: NestedHandler = Some(|par, operand| {
+const DEC: HandlerFn = |par, operand| {
     let operator: Node<_> = par.node_at_token(PostfixOperator::Decrement);
 
     par.node_at(operand.start, operator.end, PostfixExpression {
         operator,
         operand,
     })
-});
+};
 
-const COND: NestedHandler = Some(|par, test| {
+const CONDITIONAL: HandlerFn = |par, test| {
     par.lexer.advance();
 
-    let consequent = expect!(par, par.expression::<Precedence14>());
+    let consequent = expect!(par, par.expression(P14));
 
     par.expect(Token::Colon);
 
-    let alternate = expect!(par, par.expression::<Precedence14>());
+    let alternate = expect!(par, par.expression(P14));
 
     par.node_at(test.start, alternate.end, ConditionalExpression {
         test,
         consequent,
         alternate,
     })
-});
-
+};
 
 macro_rules! assign {
     ($name:ident => $op:ident) => {
-        const $name: NestedHandler = {
-            fn handler<'ast>(par: &mut Parser<'ast>, left: ExpressionNode<'ast>) -> Option<ExpressionNode<'ast>> {
-                // TODO: check if left is LValue
+        const $name: HandlerFn = |par, left| {
+            // TODO: check if left is LValue
 
-                let operator = par.node_at_token(AssignmentOperator::$op);
-                let right    = expect!(par, par.expression::<TopPrecedence>());
+            let operator = par.node_at_token(AssignmentOperator::$op);
+            let right    = expect!(par, par.expression(TOP));
 
-                par.node_at(left.start, right.end, AssignmentExpression {
-                    operator,
-                    left,
-                    right,
-                })
-            }
-
-            Some(handler)
+            par.node_at(left.start, right.end, AssignmentExpression {
+                operator,
+                left,
+                right,
+            })
         };
     }
 }
 
 macro_rules! binary {
     ($name:ident, $precedence:ident => $op:ident) => {
-        const $name: NestedHandler = {
-            fn handler<'ast>(par: &mut Parser<'ast>, left: ExpressionNode<'ast>) -> Option<ExpressionNode<'ast>> {
-                let operator = par.node_at_token(BinaryOperator::$op);
-                let right    = expect!(par, par.expression::<$precedence>());
+        const $name: HandlerFn = |par, left| {
+            let operator = par.node_at_token(BinaryOperator::$op);
+            let right    = expect!(par, par.expression($precedence));
 
-                par.node_at(left.start, right.end, BinaryExpression {
-                    operator,
-                    left,
-                    right,
-                })
-            }
-
-            Some(handler)
+            par.node_at(left.start, right.end, BinaryExpression {
+                operator,
+                left,
+                right,
+            })
         };
     }
 }
 
-assign!(ASGN  => Plain);
-assign!(A_ADD => Addition);
-assign!(A_SUB => Subtraction);
-assign!(A_MUL => Multiplication);
-assign!(A_DIV => Division);
-assign!(A_REM => Remainder);
-assign!(A_BSL => BitShiftLeft);
-assign!(A_BSR => BitShiftRight);
-assign!(A_BAN => BitAnd);
-assign!(A_XOR => BitXor);
-assign!(A_BOR => BitOr);
+assign!(ASSIGN  => Plain);
+assign!(ASSIGN_ADD => Addition);
+assign!(ASSIGN_SUB => Subtraction);
+assign!(ASSIGN_MUL => Multiplication);
+assign!(ASSIGN_DIV => Division);
+assign!(ASSIGN_REM => Remainder);
+assign!(ASSIGN_BIT_SHIFT_LEFT => BitShiftLeft);
+assign!(ASSIGN_BIT_SHIFT_RIGHT => BitShiftRight);
+assign!(ASSIGN_BIT_AND => BitAnd);
+assign!(ASSIGN_BIT_XOR => BitXor);
+assign!(ASSIGN_BIT_OR => BitOr);
 
-binary!(OR    , Precedence13 => LogicalOr);
-binary!(AND   , Precedence12 => LogicalAnd);
-binary!(EQ    , Precedence11 => Equality);
-binary!(INEQ  , Precedence11 => Inequality);
-binary!(LESS  , Precedence10 => Lesser);
-binary!(LSEQ  , Precedence10 => LesserEquals);
-binary!(GRTR  , Precedence10 => Greater);
-binary!(GREQ  , Precedence10 => GreaterEquals);
-binary!(B_OR  , Precedence9  => BitOr);
-binary!(B_XOR , Precedence8  => BitXor);
-binary!(B_AND , Precedence7  => BitAnd);
-binary!(BSL   , Precedence6  => BitShiftLeft);
-binary!(BSR   , Precedence6  => BitShiftRight);
-binary!(ADD   , Precedence5  => Addition);
-binary!(SUB   , Precedence5  => Subtraction);
-binary!(MUL   , Precedence4  => Multiplication);
-binary!(DIV   , Precedence4  => Division);
-binary!(REM   , Precedence4  => Remainder);
-binary!(EXPN  , Precedence3  => Exponent);
+binary!(LOGICAL_OR    , P13 => LogicalOr);
+binary!(LOGICAL_AND   , P12 => LogicalAnd);
+binary!(EQUALITY    , P11 => Equality);
+binary!(INEQUALITY  , P11 => Inequality);
+binary!(LESSER  , P10 => Lesser);
+binary!(LESSER_EQUALITY  , P10 => LesserEquals);
+binary!(GREATER  , P10 => Greater);
+binary!(GREATER_EQUALITY  , P10 => GreaterEquals);
+binary!(BIT_OR  , P9  => BitOr);
+binary!(BIT_XOR , P8  => BitXor);
+binary!(BIT_AND , P7  => BitAnd);
+binary!(BIT_SHIFT_LEFT   , P6  => BitShiftLeft);
+binary!(BIT_SHIFT_RIGHT   , P6  => BitShiftRight);
+binary!(ADD   , P5  => Addition);
+binary!(SUB   , P5  => Subtraction);
+binary!(MUL   , P4  => Multiplication);
+binary!(DIV   , P4  => Division);
+binary!(REMAINDER   , P4  => Remainder);
+binary!(EXPONENT  , P3  => Exponent);
 
 
 impl<'ast> Parser<'ast> {
     #[inline]
-    pub fn nested_expression<P>(&mut self, mut left: ExpressionNode<'ast>) -> ExpressionNode<'ast>
-    where
-        P: Precedence,
-    {
-        // static LUT: [NestedHandler; Token::SIZE] = P::LUT;
-
-        while let Some(node) = P::LUT[self.lexer.token as usize].and_then(|handler| handler(self, left)) {
+    pub fn nested_expression(&mut self, mut left: ExpressionNode<'ast>, precedence: Precedence) -> ExpressionNode<'ast> {
+        while let Some(node) = NESTED_LUT[self.lexer.token as usize].get(precedence).and_then(|handler| handler(self, left)) {
             left = node;
         }
 

@@ -1,17 +1,14 @@
 use toolshed::list::ListBuilder;
 
 use ast::*;
-use {Parser, Precedence, Precedence2, TopPrecedence};
+use {Parser, Precedence, P2, TOP};
 use lexer::Token;
 
 impl<'ast> Parser<'ast> {
     #[inline]
-    pub fn expression<P>(&mut self) -> Option<ExpressionNode<'ast>>
-    where
-        P: Precedence
-    {
+    pub fn expression(&mut self, precedence: Precedence) -> Option<ExpressionNode<'ast>> {
         self.bound_expression()
-            .map(|expression| self.nested_expression::<P>(expression))
+            .map(|expression| self.nested_expression(expression, precedence))
     }
 
     pub fn bound_expression(&mut self) -> Option<ExpressionNode<'ast>> {
@@ -48,13 +45,13 @@ impl<'ast> Parser<'ast> {
 
     #[inline]
     pub fn expression_list(&mut self) -> ExpressionList<'ast> {
-        let builder = match self.expression::<TopPrecedence>() {
+        let builder = match self.expression(TOP) {
             Some(expression) => ListBuilder::new(self.arena, expression),
             None             => return NodeList::empty(),
         };
 
         while self.allow(Token::Comma) {
-            match self.expression::<TopPrecedence>() {
+            match self.expression(TOP) {
                 Some(expression) => builder.push(self.arena, expression),
                 None             => self.error(),
             }
@@ -75,7 +72,7 @@ impl<'ast> Parser<'ast> {
 
     fn prefix_expression(&mut self, operator: PrefixOperator) -> Option<ExpressionNode<'ast>> {
         let operator: Node<_> = self.node_at_token(operator);
-        let operand = expect!(self, self.expression::<Precedence2>());
+        let operand = expect!(self, self.expression(P2));
 
         self.node_at(operator.start, operand.end, PrefixExpression {
             operator,
