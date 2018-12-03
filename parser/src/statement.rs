@@ -1,7 +1,7 @@
 use toolshed::list::{List, GrowableList, ListBuilder};
 
 use ast::*;
-use {Parser, TopPrecedence, StatementTypeNameContext};
+use {Parser, TOP, StatementTypeNameContext};
 use lexer::Token;
 
 /// A trait that allows for extra statements to be parsed in a specific context.
@@ -85,10 +85,6 @@ impl<'ast> Parser<'ast> {
             Token::KeywordAssembly => self.inline_assembly_statement(),
             Token::DeclarationVar  => self.inferred_definition_statement(),
 
-            // _ => match self.expression_statement() {
-            //     None => self.variable_definition_statement(),
-            //     node => node,
-            // }
             _ => match self.variable_definition_statement() {
                 None => self.expression_statement(),
                 node => node,
@@ -146,7 +142,7 @@ impl<'ast> Parser<'ast> {
 
         self.expect(Token::ParenOpen);
 
-        let test = expect!(self, self.expression::<TopPrecedence>());
+        let test = expect!(self, self.expression(TOP));
 
         self.expect(Token::ParenClose);
 
@@ -180,7 +176,7 @@ impl<'ast> Parser<'ast> {
 
         self.expect(Token::ParenOpen);
 
-        let test = expect!(self, self.expression::<TopPrecedence>());
+        let test = expect!(self, self.expression(TOP));
 
         self.expect(Token::ParenClose);
 
@@ -206,11 +202,11 @@ impl<'ast> Parser<'ast> {
             self.expect(Token::Semicolon);
         }
 
-        let test = self.expression::<TopPrecedence>();
+        let test = self.expression(TOP);
 
         self.expect(Token::Semicolon);
 
-        let update = self.expression::<TopPrecedence>();
+        let update = self.expression(TOP);
 
         self.expect(Token::ParenClose);
 
@@ -234,7 +230,7 @@ impl<'ast> Parser<'ast> {
         self.expect(Token::KeywordWhile);
         self.expect(Token::ParenOpen);
 
-        let test = expect!(self, self.expression::<TopPrecedence>());
+        let test = expect!(self, self.expression(TOP));
 
         self.expect(Token::ParenClose);
 
@@ -248,7 +244,7 @@ impl<'ast> Parser<'ast> {
 
     fn return_statement(&mut self) -> Option<StatementNode<'ast>> {
         let start = self.start_then_advance();
-        let value = self.expression::<TopPrecedence>();
+        let value = self.expression(TOP);
         let end   = self.expect_end(Token::Semicolon);
 
         self.node_at(start, end, ReturnStatement {
@@ -276,7 +272,7 @@ impl<'ast> Parser<'ast> {
     where
         S: From<ExpressionNode<'ast>> + Copy,
     {
-        let expression = self.expression::<TopPrecedence>()?;
+        let expression = self.expression(TOP)?;
         let end        = self.expect_end(Token::Semicolon);
 
         self.node_at(expression.start, end, expression)
@@ -292,7 +288,7 @@ impl<'ast> Parser<'ast> {
         let init;
 
         if self.allow(Token::Assign) {
-            init = self.expression::<TopPrecedence>();
+            init = self.expression(TOP);
 
             if init.is_none() {
                 self.error();
@@ -324,7 +320,7 @@ impl<'ast> Parser<'ast> {
 
         self.expect(Token::Assign);
 
-        let init = expect!(self, self.expression::<TopPrecedence>());
+        let init = expect!(self, self.expression(TOP));
         let end  = self.expect_end(Token::Semicolon);
 
         self.node_at(start, end, InferredDefinitionStatement {
