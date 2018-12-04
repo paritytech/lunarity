@@ -7,10 +7,8 @@ repository = "https://github.com/paritytech/lunarity"
 
 [dependencies]
 lunarity-ast = "0.2"
-# lunarity-lexer = "0.2.1"
-# lunarity-parser = "0.2.1"
-lunarity-lexer = { path = "../lexer" }
-lunarity-parser = { path = "../parser" }
+lunarity-lexer = "0.2.1"
+lunarity-parser = "0.2.1"
 
 [dev-dependencies]
 toolshed = "0.6"
